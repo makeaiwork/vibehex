@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Tell the AI what to do while dictating"; "Rewrite this dictation formally"; «Голосовая команда для переписывания текста»; «Сказать „перепиши это“ в диктовке».
 
-<!-- sources: upstream docs/features/labs.md:86-96, 914-1003; src/labs/card.rs:80, 278-280; src/control/settings/registry.rs:668-677; src/labs/catalog.rs (EVERY); src/labs/group.rs (Output); hidden from stable builds: owner's decision for this merge -->
+<!-- sources: src/labs/card.rs:80,287-289; src/labs/catalog.rs:329,503; src/labs/group.rs:110; src/labs/vibehex.rs:553-564; src/control/settings/registry.rs:669-678; src/dictation/voice_prompt.rs:11; src/rune_ui/labs/voice_prompt.rs:30; docs/features/labs.md (Voice prompt section) -->

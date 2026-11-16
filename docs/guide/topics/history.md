@@ -35,6 +35,6 @@ Replace keeps the text it swapped out. The entry then lists up to 5 **Earlier ve
 
 Open the retention menu and choose **Clear all history…**. The menu then gives way to a red **Clear all history** button and **Cancel**; press the button to confirm. This also deletes the kept audio.
 
-**Asked as.** "Where can I see my old dictations?"; "I lost what I dictated"; «Где посмотреть прошлые диктовки?»; «Как заново расшифровать запись другой моделью?»; «Как очистить историю?»
+**Asked as.** "Where can I see my old dictations?"; "I lost what I dictated"; «Где посмотреть прошлые диктовки?»; «Текст надиктовал, но он не вставился. Как его вернуть?»; «Как заново расшифровать запись другой моделью?»; «Как очистить историю?»
 
 <!-- sources: upstream docs/features/README.md:908-924; upstream docs/features/labs.md:2084-2110 (Play); docs/features/README.md:660-692; docs/features/labs.md:790-834; docs/features/transcript-cli.md:42-50; src/history.rs:29-35, 49-100, 160-175, 540-552; src/history/versions.rs:1-15; src/history/recordings.rs:24; src/rune_ui/history.rs:316-331, 515-565, 702-800, 880-930, 1140-1215; src/rune_ui/general.rs:830-845; src/rune_ui/general/search.rs:62-80; src/app_settings/hotkeys.rs:683-700; src/desktop/tray_menu.rs:160; src/control/settings.rs:340-344 -->

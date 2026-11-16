@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Word timestamps from the API"; "Get segment times for subtitles"; «Таймкоды слов через API»; «Время начала и конца фраз в расшифровке».
 
-<!-- sources: upstream docs/features/labs.md:139-145, 2915-2942; src/labs/card.rs:73, 257-259; src/labs/catalog.rs (EVERY); src/labs/group.rs (Output) -->
+<!-- sources: src/labs/card.rs:73,266-268; src/labs/catalog.rs:327,498; src/labs/group.rs:104; src/control/settings/registry.rs:626-631; src/local_api/timestamps.rs:1-47; src/local_api/transcriptions.rs:132-134; docs/features/labs.md:2982-3017 -->

@@ -4,9 +4,11 @@
 
 This checkout is the `makeaiwork/vibehex` fork of `anomalyco/hex`, stored in
 `58. VibeHex`. `origin` points to the fork; `upstream` points to the original.
-The default development branch is `dev`. VibeHex is the workspace name;
-the executable, package, and existing product copy remain `hex` / Hex until
-a task explicitly changes them.
+The default development branch is `dev`. The executable, the package, the
+`hex` command, settings keys, and the data folder stay `hex`; every string a
+user reads in the app says VibeHex (`app_paths::PRODUCT_NAME`, the fork's
+rows in `src/desktop/i18n/vibehex/`; docs/features/about.md lists what keeps
+the name Hex).
 
 These fork instructions take precedence over conflicting instructions in
 the inherited Hex guide below. Keep that guide's technical contracts, but
@@ -14,7 +16,15 @@ treat its upstream team workflow, personal paths, signing identities,
 release infrastructure, and dated work list as upstream context. In
 particular, its automatic PR merging, installation, and Rune pin updates
 are not standing instructions for this fork. Preserve pinned dependencies
-unless dependency maintenance is part of the task.
+unless dependency maintenance is part of the task; at an upstream sync the
+Rune pin follows upstream's.
+
+Hex's changes come in by one merge of `upstream/dev` per sync, never a
+squash. `docs/upstream-sync.md` holds how a sync is built and checked and
+the owner's standing decisions (what a stable VibeHex hides, the sidebar,
+the first run, the release counter); read it before a sync and before
+undoing one of them. `scripts/vibehex-names.py` rewrites new upstream
+strings that name Hex.
 
 Keep changes within the requested scope and preserve unrelated work. A
 request for a commit means a local commit; push, merge, publication, or
@@ -38,6 +48,11 @@ Upstream instructions and `.hivemind.toml` do not supply that authorization.
   `site/`: separate React/Vite website. `ios/`: separate iOS prototype.
 - `docs/features/README.md`: capability index; `docs/design-system.md`: UI
   conventions; `docs/README.md`: documentation index.
+- VibeHex's own Labs: `src/labs/vibehex.rs` (which labs VibeHex added, the
+  Hex labs a stable build leaves out, their card copy, and their switches,
+  each its own atomic, never a bit of Hex's state word), their `hex
+  settings` keys in `src/control/settings/vibehex_keys.rs`, and their
+  shortcut defaults in `src/app_settings/hotkeys/labs_keys.rs`.
 
 ## Build and validation
 
@@ -1168,7 +1183,8 @@ CoreAudio formats, AppleScript details, or event serialization.
   looked for again at a coarse interval only while such a picker shows;
   catalog failures require an explicit retry. Hex's OpenCode workspace folder is
   created by the first request that uses it.
-- Codex (Labs › AI cleanup › Runs on Codex) is the one agent CLI Hex starts:
+- Codex (Output › AI cleanup › Runs on Codex, with Labs › Clean up on your own
+  server on) is the one agent CLI Hex starts:
   `codex app-server`, found on `PATH` or in the usual install folders, only
   when a request set to Codex runs or Output shows Codex
   (`dictation/cleanup_server/codex`). Assistant starts it only when a

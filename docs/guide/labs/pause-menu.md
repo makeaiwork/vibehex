@@ -19,10 +19,10 @@ vibehex: false
 
 **Needs.** macOS and the menu bar icon: with Labs › Hide menu bar icon on there is no Resume item, so turning this lab off is what resumes.
 
-**Good to know.** Pausing cancels a dictation being recorded, but not a meeting recording. After Resume, shortcuts come back only once no key is held. `hex dictation` commands and the menu's own items still work while paused. A restart, or turning the lab off, always resumes.
+**Good to know.** Pausing cancels a dictation being recorded, but not a meeting, Annotate or screen recording already under way. After Resume, shortcuts come back only once no key is held. `hex dictation` commands and the menu's own items still work while paused. A restart, or turning the lab off, always resumes.
 
 **Where.** Labs › Pause from menu bar (`labs.pause_menu`).
 
 **Asked as.** "Pause VibeHex temporarily"; "My game needs the Option key"; «Временно отключить горячие клавиши VibeHex»; «Поставить VibeHex на паузу».
 
-<!-- sources: upstream docs/features/labs.md:191, 2290-2350; docs/features/README.md:1637-1640; src/labs/card.rs:77, 269-271; src/labs/catalog.rs (MACOS); src/labs/group.rs (Shortcuts) -->
+<!-- sources: src/labs/card.rs:77,278-280; src/labs/catalog.rs:281,501; src/labs/group.rs:140; src/control/settings/registry.rs:657-662; src/shortcut_pause.rs:1-18; src/macos_rune/status_item.rs:889-902; docs/features/labs.md (Pause from menu bar section) -->

@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Show my next meetings in the menu bar"; "Join a call from VibeHex"; «Ближайшие встречи в строке меню»; «Подключиться к звонку из меню VibeHex».
 
-<!-- sources: upstream docs/features/labs.md:192-209, 2210-2275; docs/features/meetings.md:712-748; src/labs/card.rs:78, 272-274; src/labs/catalog.rs (MACOS); src/labs/group.rs (Meetings) -->
+<!-- sources: src/labs/card.rs:78,281-283; src/labs/catalog.rs:286,508; src/labs/group.rs:122; src/control/settings/registry.rs:650-656,741-745; src/calendar_menu.rs:16,137-145,186-199; src/macos_rune/status_item.rs:321-324; src/rune_ui/platform_settings.rs:765-896; docs/features/labs.md:2305-2341 -->

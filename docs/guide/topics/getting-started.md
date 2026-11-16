@@ -1,7 +1,7 @@
 ---
 topic: getting-started
 title: Getting started
-keys: [dictation_hotkey, microphone, enable_on_launch]
+keys: [dictation_hotkey, microphone, enable_on_launch, ui_language]
 os: every OS
 ---
 
@@ -75,8 +75,8 @@ From the top, the panes appear in this order:
 - **Output**: what VibeHex does to your words before they are pasted:
   Vocabulary, Replace words, and the rules some apps use instead.
 - **History**: past dictations to search, copy, or delete.
-- **Captures**: the screenshots and recordings Labs › Screenshots saved. It
-  shows only while that lab is on (Mac).
+- **Captures**: the screenshots and recordings Labs › Screenshots saved,
+  and your annotations. It shows only while that lab is on (Mac).
 - **Meetings**: recording calls, once Labs › Meetings (beta) is on.
 - **Files** (Mac): transcribing audio or video files, once Labs › Files is on.
 - **Annotate**: drawing on the screen while you record it and talk.

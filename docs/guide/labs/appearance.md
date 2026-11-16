@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Dark mode for VibeHex only"; "The window ignores my theme"; «Тёмная тема только для VibeHex»; «Как сделать окно светлым».
 
-<!-- sources: upstream docs/features/labs.md:60, 700-730; docs/features/README.md:42-45; src/labs/card.rs:58, 216; src/control/settings/registry.rs:517-520; src/labs/catalog.rs (EVERY); src/labs/group.rs (Dictation) -->
+<!-- sources: src/labs/card.rs:58,227; src/labs/catalog.rs:323,483; src/labs/group.rs:81; src/control/settings/registry.rs:513-521; src/app_settings/labs.rs:50-55,430; src/rune_ui/labs.rs:1031-1044; src/labs.rs:779-788; src/rune_hud.rs:937; docs/features/labs.md:755-774 -->

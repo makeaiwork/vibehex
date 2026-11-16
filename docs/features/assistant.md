@@ -9,7 +9,9 @@ exception the owner chose; `assistant.enabled` hides the row.
 
 ```ts
 Sidebar                                          // rune_ui::sidebar, rune_ui::assistant::nav
-└── Assistant   below the spacer, above the version footer (nav-assistant):
+└── Assistant   below the spacer and an update to take, if there is one;
+                the last row on macOS, above Quit VibeHex on Windows and
+                Linux (nav-assistant):
                 a 32 pt row with a 24 pt face (VibeHex's hexagon with two
                 eyes); open, the face and word brighten, no fill. On the rail
                 the last button, 36 by 32, with its own tooltip. After an
@@ -927,8 +929,11 @@ the gate, saying who proposes (`Origin`: an answer, a plan, the preset).
   guide's article says whom it is for, so the answer is honest.
 - `presets/deniskey.json` is written by `scripts/export-preset` from the
   owner's settings.json and shipped with `include_str!` (last written
-  2026-11-12, whole: 91 settings keys, 10 shortcut keys, the prompt, 90
-  terms). It is an
+  2026-11-12; the Hex 3.4.0 merge moved the retired meeting labs' values to
+  `meetings.export.descriptive_filenames` and `meetings.stop_when_call_ends`
+  and dropped the other retired `labs.*` keys: now 86 settings keys, 10
+  shortcut keys, the prompt, 90 terms; the 23 labs Hex 3.4.0 added are not
+  in it until the next export). It is an
   allow-list over the `hex settings` registry: every Labs switch, the
   speech model and language, dictation cleanup (on/off, `runs_on`, local
   and Codex model, Codex effort), Meetings' engines, writer, efforts and
@@ -1019,6 +1024,9 @@ the gate, saying who proposes (`Origin`: an answer, a plan, the preset).
 
 ## What's new
 
+- This is where VibeHex tells what is new. Hex's What's new pane, a feed of
+  featured features, still builds and is tested but is never listed in the
+  sidebar (`sidebar::LISTS_WHATS_NEW` is false), so nothing opens it.
 - VibeHex's own release notes ship in the app: `docs/releases/<X.Y.Z-vibe.N>.md`
   and `next.md` (not released yet), embedded by `build.rs` (Hex's notes in
   that folder stay out). Front matter: `version`, `date`, `title` (one

@@ -11,7 +11,7 @@ vibehex: false
 
 # Copy captures as a zip
 
-**What it does.** A finished Annotate capture is normally copied as a folder. With this on, it goes on the clipboard as one zip file instead, with the summary, the contact sheet and the keyframes, but without the video and audio, so it stays small enough to attach to a chat or an AI agent.
+**What it does.** A finished Annotate capture is normally copied as its image and summary. With this on, it goes on the clipboard as one zip file instead, with the summary, the contact sheet and the keyframes, but without the video and audio, so it stays small enough to attach to a chat or an AI agent.
 
 **Turn it on when.** You paste captures into apps that take a single file.
 
@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Copy the capture as one file"; "Attach an Annotate capture to a chat"; «Скопировать запись Annotate одним архивом»; «Захват слишком большой для чата».
 
-<!-- sources: upstream docs/features/labs.md:15-16, 258-273; src/labs/card.rs:82, 284-286; src/labs/catalog.rs (EVERY); src/labs/group.rs (Annotate) -->
+<!-- sources: src/labs/card.rs:82,293-295; src/labs/catalog.rs:330,504; src/labs/group.rs:127; src/control/settings/registry.rs:543-547; src/capture_zip.rs:1-35; src/capture_host.rs:3377-3383,3509-3525; src/rune_ui/labs.rs:740-756; docs/features/labs.md:299-313 -->

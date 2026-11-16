@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "It misspells names that are right there on screen"; "Use the words in my editor"; «Пусть берёт имена из окна»; «Неправильно пишет названия, которые видны на экране».
 
-<!-- sources: upstream docs/features/labs.md:64, 395-445; src/labs/card.rs:19, 108-110; src/labs/description.rs (ScreenVocabulary); src/labs/catalog.rs (MACOS); src/labs/group.rs (Dictation) -->
+<!-- sources: src/labs/card.rs:19,119-121; src/labs/description.rs:25-27; src/labs/catalog.rs:283,444; src/labs/group.rs:72; src/control/settings/registry.rs:321-325; src/transcription/models.rs:355-383,1624; src/parakeet.rs:456-472; docs/features/labs.md (Screen vocabulary section) -->

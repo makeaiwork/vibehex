@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Don't mute my music in headphones"; "Lower audio only on speakers"; «Не глушить музыку в наушниках»; «Приглушать звук только через колонки».
 
-<!-- sources: upstream docs/features/labs.md:294-306; docs/features/README.md:1058-1068; docs/features/dictation.md:1001-1030; src/labs/card.rs:75, 263-265; src/labs/catalog.rs (EVERY); src/labs/group.rs (Dictation) -->
+<!-- sources: src/labs/card.rs:75,272-274; src/labs/catalog.rs:331,500; src/labs/group.rs:83; src/control/settings/registry.rs:140-143,644-649; src/app_settings.rs:233-235; src/rune_ui/general.rs:890; docs/features/labs.md (Only on speakers section) -->

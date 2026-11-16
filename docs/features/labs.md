@@ -50,7 +50,7 @@ not on pull requests; the live page is unverified until a deploy.
 A feature VibeHex added (`labs::Feature::vibehex`: Clean up on your own
 server, Cleanup progress, Russian vibe coding, Vocabulary text view, Add to
 vocabulary from a selection, Files, Stop shortcut, Collapsible sidebar, Listen
-to the recording; Hex itself has none of them) sits in the group
+to the recording, Lower every app; Hex itself has none of them) sits in the group
 `labs/group.rs` gives it, its copy and runtime switch live in `src/labs/vibehex.rs`
 (each its own atomic, never a bit of Hex's state word; check:
 `no_two_labs_share_a_switch`); its card carries a star ("Added in VibeHex"), and
@@ -65,8 +65,8 @@ The Turned on tab's count sits in a badge after the tabs.
 A stable VibeHex build leaves out Hex labs that repeat what VibeHex has or that
 the owner chose not to ship, and Hex labs that run only on OpenCode while
 VibeHex cleans up on its own engines, until they run there too
-(`labs::Feature::vibehex_hides`: Import audio, Release notes link, Quit closes
-window, Annotate replay, Clean up with Apple Intelligence, Voice prompt,
+(`labs::Feature::vibehex_hides`: Import audio, Release notes link, ⌘Q closes
+Settings, Annotate 15 s replay, Clean up with Apple Intelligence, Voice prompt,
 Rewrite reads nearby text); a dev build keeps them, as Hex keeps its developer
 tools. Check:
 `vibehex_hides_only_hex_labs_and_only_from_a_stable_build`.
@@ -239,7 +239,7 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 ├── ⌘Q closes Settings no labs.quit_closes_window      (macOS) the app menu's Quit Hex (⌘Q) closes the Settings window instead of quitting Hex; dictation keeps running, the menu bar icon still quits (#1473)
 ├── Notch indicator no    labs.notch_indicator         (macOS) on a screen with a notch, the HUD widens the notch sideways in the Dynamic Island's compact style at either visible position: an orange mic and level bars, the macOS spinner, a green checkmark; Hidden still hides it, and flat screens keep the Top/Bottom setting
 ├── Clean up on your own server no labs.ai_cleanup_server + dictation_processing.server
-│                                        every mode's rewrite runs on OpenRouter or an OpenAI-compatible server (LM Studio, Ollama) instead of OpenCode; Output shows its AI cleanup section
+│                                        every mode's rewrite runs on Codex, OpenRouter, an OpenAI-compatible server (LM Studio, Ollama), or a built-in model (macOS) instead of OpenCode; Output shows its AI cleanup section
 ├── Vocabulary text view no labs.vocabulary_paste_list  the Vocabulary sheet's Text view edits the whole list as text, "Term | sounds like, …" per line; Save replaces the list (vocabulary.md)
 ├── Add to vocabulary from a selection no labs.vocabulary_quick_add + vocabulary_add_hotkey (macOS)
 │                                        ⌥⇧A over a selection in any app opens a card: Heard (the selection) and Should be; Add saves to Vocabulary and replaces the selection where it is editable
@@ -730,6 +730,9 @@ year. YOLO mode opens and highlights its Labs card without changing
 the switch; Sounds opens General's sound picker without selecting or playing
 a set. `whats_new_opens_controls_without_changing_them` follows both links
 with a fixture and compares the settings before and after.
+VibeHex lists no What's new row: the pane still builds and is tested, but
+`sidebar::LISTS_WHATS_NEW` is false, so nothing opens it, and Assistant tells
+what is new after an update ([assistant.md](assistant.md) › What's new).
 
 Release notes link (`release-notes-link`, every OS): while on, About's card
 shows a small Release notes link under the version and the update check.
@@ -1339,8 +1342,8 @@ another, such as Right ⌥ to start and Return to finish so the text appears
 where you were typing. While on, General shows a "Stop shortcut" recorder
 under Shortcut, Return by default (`stop_hotkey`, also `hex settings set
 stop_hotkey return`); unlike the other shortcuts its recorder takes a key
-alone, and its restore button puts Return back. It is refused when it shares
-a key with another Hex shortcut, and the others' checks count it while the
+alone, and its Reset, shown while the key is another, puts Return back. It is
+refused when it shares a key with another VibeHex shortcut, and the others' checks count it while the
 toggle is on. The gate is `AppSettings::active_stop_hotkey`: only on macOS,
 with the toggle on and no overlap, does `RuntimeHotkeys::stop` carry it.
 
@@ -1352,6 +1355,15 @@ A shortcut's recording runs (Hold, Toggle, double-tap lock, second or raw shortc
 └── the shortcut itself           -> still finishes too
 Idle, or a programmatic dictation -> Return is the app's, untouched
 ```
+
+The stop key comes before Hex's own rules for Return and Escape during a
+held capture ([dictation.md](dictation.md), `dictate.held-return`), which
+apply while the toggle is off. With Labs › YOLO mode on, a dictation the stop
+key finishes follows YOLO mode's one rule: held long enough
+(`DictationClip::held_ms`, the audio from the press to the stop key) and in
+one of its chosen apps, if any, it is pasted and sent with Return, and an Escape just after
+pastes it without sending, as when the shortcut finishes it. No check drives
+the two labs together.
 
 Each shortcut machine (`suppression/hotkey.rs`) finishes on
 `RuntimeHotkey::matches_key_press_beside`, which reads the press without the
@@ -3063,7 +3075,7 @@ OpenCode needn't run.
 ```ts
 Output › AI cleanup (only while the toggle is on)   // labs.ai-cleanup-server
 ├── Clean up with AI -> switch for Global's rewrite (default_mode.post_processing.enabled)
-├── Runs on -> OpenCode · OpenRouter · Codex · Your own · Built in (macOS)   (dictation_processing.server.runs_on)
+├── Runs on -> OpenCode | OpenRouter | Codex | Your own | Built in (macOS)   (dictation_processing.server.runs_on)
 │   ├── OpenCode -> no further rows; rewriting is exactly as without the toggle
 │   ├── Codex -> no URL, Model field, or key rows; instead (codex_cleanup, loaded on its own
 │   │   thread while Output shows Codex; Check again asks again):
@@ -3074,8 +3086,8 @@ Output › AI cleanup (only while the toggle is on)   // labs.ai-cleanup-server
 │   │   │   with ChatGPT Pro as …" + Test | "Answered in 6.2 s" | the error
 │   │   ├── Model -> select of Codex's model/list (hidden ones left out), the chosen one's
 │   │   │   description under it; empty is Codex's default (dictation_processing.server.codex_model)
-│   │   ├── Reasoning -> Low · Medium · High (codex_effort; empty reads as Low)
-│   │   ├── Wait for Codex -> 30 s · 1 min · 2 min (codex_wait_seconds; 0 reads as 60): a dictation's
+│   │   ├── Reasoning -> Low | Medium | High (codex_effort; empty reads as Low)
+│   │   ├── Wait for Codex -> 30 s | 1 min | 2 min (codex_wait_seconds; 0 reads as 60): a dictation's
 │   │   │   cleanup on Codex waits this long instead of the mode's deadline, then pastes as heard
 │   │   ├── Plan usage (ChatGPT sign-in only) -> each account/rateLimits/read window: "5 hours 23%",
 │   │   │   "This week 41%"; reached -> "The limit is reached. Until it resets, dictations paste as heard"
@@ -3091,20 +3103,20 @@ Output › AI cleanup (only while the toggle is on)   // labs.ai-cleanup-server
 │       └── one row per model: its name, then its file's in faint type
 │           (gemma-4-E4B-it-GGUF, the repository without its owner); Speed and Quality
 │           as five-segment meters (green, blue; the rating's word only to a screen
-│           reader); tags for the quantization, its bits, and size (Q4_K_M · 4-bit ·
+│           reader); tags for the quantization, its bits, and size (Q4_K_M, 4-bit,
 │           5.0 GB), then the publisher, its licence on hover -> Download | progress + Cancel |
 │           Use (dictation_processing.server.local_model), which loads the model at
 │           once (engine::warm; a choice made while another loads, once it is done):
 │           "Loading 45%" in its place while it loads (engine::load_progress), then
 │           a green "✓ In use" pill; a trash button asks first (Cancel | "Delete
 │           3.1 GB"); a failure replaces the meters and tags. The meters show
-│           LocalModel::speed/quality (1–5), no machine-dependent numbers: E2B 5 · 3
+│           LocalModel::speed/quality (1–5), no machine-dependent numbers: E2B 5 and 3
 │           (≈93 tok/s; 36 of 44 misheard vocabulary forms written as terms), Qwen3
-│           4B 4 · 4 (≈61 tok/s; 37), E4B 3 · 5 (≈47 tok/s; 40), measured on an
+│           4B 4 and 4 (≈61 tok/s; 37), E4B 3 and 5 (≈47 tok/s; 40), measured on an
 │           M-series Mac
 ├── <server name> -> "Not tested   host" | "Testing…" | "Connected (0.8 s)" | the error; Test
 │   sends one short request on its own thread (30 s), a changed server forgets the result
-├── URL (Your own) -> field + Save; Fill in LM Studio (http://127.0.0.1:1234/v1) · Ollama
+├── URL (Your own) -> field + Save; Fill in LM Studio (http://127.0.0.1:1234/v1) | Ollama
 │   (http://127.0.0.1:11434/v1); anything but http(s) is refused
 ├── Model -> field + Save: openrouter_model or custom_model, as the server names it;
 │   ⌄ beside it opens the server's models, searchable by id and name; choosing one saves it
@@ -3418,15 +3430,15 @@ on
 ├── presets/deniskey.json     its Vocabulary merged into the shared vocabulary (new terms and spellings only)
 ├── replacements-ru.json      added to Global's word fixes, unless a fix for the same phrase exists
 ├── cleanup-instructions-ru.txt  Global's instructions: replaces Hex's default prompt, else appended once
-├── Global's Clean up with AI    on (it runs where Output says: OpenCode, OpenRouter, or your server)
-└── Labs it builds on            every other starred Lab but Stop shortcut, and Vocabulary in meeting notes, on
+├── Global's Clean up with AI    on (it runs where Output says: OpenCode, Codex, OpenRouter, your server, or built in)
+└── Labs it builds on            every other starred Lab but Stop shortcut on (meeting notes always read the vocabulary)
 off
 ├── vocabulary entries and fixes exactly as the preset wrote them are removed; edited ones stay
 │   (also an entry exactly as the earlier 80-term list wrote it, through 3.3.0:
 │   src/dictation/presets/starter-through-3.3.0.txt)
 ├── instructions: only the preset's text is removed; if nothing else was there, Hex's default
 │   prompt returns and Clean up with AI turns off
-└── Clean up on your own server and Paste vocabulary as a list stay on (a server or key set up there is the person's own)
+└── the Labs it turned on stay on (a server or key set up there is the person's own)
 ```
 
 Everything it writes stays editable in Vocabulary and Output. The managed

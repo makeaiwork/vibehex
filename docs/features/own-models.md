@@ -155,7 +155,7 @@ Picker opens, or onboarding starts -> one scan (found_models::scan)   // setup.f
 │   -> that catalog model counts as downloaded; its card says "Found on this
 │   computer" and offers Use, never Download
 ├── Other compatible files -> "Found on this computer" at the top of the picker:
-│   name · Not tested by VibeHex · Q8_0/F16/F32 · owner/name@revision · languages,
+│   name, Not tested by VibeHex, Q8_0/F16/F32, owner/name@revision, languages,
 │   "It may be too big for this computer's GPU memory." when the tensor data
 │   plus a quarter exceeds the largest GPU transcribe.cpp reports, and
 │   "Compatible doesn't mean accurate: …"

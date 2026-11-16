@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "The first word is cut when I dictate again"; "Keep the mic warm between dictations"; «Микрофон каждый раз включается заново»; «Обрезается начало следующей диктовки».
 
-<!-- sources: upstream docs/features/labs.md:78-80, 584-640; src/labs/card.rs:27, 128-130; src/control/settings/registry.rs:351-354 (30/60/180/300/1800); src/app_settings.rs:441 (release_microphone_while_idle false); src/labs/catalog.rs (EVERY) -->
+<!-- sources: src/labs/card.rs:27,139-141; src/labs/catalog.rs:308,452; src/labs/group.rs:74; src/control/settings/registry.rs:102,346-355; src/app_settings/labs.rs:298,308; src/app_settings.rs:461; src/rune_ui/labs.rs:1002-1015,1121-1150; src/rune_ui/general.rs:254-258; docs/features/labs.md (Keep mic open section) -->

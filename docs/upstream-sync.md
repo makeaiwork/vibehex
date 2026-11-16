@@ -175,6 +175,20 @@ standing decisions are answers the owner has already given, and each sync gets o
   compares 17 frames and fails when the machine is busy enough for the clock to cross a second
   before its first frame. It passed in both full runs and failed twice beside heavier tests.
 
+**Documentation after the merge** (checked against the code by separate agents, 2026-11-16)
+
+- The 23 new Labs articles: seven had a wrong or unclear sentence; every key, group and OS matches
+  the code, and each article's sources now name the lines it was checked against.
+- The topic articles: each of the eleven graduated features is described where it lives now, with
+  its setting; sixteen plain settings the guide never mentioned were added (sounds and volume, the
+  interface language, Files' prompt, the Summary prompt, Assistant's own engine).
+- `docs/releases/next.md` said "Nothing new yet". It now lists what this sync brings, without the
+  hidden features, so Assistant can answer "what's new" after the update.
+- README, `docs/features` and AGENTS.md: only the fork's lines were touched. Upstream's text that is
+  wrong for VibeHex has a fork line beside it instead of an edit.
+- Guide search: four Russian phrasings joined "Asked as", after longer topics pushed their own
+  questions out of the top three.
+
 **Left as upstream has it** (seen in the review, not changed)
 
 - A shortcut row has no trash button: Reset appears when the shortcut differs from its default, and

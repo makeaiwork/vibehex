@@ -1,7 +1,7 @@
 ---
 topic: output-and-instructions
 title: Output, word fixes, and instructions
-keys: [dictation_processing.default_mode, dictation_processing.modes, labs.output_fixes]
+keys: [dictation_processing.default_mode, dictation_processing.modes, labs.output_fixes, raw_dictation_hotkey]
 os: every OS
 ---
 
@@ -49,7 +49,7 @@ no steps pastes without AI cleanup.
 ## Skip everything once
 
 **Output › Without processing › Dictate without processing** is a second shortcut,
-unbound until you record one. It pastes exactly what the model heard.
+unbound until you record one; Backspace while recording turns it off again. It pastes exactly what the model heard.
 
 ## Personal commands
 
@@ -61,4 +61,4 @@ or to run programs waits for **Allow** in Output; until then your words paste un
 
 **Asked as.** "How do I make it delete 'um'?"; "Replace a word automatically"; «Как заменять слова при диктовке»; «Как задать инструкции для чистки текста»; «Как отключить обработку текста».
 
-<!-- sources: src/rune_ui/output.rs:1-15,98-200,230-260,360-420,470-640,737-780; docs/features/README.md:973-1062; docs/features/dictation.md:217-228; src/dictation/text_replacements.rs; src/rune_ui/output/ai_cleanup.rs:109-130,540-575; site/public/docs/transforms.md; src/personal_commands/hex.config.ts; src/rune_ui/labs.rs:470-475 -->
+<!-- sources: src/rune_ui/output.rs:413-431 (Without processing); src/rune_ui/output.rs:1-15,98-200,230-260,360-420,470-640,737-780; docs/features/README.md:973-1062; docs/features/dictation.md:217-228; src/dictation/text_replacements.rs; src/rune_ui/output/ai_cleanup.rs:109-130,540-575; site/public/docs/transforms.md; src/personal_commands/hex.config.ts; src/rune_ui/labs.rs:470-475 -->

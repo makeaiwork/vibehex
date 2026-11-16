@@ -770,6 +770,8 @@ Ordinary hold                            // lock activation is mapped below
   │   (key reaches the app; locked and toggle captures keep recording)
   │   └── Return or keypad Enter past 300 ms -> Nothing: the capture goes on,
   │       Return reaches the app                          // dictate.held-return
+  │       VibeHex: with Labs › Stop shortcut on, its key (Return by default)
+  │       finishes and pastes instead, kept from the app (labs.md)
   ├── Escape while held past 300 ms -> Cancel, cancel tone; the tap keeps
   │   Escape from the app                                 // dictate.held-escape
   │   └── Before 300 ms -> Nothing: Option-Escape reaches the app, logged

@@ -1,7 +1,7 @@
 ---
 topic: files
 title: Files
-keys: [labs.files, files.transcription, files.language, files.cleanup_after, files.cleanup_engine, files.cleanup_effort, files.request_engine, files.request_effort, files.quick_prompts]
+keys: [labs.files, files.transcription, files.language, files.cleanup_after, files.cleanup_engine, files.cleanup_effort, files.request_engine, files.request_effort, files.quick_prompts, files.use_vocabulary, files.show_timestamps, files.use_default_prompt, files.prompt]
 os: macOS (Labs)
 ---
 
@@ -29,7 +29,7 @@ Under the text, tap **Structure**, **Summary** or **Action items**, pick one fro
 
 Open the header switch **Settings**:
 - **Transcription › Model** (Same as dictation or any downloaded model), Language, Use vocabulary, Show timestamps.
-- **Cleanup**: **Clean up after transcription**, and **Runs on**. On Codex, **Reasoning** picks how long it thinks; until you pick, it follows Output › AI cleanup's. Cleanup uses your Default mode's prompt unless you turn **Use the Default mode's prompt** off.
+- **Cleanup**: **Clean up after transcription**, and **Runs on**. On Codex, **Reasoning** picks how long it thinks; until you pick, it follows Output › AI cleanup's. Cleanup uses your Default mode's prompt unless you turn **Use the Default mode's prompt** off; **Cleanup prompt** then holds instructions just for files, and **Use the VibeHex prompt** restores its own.
 - **Requests › Runs on**: Same as cleanup, or another. **Reasoning** shows for Codex. **Quick requests › Edit…** changes the chips.
 
 Engines: Built in (a downloaded model, offline), OpenCode, and, with **Labs › Clean up on your own server** set up in Output › AI cleanup, Codex, OpenRouter or Your server. Codex, OpenRouter, Your server and OpenCode send the text to that service.
@@ -40,4 +40,4 @@ Engines: Built in (a downloaded model, offline), OpenCode, and, with **Labs › 
 
 **Asked as.** "Can I transcribe an mp3 or a video?"; "How do I summarize a recording?"; «Как расшифровать аудиофайл?»; «Как сделать краткое содержание записи?»
 
-<!-- sources: docs/features/files.md:1-130, 217-227; src/files/decode.rs:10-27; src/rune_ui/files/settings.rs:195-470; src/rune_ui/files/actions.rs:190-400, 595; src/rune_ui/files.rs:587-830; src/app_settings/prompt_defaults.rs:83 -->
+<!-- sources: src/rune_ui/files/settings.rs:310-335, 412-440, 610-680 (Use vocabulary, Show timestamps, Cleanup prompt); docs/features/files.md:1-130, 217-227; src/files/decode.rs:10-27; src/rune_ui/files/settings.rs:195-470; src/rune_ui/files/actions.rs:190-400, 595; src/rune_ui/files.rs:587-830; src/app_settings/prompt_defaults.rs:83 -->

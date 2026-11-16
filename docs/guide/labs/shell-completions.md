@@ -15,7 +15,7 @@ vibehex: false
 
 **Turn it on when.** You use the `hex` command often.
 
-**Leave it off when.** You don't use the terminal. Off, the command answers that the lab is off and stays out of `hex --help`.
+**Leave it off when.** You don't use the terminal. Off, the command answers that the lab is off. It never shows in `hex --help`.
 
 **Needs.** Nothing else; VibeHex doesn't need to be running. Save the script where your shell looks, for example `hex completions zsh > ~/.zfunc/_hex` with `~/.zfunc` on zsh's `fpath`, or `hex completions fish > ~/.config/fish/completions/hex.fish`.
 
@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Tab completion for hex"; "zsh completions"; «Автодополнение команды hex»; «Как включить дополнение по Tab для hex».
 
-<!-- sources: upstream docs/cli.md:86, 202-223; docs/features/labs.md:179-186; src/labs/card.rs:83, 287-289; src/labs/catalog.rs (EVERY); src/labs/group.rs (Output) -->
+<!-- sources: src/labs/card.rs:83,296-298; src/labs/catalog.rs:332,505; src/labs/group.rs:107; src/control/settings/registry.rs:598-603; src/control/cli.rs:211-218 (hide = true); docs/cli.md:202-222 -->

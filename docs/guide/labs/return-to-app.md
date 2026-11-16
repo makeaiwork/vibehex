@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "The text pasted into the wrong window"; "Paste back into the app I started in"; «Текст вставился не в то окно»; «Вставлять в приложение, где начал диктовку».
 
-<!-- sources: upstream docs/features/labs.md:84, 842-870; src/labs/card.rs:30, 135-137; src/labs/catalog.rs (MACOS); src/labs/group.rs (Output) -->
+<!-- sources: src/labs/card.rs:30,146-148; src/labs/catalog.rs:289,455; src/labs/group.rs:97; src/control/settings/registry.rs:366-370; src/paste/return_to_app.rs:17-21; docs/features/labs.md (Return to app section) -->

@@ -20,6 +20,10 @@ VibeHex (stable build, not HEX_LOCAL_BUILD)       // src/updater.rs
 │     size and SHA-256 must match the manifest
 ├── unpack VibeHex.app beside the installed one, check its signature against
 │     app/update-requirement.txt (identifier, team 3M7AWY4D32, notarized)
+│     └── the folder is .VibeHex-update-<version> (src/updater/staging.rs), not
+│         Hex's .Hex-update-*, so Hex and VibeHex side by side never delete each
+│         other's waiting update; an older .Hex-update-* folder is removed only
+│         when it holds VibeHex.app
 ├── GET …/updates/stable-notes.json: every release's changes, newest first
 │     (src/updater/notes.rs); the update sheet lists the staged release and
 │     every one skipped since the running build, and opens by itself once
@@ -71,6 +75,8 @@ notes), and the commit.
 release `v<version>` with the DMG and ZIP, then replaces `stable-notes.json`
 and `stable.json` on the `updates` release, notes first. Without a step name the script runs both. Each version is
 `X.Y.Z-vibe.N` of the checked-out crate version; never publish one twice.
+`X.Y.Z` follows Hex's version in `Cargo.toml`, and `N` keeps counting
+across Hex's versions: after 3.3.0-vibe.7 comes 3.4.0-vibe.8.
 
 `scripts/build-app.sh` copies the binaries from `target/release`; with
 `hex-env.sh`'s `CARGO_TARGET_DIR` elsewhere, link `target/release` to

@@ -8,7 +8,9 @@ fork is, asks for a star on GitHub, and says how to reach its developer.
 Sidebar                                         // rune_ui::brand, rune_ui::sidebar
 ├── Header   Hex's logo (packaging/linux/icons, 128 px, decoded once) and
 │            "VibeHex", above the navigation; not a button
-├── About    the last item, after Labs (Pane::About, nav-about)
+├── About    the last item, after Labs (Pane::About, nav-about); Hex's
+│            What's new row is not listed (sidebar::LISTS_WHATS_NEW):
+│            Assistant tells what is new after an update
 └── Bottom   an update to take (Restart to update, Download update, Switch
              to …) with its dot, only while there is one, then Assistant.
              No version and no check here. Assistant's face sits as far

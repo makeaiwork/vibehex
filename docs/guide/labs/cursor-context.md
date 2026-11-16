@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Let the AI see what I'm typing in"; "Rewrite misspells names from my document"; «Пусть ИИ учитывает текст вокруг курсора»; «Переписывание не знает имён из документа».
 
-<!-- sources: upstream docs/features/labs.md:65, 447-500; docs/features/README.md:45-51, 1375-1379; src/labs/card.rs:81, 281-283; src/labs/description.rs (CursorContext); src/labs/catalog.rs (MACOS); src/labs/group.rs (Output); hidden from stable builds: owner's decision for this merge -->
+<!-- sources: src/labs/card.rs:81,290-292; src/labs/description.rs:197-199; src/labs/catalog.rs:284,507; src/labs/group.rs:109; src/labs/vibehex.rs:553-564; src/control/settings/registry.rs:326-330; src/rune_ui/labs.rs:672-680; src/dictation/caret_text.rs:1-25; docs/features/labs.md:488-520 -->

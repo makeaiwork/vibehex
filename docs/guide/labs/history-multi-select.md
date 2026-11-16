@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Copy several dictations at once"; "Delete many history entries"; «Выделить несколько диктовок»; «Удалить сразу несколько записей из истории».
 
-<!-- sources: upstream docs/features/labs.md:128-129, 1885-1916; docs/features/README.md:912-916; src/labs/card.rs:46, 184-186; src/labs/catalog.rs (EVERY); src/labs/group.rs (History) -->
+<!-- sources: src/labs/card.rs:46,195-197; src/labs/catalog.rs:316,471; src/labs/group.rs:115; src/control/settings/registry.rs:483-487; src/rune_ui/history/selection.rs:1-4,401-449 -->

@@ -26,4 +26,4 @@ vibehex: false
 
 **Asked as.** "Use the F5 microphone key"; "Dictate with the mic key on my MacBook"; «Диктовать клавишей с микрофоном»; «Назначить клавишу F5 с микрофоном».
 
-<!-- sources: upstream docs/features/labs.md:126, 1765-1840; docs/features/dictation.md (microphone key); src/labs/card.rs:55, 209-211; src/labs/description.rs (MicrophoneKeyAlone); src/labs/catalog.rs (MACOS); src/labs/group.rs (Shortcuts) -->
+<!-- sources: src/labs/card.rs:55,220-222; src/labs/description.rs:125-127; src/labs/catalog.rs:261,480; src/labs/group.rs:137; src/control/settings/registry.rs:170,462-467; src/rune_ui/labs.rs:629-634; src/rune_ui/general.rs:50-60; docs/features/labs.md (Microphone key alone section) -->

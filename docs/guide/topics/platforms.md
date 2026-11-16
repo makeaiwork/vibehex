@@ -70,7 +70,8 @@ Meetings article.
 
 - **Mac only**: Import
   audio (dev builds), Screenshots, Annotate 15 s replay (dev builds, macOS 27),
-  ⌘Q closes Settings (dev builds), Files, Listen to the recording, Smart spacing, Mouse shortcuts, Caps Lock dictation, Also pause
+  ⌘Q closes Settings, Clean up with Apple Intelligence and Rewrite reads
+  nearby text (these three dev builds only), Files, Listen to the recording, Smart spacing, Mouse shortcuts, Caps Lock dictation, Also pause
   the browser, Stop shortcut, Sided modifier chords, Double-tap on a lone
   modifier, More dictation shortcuts, Microphone key alone, Pause from menu
   bar, Return to app, Screen vocabulary, Smaller model files, Print-only CLI
@@ -96,4 +97,4 @@ Linux. A stable build keeps only an Uninstall for a driver already installed.
 **Asked as.** "Does VibeHex work on Windows?"; "Can I record calls on Linux?";
 «Есть ли версия для Windows?»; «Почему у меня нет вкладки Meetings?».
 
-<!-- sources: upstream src/labs/catalog.rs (oses); upstream src/rune_ui/platform_settings.rs:975-985 (Stop when the call ends, macOS); app/Info.plist:36-37; docs/windows.md:34, 54-57; src/windows/vulkan.rs:1-40; src/rune_ui/general.rs:1240-1285; src/rune_ui/platform.rs:70-130, 809-852; src/labs.rs:279-284, 460-495; src/rune_ui/labs.rs:422-505, 520-530, 560-575, 785-880; src/rune_ui/fun.rs:285-300, 464-490; src/labs/cli.rs:104-113; src/control/settings.rs:944-956; docs/features/meetings.md:128-215; docs/features/labs.md:73, 607-640; src/rune_ui/settings.rs:221; src/app_settings/hotkeys.rs:645-655; src/transcription/cpu_floor.rs:11; src/dictation/cleanup_server/engine.rs; src/rune_ui/output/ai_cleanup.rs:188-195 -->
+<!-- sources: src/labs/vibehex.rs:61-77 (hidden from a stable build); upstream src/labs/catalog.rs (oses); upstream src/rune_ui/platform_settings.rs:975-985 (Stop when the call ends, macOS); app/Info.plist:36-37; docs/windows.md:34, 54-57; src/windows/vulkan.rs:1-40; src/rune_ui/general.rs:1240-1285; src/rune_ui/platform.rs:70-130, 809-852; src/labs.rs:279-284, 460-495; src/rune_ui/labs.rs:422-505, 520-530, 560-575, 785-880; src/rune_ui/fun.rs:285-300, 464-490; src/labs/cli.rs:104-113; src/control/settings.rs:944-956; docs/features/meetings.md:128-215; docs/features/labs.md:73, 607-640; src/rune_ui/settings.rs:221; src/app_settings/hotkeys.rs:645-655; src/transcription/cpu_floor.rs:11; src/dictation/cleanup_server/engine.rs; src/rune_ui/output/ai_cleanup.rs:188-195 -->

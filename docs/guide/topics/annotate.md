@@ -1,7 +1,7 @@
 ---
 topic: annotate
 title: Annotate
-keys: [capture.enabled, capture.hotkey, capture.transcriber, capture.folder, capture.media_days, capture.show_overlays_in_recordings]
+keys: [capture.enabled, capture.hotkey, capture.transcriber, capture.folder, capture.media_days, capture.bundle_days, capture.show_overlays_in_recordings]
 os: macOS, Windows, Linux (not on every feature)
 ---
 
@@ -32,7 +32,7 @@ Paste the result anywhere, or click **Send to…** on the capsule to choose an O
 
 ## Where captures go
 
-**Storage › Annotations folder** is, by default, Scrawl's own folder: `~/Library/Application Support/scrawl/captures` on a Mac, and a `scrawl/captures` folder in the local data folder on Windows and Linux. Press **Reveal** to open it. On a Mac, the folder button picks another; on Windows and Linux that is only possible in the settings file for now. **Keep** is Video for 7 days (default), Video for 30 days, or Forever. The video and audio go first; the annotation itself is removed after 30 or 90 days.
+**Storage › Annotations folder** is, by default, Scrawl's own folder: `~/Library/Application Support/scrawl/captures` on a Mac, and a `scrawl/captures` folder in the local data folder on Windows and Linux. Press **Reveal** to open it. On a Mac, the folder button picks another; on Windows and Linux that is only possible in the settings file for now. **Keep** is Video for 7 days (default), Video for 30 days, or Forever. The video and audio go first; the annotation itself is removed after 30 or 90 days. With Labs › Screenshots on (Mac), the Captures pane lists the last 30 days of annotations too, to open, copy, drag or move to the Trash.
 
 ## Limits
 
@@ -40,4 +40,4 @@ Windows has no `hex annotate` command. On Linux, Wayland gives no area selection
 
 **Asked as.** "How do I draw on my screen and send it?"; "What is the F9 key for?"; «Как записать экран с комментариями?»; «Какой хоткей у Annotate?»
 
-<!-- sources: build.rs:8-16; src/app_settings.rs:445-516, 558-565; src/app_settings/hotkeys.rs:703-719; src/rune_ui/scrawl.rs:15-130, 200-380, 380-445; src/rune_ui/sidebar.rs:121-133; src/rune_ui/platform.rs:755-790; src/capture_host/permissions.rs:1-30; crates/capture/src/handoff.rs:66-77; docs/features/capture.md:1-160 -->
+<!-- sources: crates/capture/src/retention.rs:91-110; upstream 71cdbd4d (annotations in Captures, docs/features/labs.md); build.rs:8-16; src/app_settings.rs:445-516, 558-565; src/app_settings/hotkeys.rs:703-719; src/rune_ui/scrawl.rs:15-130, 200-380, 380-445; src/rune_ui/sidebar.rs:121-133; src/rune_ui/platform.rs:755-790; src/capture_host/permissions.rs:1-30; crates/capture/src/handoff.rs:66-77; docs/features/capture.md:1-160 -->

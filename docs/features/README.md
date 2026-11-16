@@ -53,6 +53,11 @@ byte unchanged. Its Clean up with Apple Intelligence toggle (off by default,
 macOS) gives each dictation its mode does not rewrite one short on-device pass
 that fixes clearly misheard words and spoken self-corrections, pasting the
 corrected text whenever Apple Intelligence is unavailable, slow, or refuses.
+A stable VibeHex leaves Hex's Import audio, Release notes link, ⌘Q closes
+Settings, and Annotate 15 s replay out of Labs, and Rewrite reads nearby text,
+Clean up with Apple Intelligence, and Voice prompt too until they run on
+VibeHex's own cleanup engines and not only OpenCode; a dev build keeps them
+(`labs::Feature::vibehex_hides`, [labs.md](labs.md)).
 General › Advanced › Interface language offers Português (Brasil), and Hex
 uses it for any Portuguese system language (#867); it also offers Français,
 used for any French system language (#892), and Русский, used for any
@@ -971,7 +976,9 @@ Labs > Stop shortcut (macOS, off)   // labs.md
   -> General shows "Stop shortcut" under Shortcut (Return by default, restorable)
   -> while a shortcut's recording runs, in any mode: Return -> Finish -> pastes
      (also with the held shortcut's own modifiers down: hold Right ⌥, press Return)
-  -> Hex takes Return from the app only then; idle it is the app's
+  -> VibeHex takes Return from the app only then; idle it is the app's
+  -> with Labs > YOLO mode on, a dictation long enough for it is pasted and sent,
+     whichever key finished it (labs.md)
 
 Labs > Terminal paste shortcut (Windows, Linux; off)   // labs.md
   -> General shows "Terminal paste shortcut" under Shortcut (unbound, clearable)
@@ -1756,7 +1763,7 @@ Menu bar and Settings                    // maintenance
 │   ├── Paste Last Dictation ⌥⇧V (saved binding), Copy Recent Dictation ▸ (Labs),
 │   │   Copy Last Meeting Transcript (Meetings on), Restore Last Capture (Labs ›
 │   │   Screenshots on; dimmed until a capture card was closed), Speech Model ▸
-│   ├── Settings… ⌘, · Check for Updates… · Quit VibeHex ⌘Q (the name: features/about.md)
+│   ├── Settings… ⌘,   Check for Updates…   Quit VibeHex ⌘Q (the name: features/about.md)
 │   │   └── Labs > ⌘Q closes Settings (off, #1473) -> ⌘Q closes the Settings
 │   │       window instead; dictation keeps running, the menu bar icon quits (labs.md)
 │   ├── No Meetings… (Settings… opens the same window) and no Show Hex in
@@ -1802,7 +1809,7 @@ Show Dock icon off                       // maintain.dock-policy
 └── Settings window closes -> Menu-bar only
 
 Window's menu bar (macOS)                // maintain.edit-menu
-├── Hex, File, Edit, View, Window (macos_rune::install_main_menu)
+├── VibeHex, File, Edit, View, Window (macos_rune::install_main_menu)
 └── Edit -> Undo, Redo, Cut, Copy, Paste, Select All for the focused field
     └── Any keyboard layout -> AppKit matches ⌘V on a Cyrillic layout (where the key
         reads ⌘м) and Rune's `standard_menus` hands the field ⌘V itself
@@ -1931,7 +1938,7 @@ Hex checks the release service            // maintain.updates
 │   │   └── Same release, rollout deferred, unconfirmed switch, rollback, failure -> keep the staged one
 │   ├── Staged -> notes: <channel>-notes.json beside the manifest (updater/notes.rs),
 │   │   every release from the staged one back to the running one, skipped ones too
-│   │   ├── Update sheet (rune_ui/update_sheet.rs): Hex <version> is ready, each release's
+│   │   ├── Update sheet (rune_ui/update_sheet.rs): VibeHex <version> is ready, each release's
 │   │   │   version, date, and changes, Not now / Restart to update
 │   │   │   ├── Opens once per staged version, after anything else holding the window
 │   │   │   │   (another sheet, the first run, a shortcut recording) closes
@@ -2110,7 +2117,7 @@ Linux beta                               // not macOS feature parity
 │   // checked on apollo with a planted record (RADV); a real i915 hang not reproduced
 │   └── CPU or a model that cannot stream -> Transcribe the whole clip after release
 ├── hex / hex app -> Window in the same process; closing it leaves Hex running
-│   └── Ctrl+Q in the window or Quit VibeHex in the sidebar -> quits Hex (#808)
+│   └── Ctrl+Q in the window or Quit VibeHex in the sidebar -> quits VibeHex (#808)
 │       // check: ctrl_q_quits_hex (fixture; not run on a GNOME session)
 ├── Recording sounds -> Shortcut press / capture stop
 ├── Shortcuts -> One state machine, three sources        // linux.shortcuts
@@ -2445,9 +2452,9 @@ Windows beta                             // x64 (Vulkan GPU) and ARM64 (CPU)
 │   └── Theme read when the tray is created; a later switch applies at the next launch
 ├── Tray menu (tray_menu, shared with Linux)    // maintain.tray
 │   ├── Recording / Transcribing… status line and tooltip while the listener works
-│   ├── Show VibeHex · Paste last dictation (refocuses the app the menu covered)
+│   ├── Show VibeHex, Paste last dictation (refocuses the app the menu covered)
 │   ├── Speech model: downloaded models, ✓ on the selected one; none while one prepares
-│   └── Update item · Enable / Disable VibeHex · Quit VibeHex
+│   └── Update item, Enable / Disable VibeHex, Quit VibeHex
 ├── Single-modifier shortcut -> Left / Either / Right side picker, as macOS
 ├── Recordable keys -> letters, digits, F1–F24, named keys, mouse buttons (#794)
 │   ├── Punctuation -> saved by virtual key (`oem 1`…`oem 102`), so a layout

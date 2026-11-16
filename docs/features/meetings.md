@@ -706,7 +706,7 @@ Meeting = not all-day, declined, free, or cancelled, AND has other attendees or 
 
 Lead time reached (or Mac wakes within 5 min of the start)   // meetings.reminder
   -> Reminder capsule, offer-capsule placement, focus-free
-     ├── "Design sync" · "Starts in 1 min   Zoom"
+     ├── "Design sync" with "Starts in 1 min   Zoom"
      │   ├── Not now -> close; this call is not offered when detected
      │   ├── Join & record (only with a link) -> open the link, then record
      │   └── Record -> recording titled "Design sync" with its attendees
@@ -877,6 +877,8 @@ Record (offer, menu bar "Record Meeting", Meetings pane, or voice command)
       under Paste Last Dictation; there is no Meetings… item, Settings… opens
       the same window)
   -> Floating recording indicator (when Show recording indicator is on) // meetings.indicator
+     ├── VibeHex: Hex's pill as it is, with VibeHex's words (its name, no middle
+     │   dots); the Open button the pill had before Hex 3.4.0 is not added back
      ├── Rune interactive overlay: a non-activating panel that never becomes key
      ├── Only the drawn pill takes the pointer (OverlayInput::Regions, the
      │   pill `.hit()`); the window is as wide as the open pill, and clicks

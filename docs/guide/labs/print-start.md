@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Get dictated text in a script"; "hex dictation start --print says disabled"; «Получить надиктованный текст в терминале»; «Диктовка для скрипта без вставки».
 
-<!-- sources: upstream docs/features/labs.md:85, 872-912; docs/cli.md:37, 114-142; src/labs/card.rs:79, 275-277; src/labs/catalog.rs (MACOS); src/labs/group.rs (Output) -->
+<!-- sources: src/labs/card.rs:79,284-286; src/labs/catalog.rs:282,502; src/labs/group.rs:106; src/control/settings/registry.rs:663-668; src/control.rs:414; src/rune_ui/labs.rs:576-581; docs/features/labs.md (Print-only CLI dictation section) -->

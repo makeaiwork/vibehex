@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Fix misheard words on device"; "Remove my 'no wait' corrections"; «Исправлять ошибки распознавания без интернета»; «Убирать оговорки вроде „нет, подожди“».
 
-<!-- sources: upstream docs/features/labs.md:102-107, 1106-1150; src/labs/card.rs:33, 144-146; src/labs/catalog.rs (MACOS); src/labs/group.rs (Output); hidden from stable builds: owner's decision for this merge -->
+<!-- sources: src/labs/card.rs:33,155-157; src/labs/catalog.rs:287,458; src/labs/group.rs:94; src/labs/vibehex.rs:553-564; src/control/settings/registry.rs:386-390; src/dictation/apple_cleanup.rs:22,135; src/rune_ui/labs.rs:654-665; docs/features/labs.md:1158-1200 -->

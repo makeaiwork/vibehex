@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Can I use a Q4_K model?"; "Smaller GGUF speech model"; «Можно ли подключить модель Q4_K»; «Модель поменьше весом».
 
-<!-- sources: upstream docs/features/labs.md:173-177, 2036-2056; src/labs/card.rs:52, 200-202; src/labs/catalog.rs (MACOS); src/labs/group.rs (Models) -->
+<!-- sources: src/labs/card.rs:52,211-213; src/labs/catalog.rs:257,477; src/labs/group.rs:149; src/control/settings/registry.rs:588-592; src/rune_ui/labs.rs:686-690; src/rune_ui/model_import.rs:55-85; docs/features/labs.md (Smaller model files section) -->

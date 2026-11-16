@@ -26,4 +26,4 @@ vibehex: false
 
 **Asked as.** "Several dictation keys with different modes"; "A tap key and a hold key"; «Несколько клавиш для диктовки»; «Одна клавиша удерживать, другая нажимать».
 
-<!-- sources: upstream docs/features/labs.md:111-113, 1225-1280; docs/features/README.md:858-863; src/labs/card.rs:76, 266-268; src/labs/catalog.rs (MACOS); src/labs/group.rs (Shortcuts) -->
+<!-- sources: src/labs/card.rs:76,275-277; src/labs/catalog.rs:285,509; src/labs/group.rs:130; src/control/settings/registry.rs:199-204,396-401; src/control/settings/requires.rs (extra_dictation_hotkeys); src/rune_ui/general/extra_shortcuts.rs:49-127; src/rune_ui/shortcut_mode.rs:57-63; docs/features/labs.md (More dictation shortcuts section) -->

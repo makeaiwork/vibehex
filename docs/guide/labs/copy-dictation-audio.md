@@ -25,4 +25,4 @@ vibehex: false
 
 **Asked as.** "Copy the audio of my dictation"; "Attach the recording to a message"; «Скопировать аудио диктовки»; «Отправить запись диктовки файлом».
 
-<!-- sources: upstream docs/features/labs.md:189, 2157-2193; docs/features/README.md:922-924; src/labs/card.rs:85, 291-293; src/labs/catalog.rs (EVERY); src/labs/group.rs (History) -->
+<!-- sources: src/labs/card.rs:85,300-302; src/labs/catalog.rs:334,510; src/labs/group.rs:117; src/control/settings/registry.rs:468-477; src/rune_ui/history.rs:898-913,1185-1205; src/macos_rune/status_item.rs:332; docs/features/labs.md (Copy dictation audio section) -->
