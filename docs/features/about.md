@@ -31,7 +31,7 @@ About                                           // rune_ui::about
 │            └── Release notes (Labs › Release notes link, a release build)
 ├── Fork     "VibeHex is a fork of Hex, the open-source dictation app…",
 │            "If VibeHex is useful to you, a star on GitHub helps others
-│            find it.", then Source code github.com/makeaiwork/VibeHex with
+│            find it.", then Source code github.com/makeaiwork/vibehex with
 │            Star on GitHub (a star icon; it opens the repository, where
 │            starring happens)
 └── Footer   "Hi! I'm Denis, and I make VibeHex…", Email the developer (a new

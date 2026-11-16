@@ -247,7 +247,7 @@ pub(super) fn fixture(ui: &mut Ui) {
                 .iter()
                 .flat_map(|release| release.items.clone())
                 .collect(),
-            url: "https://github.com/makeaiwork/VibeHex/releases".into(),
+            url: "https://github.com/makeaiwork/vibehex/releases".into(),
             version: "3.3.0-vibe.5".into(),
             releases,
         });

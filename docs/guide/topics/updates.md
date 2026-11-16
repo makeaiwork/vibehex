@@ -15,7 +15,7 @@ developer.
 
 VibeHex looks for a new version ten seconds after it starts and then every
 hour. The news comes from the fork's releases on GitHub
-(github.com/makeaiwork/VibeHex). To check right now, open About (the last item after
+(github.com/makeaiwork/vibehex). To check right now, open About (the last item after
 Labs) and press "Check for updates"; beside it VibeHex then says "VibeHex is
 up to date" or "Couldn't check for updates". Check for Updates in the menu
 bar opens About to say the same.
@@ -54,7 +54,7 @@ such as "Switch to Stable" followed by the version. If unsure, stay on Stable.
 
 ## Release notes
 
-Each release's notes are on its page at github.com/makeaiwork/VibeHex/releases.
+Each release's notes are on its page at github.com/makeaiwork/vibehex/releases.
 "What's new" under Restart to update opens the page for the staged release.
 Labs › Release notes link adds a Release notes link to About for the version
 you run.
