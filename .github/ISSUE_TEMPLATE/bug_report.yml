@@ -1,20 +1,21 @@
 name: Bug report
-description: Report something that does not work as expected in Hex.
+description: Report something that does not work as expected in VibeHex.
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping improve Hex. Please search existing issues first.
+        Thanks for helping improve VibeHex. Please search existing issues first.
+        If the original Hex does the same thing, report it at https://github.com/anomalyco/hex/issues instead.
         Do not share private dictation, audio recordings, credentials, or full logs.
         Review and redact any diagnostic excerpts or screenshots before attaching them.
-        Diagnoses and proposed fixes are welcome here. We don't accept outside pull
-        requests, but we credit your analysis in the pull request that fixes it.
+        Diagnoses and proposed fixes are welcome here, and small fixes are welcome as
+        pull requests: see CONTRIBUTING.md.
   - type: input
     id: version
     attributes:
-      label: Hex version
+      label: VibeHex version
       description: Include the commit if you built from source, or the package version for an SDK issue.
-      placeholder: "2.1.13, installed from the signed DMG"
+      placeholder: "3.3.0-vibe.7, installed from the DMG"
     validations:
       required: true
   - type: dropdown
