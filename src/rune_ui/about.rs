@@ -18,7 +18,7 @@ pub(super) use update::BuildKind;
 /// The developer's Telegram.
 pub(super) const TELEGRAM_URL: &str = "https://t.me/DenisKey";
 /// The fork's source.
-pub(super) const SOURCE_URL: &str = "https://github.com/makeaiwork/VibeHex";
+pub(super) const SOURCE_URL: &str = "https://github.com/makeaiwork/vibehex";
 
 /// Opens `url` in its app (the browser, Mail, Telegram); the window shows
 /// why it couldn't.
@@ -110,7 +110,7 @@ fn fork_card(p: Paint) -> El {
                 "source",
                 &SOURCE,
                 tr("Source code"),
-                Some("github.com/makeaiwork/VibeHex"),
+                Some("github.com/makeaiwork/vibehex"),
                 open_source,
             ),
         ],

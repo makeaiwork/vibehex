@@ -14,7 +14,7 @@ because both use the `hex` data folder. Only one of them runs at a time
 ```ts
 VibeHex (stable build, not HEX_LOCAL_BUILD)       // src/updater.rs
 ├── 10 s after launch, then hourly, and Check for updates in About
-├── GET https://github.com/makeaiwork/VibeHex/releases/download/updates/stable.json
+├── GET https://github.com/makeaiwork/vibehex/releases/download/updates/stable.json
 │     the release protocol's manifest (schema 1, app hex, artifact desktop)
 ├── version differs from the running one -> download macos-arm64 (the ZIP)
 │     size and SHA-256 must match the manifest
@@ -33,10 +33,15 @@ is the update. A local build (`HEX_LOCAL_BUILD=1`) never checks.
 
 The repository was `makeaiwork/hex` until November 10, 2026. Builds from
 before then still poll `github.com/makeaiwork/hex/...`, and GitHub redirects
-that (and its release downloads) to `makeaiwork/VibeHex`; the updater follows
+that (and its release downloads) to `makeaiwork/vibehex`; the updater follows
 redirects and only requires the download to stay on `github.com`. Never
 create a repository named `hex` under `makeaiwork`: it would take the old
 address and those installs would stop seeing updates.
+
+On November 16, 2026 the repository name was lowercased from `VibeHex` to
+`vibehex` (the app is still called VibeHex). GitHub ignores case in owner and
+repository names, so builds that poll `github.com/makeaiwork/VibeHex/...`
+keep working.
 
 ## Publishing a version
 

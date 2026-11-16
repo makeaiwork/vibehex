@@ -204,7 +204,7 @@ until you turn it on. Russian vibe coding turns on most of it in one go.
 VibeHex runs on macOS 15 or later on Apple silicon. There are no Windows or
 Linux builds.
 
-Get the DMG from the [latest release](https://github.com/makeaiwork/VibeHex/releases/latest)
+Get the DMG from the [latest release](https://github.com/makeaiwork/vibehex/releases/latest)
 and drag VibeHex to Applications. It updates itself after that, and each
 update lists what changed.
 
