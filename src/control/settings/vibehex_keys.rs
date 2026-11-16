@@ -75,14 +75,6 @@ pub(super) const VIBEHEX_KEYS: &[Key] = &[
         "Labs: stop_hotkey finishes and pastes a recording a shortcut started (macOS)",
     ),
     key(
-        "labs.cursor_context_cloud",
-        Kind::Bool,
-        "Labs: while labs.cursor_context is on, the text around the cursor goes to a cloud \
-         cleanup engine too (Codex, OpenRouter, or your own server at an address that is not \
-         this computer); off, it is used only by the built-in model, a server on this computer, \
-         or OpenCode, and not read for a cloud engine (macOS)",
-    ),
-    key(
         "labs.lower_every_app",
         Kind::Bool,
         "Labs: with recording_audio_behavior mute or duck and an output macOS can't set the volume of (a DisplayPort or HDMI display), every other app is turned down through a muting system audio tap (macOS 14.2+, needs system audio access)",

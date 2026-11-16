@@ -1,6 +1,5 @@
-//! VibeHex: Labs › Rewrite reads nearby text's card while on: the line that
-//! names where the text goes with the cleanup engine chosen now, and Send it
-//! to cloud engines, which a cloud engine needs before it gets the text.
+//! VibeHex: Labs › Rewrite reads nearby text's card while on: the one line
+//! that names where the text goes with the cleanup engine chosen now.
 
 use super::*;
 use crate::app_settings::CleanupRunsOn;
@@ -10,7 +9,7 @@ fn shows(rt: &Runtime<Ui>, line: &str) -> bool {
 }
 
 #[test]
-fn the_nearby_text_card_names_where_it_goes_and_asks_for_the_cloud() {
+fn the_nearby_text_card_names_where_it_goes() {
     let mut rt = runtime("mac-production", true, (980.0, 2000.0));
     {
         let settings = &mut rt.state.settings;
@@ -33,17 +32,10 @@ fn the_nearby_text_card_names_where_it_goes_and_asks_for_the_cloud() {
         &rt,
         "With your cleanup engine now, the nearby text stays on this Mac."
     ));
-    assert!(rt.find("cursor-context-cloud-switch").is_some());
 
     rt.state.settings.dictation_processing.server.runs_on = CleanupRunsOn::Codex;
     rt.invalidate();
     settle(&mut rt);
-    assert!(shows(
-        &rt,
-        "Not used now: your cleanup runs on Codex. Turn on Send it to cloud engines to use it there."
-    ));
-    tap(&mut rt, "cursor-context-cloud-switch");
-    assert!(rt.state.settings.labs.cursor_context_cloud);
     assert!(shows(
         &rt,
         "With your cleanup engine now, the nearby text is sent to Codex with each dictation."

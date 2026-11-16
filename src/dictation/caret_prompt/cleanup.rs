@@ -1,21 +1,15 @@
 //! VibeHex: Labs › Rewrite reads nearby text on every cleanup engine.
 //!
 //! Hex gives the text around the cursor to the mode's OpenCode rewrite only.
-//! VibeHex gives it to the engine that cleans the dictation up, wherever that
-//! runs. What decides is where the text would go with the engine chosen now
-//! ([`destination`]):
-//!
-//! - this computer (the built-in model, or the person's own server at
-//!   `localhost`, 127.0.0.1 or ::1): used whenever the lab is on;
-//! - the mode's OpenCode model, as Hex sends it: used whenever the lab is on,
-//!   as in Hex. That model may be a cloud provider, and the card says so;
-//! - a cloud engine (Codex, OpenRouter, the person's server at any other
-//!   address): only with Send it to cloud engines on
-//!   (`labs.cursor_context_cloud`).
-//!
-//! Text that would not be used is not read at all ([`read_now`], checked by
-//! `CaretTextRead::start`), and the processor checks again for the engine
-//! that runs ([`Nearby`]).
+//! VibeHex gives it to whichever engine cleans the dictation up: the
+//! built-in model, the person's own server, Codex, OpenRouter, or OpenCode.
+//! The owner's rule (2026-11-16): a lab that is on works with whatever
+//! cleanup engine is chosen, and the card and the guide say when that is a
+//! cloud engine; there is no separate consent switch. [`destination`] only
+//! picks the card's words: this computer (the built-in model, or an own
+//! server at `localhost`, 127.x or ::1), OpenCode's model, or a cloud engine
+//! by name. Known key and token shapes are cut out of the text as it is read
+//! ([`super::secrets`]), before it reaches the dictation's context.
 //!
 //! The section goes in the transcript's part of the prompt, ahead of the
 //! transcript ([`section_in`]): a chat server's user message and Codex's
@@ -50,9 +44,9 @@ pub(crate) enum Destination {
     /// The built-in model, or the person's own server at a loopback address.
     ThisComputer,
     /// The mode's OpenCode model: Hex's own path, which may be a cloud
-    /// provider. Treated as Hex treats it.
+    /// provider.
     OpenCode,
-    /// A cloud engine: the text goes there only with the person's consent.
+    /// A cloud engine, which receives the text with each dictation.
     Cloud(Cloud),
 }
 
@@ -66,17 +60,10 @@ pub(crate) enum Cloud {
     Server(String),
 }
 
-impl Destination {
-    /// Whether the text goes there only with Send it to cloud engines on.
-    pub(crate) fn asks(&self) -> bool {
-        matches!(self, Self::Cloud(_))
-    }
-}
-
 /// Where the nearby text goes with `server`, the cleanup engine chosen now
-/// (`None` is OpenCode). An own server counts as this computer only at
-/// `localhost`, 127.0.0.1 (any 127.x address) or ::1; any other address, or
-/// one that doesn't parse, is a cloud engine.
+/// (`None` is OpenCode), for the card's line. An own server counts as this
+/// computer only at `localhost`, 127.0.0.1 (any 127.x address) or ::1; any
+/// other address, or one that doesn't parse, is named as a server elsewhere.
 pub(crate) fn destination(server: Option<&Server>) -> Destination {
     let Some(server) = server else {
         return Destination::OpenCode;
@@ -103,26 +90,7 @@ pub(crate) fn chosen(settings: &AppSettings) -> Option<Server> {
     Server::from_settings(&settings.dictation_processing.server)
 }
 
-/// Whether a dictation's cleanup is given the nearby text: the lab is on
-/// (`lab`), and the text stays on this computer, goes to OpenCode as in Hex,
-/// or may go to the cloud (`cloud`, Send it to cloud engines).
-pub(crate) fn used(lab: bool, destination: &Destination, cloud: bool) -> bool {
-    lab && (!destination.asks() || cloud)
-}
-
-/// Whether a capture that becomes real now reads the nearby text: [`used`]
-/// for the cleanup engine chosen now. Read by `CaretTextRead::start`, so text
-/// that would not be used never leaves the app it is in.
-#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
-pub(crate) fn read_now() -> bool {
-    used(
-        crate::labs::cursor_context(),
-        &destination(cleanup_server::active().as_ref()),
-        crate::labs::cursor_context_cloud(),
-    )
-}
-
-/// One dictation's nearby text, as its cleanup may be given it.
+/// One dictation's nearby text, as its cleanup is given it.
 pub(crate) struct Nearby<'a> {
     context: &'a ContextSnapshot,
     /// The text around the cursor this cleanup is given, if any.
@@ -130,22 +98,12 @@ pub(crate) struct Nearby<'a> {
 }
 
 impl<'a> Nearby<'a> {
-    /// The gate is read here, for `server` (`None`: OpenCode), the engine
-    /// this cleanup runs on.
-    pub(crate) fn new(
-        context: &'a ContextSnapshot,
-        source: Source,
-        server: &Option<Server>,
-    ) -> Self {
-        let used = used(
-            crate::labs::cursor_context(),
-            &destination(server.as_ref()),
-            crate::labs::cursor_context_cloud(),
-        );
-        Self::when(used, context, source)
+    /// The lab is read here: on, whatever engine runs the cleanup.
+    pub(crate) fn new(context: &'a ContextSnapshot, source: Source) -> Self {
+        Self::when(crate::labs::cursor_context(), context, source)
     }
 
-    /// [`Self::new`] with the gate given. Typed text never takes it.
+    /// [`Self::new`] with the lab given. Typed text never takes it.
     pub(crate) fn when(used: bool, context: &'a ContextSnapshot, source: Source) -> Self {
         let caret = super::for_source(context, source).filter(|_| used);
         Self { context, caret }
@@ -242,9 +200,10 @@ mod tests {
         }
     }
 
-    /// The built-in model and an own server at this computer's address keep
-    /// the text here; Codex, OpenRouter and an own server anywhere else are
-    /// cloud engines, named by their host; OpenCode is Hex's own path.
+    /// For the card's line: the built-in model and an own server at this
+    /// computer's address keep the text here; Codex, OpenRouter and an own
+    /// server anywhere else are cloud engines, named by their host; OpenCode
+    /// is Hex's own path.
     #[test]
     fn each_engine_names_where_the_text_goes() {
         use Destination::{Cloud as Away, OpenCode, ThisComputer};
@@ -300,8 +259,6 @@ mod tests {
         for (server, expected) in cases {
             assert_eq!(destination(Some(&server)), expected, "{}", server.url);
         }
-        assert!(!ThisComputer.asks() && !OpenCode.asks());
-        assert!(Away(Cloud::Codex).asks());
     }
 
     /// The chosen engine is OpenCode while Clean up on your own server is
@@ -318,22 +275,10 @@ mod tests {
         );
     }
 
-    /// Lab off: nothing. On, with the engine here (or OpenCode, as in Hex):
-    /// used, no switch needed. A cloud engine: only with the cloud switch.
+    /// The lab on gives the text to whatever engine runs; off (or for
+    /// typed text) nothing.
     #[test]
-    fn the_text_is_used_here_and_in_the_cloud_only_with_consent() {
-        let here = Destination::ThisComputer;
-        let opencode = Destination::OpenCode;
-        let codex = Destination::Cloud(Cloud::Codex);
-        for destination in [&here, &opencode, &codex] {
-            assert!(!used(false, destination, false), "{destination:?}");
-            assert!(!used(false, destination, true), "{destination:?}");
-        }
-        assert!(used(true, &here, false));
-        assert!(used(true, &opencode, false));
-        assert!(!used(true, &codex, false));
-        assert!(used(true, &codex, true));
-
+    fn the_lab_alone_decides_whether_cleanup_gets_the_text() {
         let context = with_caret();
         let whole = piece(true, true);
         let refused = Nearby::when(false, &context, Source::Dictation);
@@ -341,35 +286,18 @@ mod tests {
         assert_eq!(refused.context(whole).application.as_deref(), Some("Notes"));
         let given = Nearby::when(true, &context, Source::Dictation);
         assert!(matches!(given.context(whole), Cow::Borrowed(_)));
-    }
-
-    /// With the lab on and a cloud engine chosen but the switch off, a
-    /// capture doesn't read the text at all; switched on, or with the
-    /// engine on this computer, it does.
-    #[test]
-    fn text_a_cloud_engine_may_not_get_is_not_read() {
+        crate::labs::apply(&AppSettings::default().labs);
+        let off = Nearby::new(&context, Source::Dictation);
+        assert_eq!(off.context(whole).caret_text, None, "the lab is off");
         let mut settings = AppSettings::default();
         settings.labs.cursor_context = true;
-        settings.labs.ai_cleanup_server = true;
-        settings.dictation_processing.server.runs_on = CleanupRunsOn::Codex;
-        let apply = |settings: &AppSettings| {
-            crate::labs::apply(&settings.labs);
-            cleanup_server::set_saved(&settings.dictation_processing.server);
-        };
-        let lab = crate::labs::Feature::CursorContext.on_this_os();
-        apply(&settings);
-        assert!(!read_now(), "Codex without consent");
-        settings.labs.cursor_context_cloud = true;
-        apply(&settings);
-        assert_eq!(read_now(), lab, "Codex with consent");
-        settings.labs.cursor_context_cloud = false;
-        settings.dictation_processing.server.runs_on = CleanupRunsOn::Local;
-        apply(&settings);
-        assert_eq!(read_now(), lab, "the built-in model");
-        settings.labs.cursor_context = false;
-        apply(&settings);
-        assert!(!read_now(), "the lab is off");
-        apply(&AppSettings::default());
+        crate::labs::apply(&settings.labs);
+        let on = Nearby::new(&context, Source::Dictation);
+        assert_eq!(
+            on.context(whole).caret_text.is_some(),
+            crate::labs::Feature::CursorContext.on_this_os()
+        );
+        crate::labs::apply(&AppSettings::default().labs);
     }
 
     /// A long dictation's first piece gets what comes before the cursor and

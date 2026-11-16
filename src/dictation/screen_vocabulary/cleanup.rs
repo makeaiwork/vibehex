@@ -90,7 +90,10 @@ impl<'a> ForCleanup<'a> {
     }
 }
 
-/// `terms` without the ones `vocabulary` has, in any case, each once.
+/// `terms` without the ones `vocabulary` has, in any case, each once, and
+/// without any shaped like a key or a token (an AWS key id or a Slack token
+/// in the window passes the extraction's rules), which never goes to a
+/// cleanup engine (`caret_prompt::secrets`).
 fn new_terms(terms: &[String], vocabulary: &[VocabularyEntry]) -> Vec<String> {
     let mut kept: Vec<String> = Vec::new();
     for term in terms.iter().map(|term| term.trim()) {
@@ -98,7 +101,8 @@ fn new_terms(terms: &[String], vocabulary: &[VocabularyEntry]) -> Vec<String> {
             || kept
                 .iter()
                 .any(|seen| seen.to_lowercase() == term.to_lowercase());
-        if !term.is_empty() && !known {
+        let secret = crate::dictation::caret_prompt::secrets::cut(term) != term;
+        if !term.is_empty() && !known && !secret {
             kept.push(term.to_owned());
         }
     }
@@ -171,6 +175,25 @@ mod tests {
                 .iter()
                 .all(|entry| entry.sounds_like.is_empty())
         );
+    }
+
+    /// A term shaped like a key or a token, which the window's extraction
+    /// can keep, never reaches cleanup; the speech model's terms are left as
+    /// they are.
+    #[test]
+    fn a_secret_shaped_term_never_reaches_cleanup() {
+        let text = "Keys AKIAIOSFODNN7EXAMPLE and xoxb-1234567890-abcdefghij in Qdrant";
+        let terms = crate::dictation::screen_vocabulary::extract(text, &[]);
+        assert!(
+            terms.iter().any(|term| term == "AKIAIOSFODNN7EXAMPLE"),
+            "{terms:?}"
+        );
+        let context = ContextSnapshot {
+            screen_terms: terms,
+            ..ContextSnapshot::default()
+        };
+        let screen = ForCleanup::when(true, &context, &[]);
+        assert_eq!(screen.context.screen_terms, ["Qdrant"]);
     }
 
     #[test]

@@ -211,10 +211,6 @@ impl Feature {
         if key == "labs.screen_vocabulary_cleanup" {
             return Some(Self::ScreenVocabulary);
         }
-        // VibeHex: a row of Rewrite reads nearby text's card.
-        if key == "labs.cursor_context_cloud" {
-            return Some(Self::CursorContext);
-        }
         if key == "labs.caps_lock_light" {
             return Some(Self::CapsLockDictation);
         }

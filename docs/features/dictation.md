@@ -520,11 +520,10 @@ typed-text path, the Voice prompt request, meetings, the local API, History,
 logs, and events never see it, and the text is never saved. Off, no
 Accessibility read or thread starts, and the rewrite prompt is byte for byte
 what it was. A cancelled capture discards a late read. VibeHex: every cleanup
-engine gets it, in the transcript's part of the prompt (the user message);
-with Codex, OpenRouter, or an own server not at a loopback address only while
-`labs.cursor_context_cloud` is on, and otherwise it isn't read; a long
-dictation's first piece gets the text before the cursor, its last the text
-after. See [labs.md](labs.md) for the prompt wording, bounds, and checks. Not
+engine gets it, a cloud one included, in the transcript's part of the prompt
+(the user message); known key and token shapes are cut out as it is read
+(best effort); a long dictation's first piece gets the text before the cursor,
+its last the text after. See [labs.md](labs.md) for the prompt wording, bounds, and checks. Not
 observed: a real Mac reading a real text field, or a rewritten word corrected
 by the text around the cursor.
 

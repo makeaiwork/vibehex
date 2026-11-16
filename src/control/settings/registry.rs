@@ -333,8 +333,8 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.cursor_context",
         Kind::Bool,
-        // VibeHex: every cleanup engine reads it, a cloud one with labs.cursor_context_cloud.
-        "Labs: AI cleanup reads the text around the cursor, so names and terms match where the result lands (macOS); a cloud engine gets it only once labs.cursor_context_cloud is on too, and password fields are never read",
+        // VibeHex: every cleanup engine reads it, a cloud one too.
+        "Labs: AI cleanup reads the text around the cursor, so names and terms match where the result lands (macOS); a cloud cleanup engine receives it with the dictation, known key and token shapes are cut out first, and password fields are never read",
     ),
     key(
         "labs.mouse_shortcuts",

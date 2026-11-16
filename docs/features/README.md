@@ -49,10 +49,10 @@ Accessibility and never saved ([vocabulary.md](vocabulary.md)); in VibeHex its
 reads nearby text toggle (off by default, macOS) hands AI cleanup the text
 around the caret as context for names, terms, and where the result lands, on
 every engine: it stays on this Mac with the built-in model or an own server at
-a loopback address, goes to OpenCode's model as in Hex, and reaches Codex,
-OpenRouter, or another server only with its `labs.cursor_context_cloud` switch
-(off by default; without it the text isn't read); password fields are never
-read, and off leaves the prompt byte for byte unchanged. Its Clean up with Apple Intelligence toggle (off by default,
+a loopback address, goes to OpenCode's model as in Hex, and is sent to Codex,
+OpenRouter, or another server when cleanup runs there (the card says which);
+known key and token shapes are cut out as it is read, password fields are
+never read, and off leaves the prompt byte for byte unchanged. Its Clean up with Apple Intelligence toggle (off by default,
 macOS) gives each dictation its mode does not rewrite one short on-device pass
 that fixes clearly misheard words and spoken self-corrections, pasting the
 corrected text whenever Apple Intelligence is unavailable, slow, or refuses.
@@ -1505,8 +1505,8 @@ provider; speech transcription stays local. With Labs › Rewrite reads nearby
 text on (macOS), that context also includes the focused text element's text
 around the caret, read through Accessibility and never saved; password fields
 are skipped, and off leaves the prompt unchanged. In VibeHex the fork's
-cleanup engines get it too, a cloud one only with `labs.cursor_context_cloud`
-([labs.md](labs.md)).
+cleanup engines get it too, cloud ones included, with known key and token
+shapes cut out ([labs.md](labs.md)).
 
 ```ts
 Discover custom transformations           // personal_commands::host_needed; every OS

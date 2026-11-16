@@ -98,11 +98,6 @@ impl CaretTextRead {
         if !pending || !crate::labs::cursor_context() {
             return;
         }
-        // VibeHex: nor when the cleanup engine chosen now may not get the
-        // text, such as a cloud one without consent (`caret_prompt::cleanup`).
-        if !crate::dictation::caret_prompt::cleanup::read_now() {
-            return;
-        }
         let Some(sender) = self.begin(true) else {
             return;
         };
@@ -119,7 +114,9 @@ impl CaretTextRead {
                 }
                 let _done = Done(running);
                 if let Some(caret) = from_focused_element() {
-                    let _ = sender.send(caret);
+                    // VibeHex: known key and token shapes never leave this
+                    // thread (`caret_prompt::secrets`).
+                    let _ = sender.send(crate::dictation::caret_prompt::secrets::cut_from(caret));
                 }
             });
         if let Err(error) = spawned {

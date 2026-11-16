@@ -572,9 +572,9 @@ impl Profiles {
             }
             _ => profile.deadline,
         };
-        // VibeHex: Labs › Rewrite reads nearby text on every engine, where its
-        // text may go (`caret_prompt::cleanup`).
-        let nearby = crate::dictation::caret_prompt::cleanup::Nearby::new(context, source, &server);
+        // VibeHex: Labs › Rewrite reads nearby text on every engine
+        // (`caret_prompt::cleanup`).
+        let nearby = crate::dictation::caret_prompt::cleanup::Nearby::new(context, source);
         // In pieces of a few minutes' speech, each within the deadline, so a
         // dictation of any length is cleaned whole (`cleanup_pieces`).
         let cleaned = crate::dictation::cleanup_pieces::clean(

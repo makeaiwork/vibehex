@@ -130,12 +130,6 @@ const RULES: &[Rule] = &[
         When::Set,
         "labs.screen_vocabulary",
     ),
-    // VibeHex: sending the nearby text to a cloud engine needs the lab.
-    rule(
-        "labs.cursor_context_cloud",
-        When::Set,
-        "labs.cursor_context",
-    ),
     // How long before a meeting its reminder shows: nothing without one.
     rule(
         "meetings.calendar.lead_minutes",

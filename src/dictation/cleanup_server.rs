@@ -29,7 +29,7 @@ use std::time::{Duration, Instant};
 use color_eyre::eyre::{Result, eyre};
 use serde::{Deserialize, Serialize};
 
-use crate::app_settings::{CleanupRunsOn, CleanupServerSettings};
+use crate::app_settings::{CleanupRunsOn, CleanupServerSettings, DictationProcessingSettings};
 use crate::dictation::cleanup_pieces::Streamed;
 
 pub const OPENROUTER_URL: &str = "https://openrouter.ai/api/v1";
@@ -52,6 +52,14 @@ pub fn set_saved(settings: &CleanupServerSettings) {
     if let Ok(mut saved) = SAVED.write() {
         *saved = Some(settings.clone());
     }
+}
+
+/// Whether some mode, Global included, cleans its dictations up with AI:
+/// what a Labs card that feeds cleanup calls "AI cleanup is off" when not.
+pub fn cleans_up(processing: &DictationProcessingSettings) -> bool {
+    std::iter::once(&processing.default_mode)
+        .chain(&processing.modes)
+        .any(|mode| mode.post_processing.enabled)
 }
 
 /// The server a dictation's rewrite runs on now: `None` means OpenCode,
