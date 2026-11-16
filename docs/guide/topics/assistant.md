@@ -14,11 +14,17 @@ texts, and dictations: "What did we decide about the budget in November?",
 
 ## Its language
 
-Assistant speaks the language you dictate in: with a specific speech
-recognition language, its example questions, setup's questions and chips,
-card buttons, and answers are in it; on Auto, the window's language. Write in
-another language and it answers in that one. Places it names keep the
-window's words. Without a translation its buttons stay English.
+Assistant speaks the language you dictate in (on Auto, the window's): its
+example questions, setup's questions, buttons, and answers. Write in another
+language and it answers in that one. Places it names keep the window's words.
+
+## Its start screen
+
+A new conversation suggests what fits now: dictations pasted without AI
+cleanup, meeting notes that weren't written, a setup left halfway, new
+features that suit you, or a question about the pane you came from. **×**
+hides one. When something stopped working, a warning dot marks Assistant in
+the sidebar until you open it.
 
 ## Changes it suggests
 
@@ -91,10 +97,8 @@ cleanup instructions, and Vocabulary terms you don't have yet. Keeping meetings
 for a month starts unticked. Then his shortcuts beside yours: record your own
 key in any row, then **Use these** or **Keep mine**.
 
-That preset is his setup for dictating in one language, so it is offered
-only when Russian is the recognition language in **General › Language**,
-whatever the speech model. With Auto or another language there is no such
-row and asking for it sets nothing up; use **Set VibeHex up for me**.
+It is offered only when Russian is the recognition language in **General ›
+Language**; otherwise use **Set VibeHex up for me**.
 
 ## Ask about your recordings
 
@@ -107,19 +111,15 @@ never ask.
 Once allowed, it searches on this computer for the meetings, Files texts, and
 History dictations that match the question's time ("yesterday", "last week",
 "the last five meetings") and words, and reads their notes and the best
-passages. While it works, its steps appear one by one; the answer then folds
-them into one line, such as "Read 4 meetings and 1 file in 9 s", which opens
-on a click. If the recordings don't say, the answer says so.
+passages. Its steps fold into one line, such as "Read 4 meetings and 1 file
+in 9 s", which opens on a click. If the recordings don't say, the answer says so.
 
 ## Go to the place cited
 
-Each numbered mark in the answer, and each chip under **From your
-recordings**, opens its place: a meeting on Transcript with the passage
-tinted and the phrases it cited lit, a Files text on its Original the same
-way, or the dictation in History, its row
-marked with the number. **Back to Assistant** returns
-to the same spot in the conversation; Cmd-[ on a Mac and Ctrl+[ elsewhere do
-the same.
+Each numbered mark, and each chip under **From your recordings**, opens its
+place, tinted: a meeting on Transcript, a Files text on its Original, or the
+dictation in History. **Back to Assistant** (Cmd-[ on a Mac, Ctrl+[
+elsewhere) returns to the same spot.
 
 ## What leaves your computer
 
@@ -151,4 +151,4 @@ me"; "Can Assistant search the web?"; «Может ли ассистент ис�
 ассистенту читать мои записи?»; «Помоги мне настроить VibeHex под меня»;
 «Добавь Kubernetes в словарь».
 
-<!-- sources: docs/features/assistant.md; src/assistant/web.rs; src/rune_ui/assistant/web.rs; src/assistant/intent/mod.rs; src/assistant/intent/setup.rs; src/assistant/setup/mod.rs; src/assistant/setup/follow.rs; src/assistant/setup/plan.rs; src/assistant/setup/preset.rs; src/assistant/changes/vocab.rs; src/assistant/changes/companion.rs; src/rune_ui/assistant/card.rs; src/rune_ui/assistant/plan.rs; src/rune_ui/assistant/vocab.rs; src/assistant/recordings/mod.rs; src/rune_ui/assistant/recall.rs; src/rune_ui/assistant/jump.rs; src/rune_ui/assistant/settings.rs -->
+<!-- sources: docs/features/assistant.md; src/assistant/web.rs; src/rune_ui/assistant/web.rs; src/assistant/intent/mod.rs; src/assistant/intent/setup.rs; src/assistant/setup/mod.rs; src/assistant/setup/follow.rs; src/assistant/setup/plan.rs; src/assistant/setup/preset.rs; src/assistant/changes/vocab.rs; src/assistant/changes/companion.rs; src/rune_ui/assistant/card.rs; src/rune_ui/assistant/plan.rs; src/rune_ui/assistant/vocab.rs; src/assistant/recordings/mod.rs; src/rune_ui/assistant/recall.rs; src/rune_ui/assistant/jump.rs; src/rune_ui/assistant/settings.rs; src/rune_ui/assistant/suggestions/mod.rs -->

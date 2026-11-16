@@ -36,6 +36,8 @@ keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.d
   asks first, and an entry with kept audio has Play.
 - New in Labs: Appearance, to keep the window light or dark, and Pause from menu bar (macOS),
   which frees VibeHex's keys for another app.
+- New: Assistant's start page suggests what fits now, such as dictations pasted without AI
+  cleanup or notes not written, and a warning dot on Assistant says when something broke.
 - New: `hex transcribe <file>` prints the text of any audio or video file, long ones too.
   Labs has Shell completions for Tab in your terminal.
 - New in Labs for developers: Print-only CLI dictation (macOS), Timestamps in API

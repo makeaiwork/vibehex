@@ -67,6 +67,8 @@ pub(in super::super) struct CameFrom {
 #[derive(Clone, Debug, PartialEq)]
 pub(in super::super) enum Origin {
     Assistant(u32),
+    /// A new conversation's start page, where a suggestion was pressed.
+    Start,
     Requests {
         kind: Kind,
         id: String,
@@ -302,6 +304,21 @@ pub(super) fn came_for_place(ui: &mut Ui, conversation: u32, scroll_y: f32) {
     });
 }
 
+/// A pane opened from a start page's suggestion: Back to Assistant returns
+/// to the conversation open there, else to a new one's start page.
+pub(super) fn came_for_suggestion(ui: &mut Ui) {
+    let origin = match ui.assistant.open {
+        Some(conversation) => Origin::Assistant(conversation),
+        None => Origin::Start,
+    };
+    ui.came_from = Some(CameFrom {
+        origin,
+        scroll_y: 0.0,
+        cited: None,
+        land: false,
+    });
+}
+
 /// Every place `refs` cite in `target`'s item, the one its `mark`-th `[n]`
 /// names current, else its first.
 fn places(question: &str, refs: &[Ref], target: &Ref, mark: Option<u32>) -> Cited {
@@ -479,6 +496,13 @@ pub(in super::super) fn back(ui: &mut Ui, tx: &mut Tx) {
     };
     let conversation = match from.origin {
         Origin::Assistant(conversation) => conversation,
+        Origin::Start => {
+            ui.select_pane(Pane::Assistant, tx);
+            super::suggestions::by_link(ui);
+            ui.assistant.open = None;
+            ui.assistant.view = super::View::Chat;
+            return;
+        }
         Origin::Requests {
             kind: Kind::Meeting,
             id,
@@ -491,6 +515,7 @@ pub(in super::super) fn back(ui: &mut Ui, tx: &mut Tx) {
         }
     };
     ui.select_pane(Pane::Assistant, tx);
+    super::suggestions::by_link(ui);
     let pane = &mut ui.assistant;
     if pane.store.get(conversation).is_some() {
         pane.open = Some(conversation);

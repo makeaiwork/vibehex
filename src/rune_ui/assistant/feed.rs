@@ -72,19 +72,23 @@ pub(super) fn feed(ui: &Ui, p: Paint, asking: bool, still: bool, layer: &mut Vec
     feed
 }
 
-/// A greeting, a way into what changed after an update, setup, and, while
-/// a model can be asked (`asking`), the example questions two by two. With
-/// none, setup still shows: it needs no model, and the Connect panel
+/// A greeting, the suggestions that fit what is going on (`suggestions`),
+/// setup, and, while a model can be asked (`asking`), the example
+/// questions two by two, as many as fill the suggestions' block to four.
+/// With none, setup still shows: it needs no model, and the Connect panel
 /// follows for questions.
 fn start(ui: &Ui, p: Paint, asking: bool) -> El {
+    let examples = super::suggestions::examples(ui, asking, &EXAMPLES);
     let mut grid = col().key("examples").gap(8.0);
-    for (index, pair) in EXAMPLES.chunks(2).enumerate() {
+    for (index, pair) in examples.chunks(2).enumerate() {
         let mut line = row().key(format!("line{index}")).gap(8.0);
         for (offset, question) in pair.iter().enumerate() {
             line = line.child(example(p, index * 2 + offset, tr(question)));
         }
         grid = grid.child(line);
     }
+    let block = super::suggestions::block(ui, p, asking);
+    let after_block = if block.is_some() { 8.0 } else { 12.0 };
     col()
         .key("assistant-start")
         .pt(28.0)
@@ -104,12 +108,12 @@ fn start(ui: &Ui, p: Paint, asking: bool) -> El {
             .color(p.muted())
             .wrap_anywhere(),
         )
-        .children(super::whats_new::row_for(ui, p).map(|row| row.mt(12.0)))
-        .child(setup(p).mt(if ui.assistant.updated.is_some() { 8.0 } else { 12.0 }))
+        .children(block.map(|block| block.mt(12.0)))
+        .child(setup(p).mt(after_block))
         .children(
             crate::assistant::setup::preset::offered(&ui.settings).then(|| like_denis(p)),
         )
-        .children(asking.then(|| grid.mt(8.0)))
+        .children((asking && !examples.is_empty()).then(|| grid.mt(8.0)))
         .children(asking.then(|| knows(p)))
 }
 
@@ -190,7 +194,7 @@ fn like_denis(p: Paint) -> El {
         .on_press(|ui: &mut Ui| super::preset::begin(ui, String::new()))
 }
 
-static SLIDERS: rune::Icon = rune::Icon {
+pub(super) static SLIDERS: rune::Icon = rune::Icon {
     name: "hex-assistant-setup",
     view: 16.0,
     body: r#"<path d="M2.5 4.5h6M11.5 4.5h2M2.5 11.5h2M7.5 11.5h6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="4.5" r="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="11.5" r="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/>"#,

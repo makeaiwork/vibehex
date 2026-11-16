@@ -212,6 +212,14 @@ const PATHS: &[(&str, &str)] = &[
         "assistant-start-russian",
         "Window/Assistant/New conversation, dictating Russian",
     ),
+    (
+        "assistant-start-broke",
+        "Window/Assistant/New conversation when something broke",
+    ),
+    (
+        "assistant-start-meetings",
+        "Window/Assistant/New conversation from Meetings",
+    ),
     ("assistant-connect", "Window/Assistant/Connect a model"),
     (
         "assistant-setup-unreachable",

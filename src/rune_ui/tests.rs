@@ -4053,6 +4053,8 @@ fn goldens() {
     // What's new, places named in an answer, the web, and Requests that
     // read other recordings, in both themes.
     for scene in [
+        "assistant-start-broke",
+        "assistant-start-meetings",
         "assistant-whats-new",
         "assistant-updated",
         "assistant-marked",

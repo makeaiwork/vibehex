@@ -193,6 +193,8 @@ impl Suggestion {
 
     /// Where the person came from. These come back each visit: hiding one
     /// hides it for that pane, pressing one doesn't.
+    // "From" names the pane here, not a conversion.
+    #[allow(clippy::wrong_self_convention)]
     pub fn from_pane(&self) -> bool {
         matches!(
             self,

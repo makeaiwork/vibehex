@@ -5,7 +5,8 @@
 //! word turn bright, the word medium, and the pane's title says the rest. A
 //! fill there read as a separate bar apart from the navigation; the items at
 //! the top keep theirs. After an update both carry a dot until Assistant
-//! opens (`whats_new::marked`).
+//! opens (`whats_new::marked`); when something stopped working the dot is
+//! the warning colour (`suggestions::trouble`), and wins over an update's.
 
 use rune::{El, Tx, col, el, row, text};
 
@@ -40,8 +41,25 @@ fn on(ui: &Ui) -> bool {
 fn select_on_down(ui: &mut Ui, drag: &mut rune::Drag, tx: &mut Tx) {
     if drag.phase == rune::Phase::Down {
         ui.assistant.face.squish(tx);
-        ui.select_pane(Pane::Assistant, tx);
+        open(ui, tx);
     }
+}
+
+/// Opens Assistant from the sidebar: pressed while it shows already, it
+/// still counts as opened for the trouble mark.
+fn open(ui: &mut Ui, tx: &mut Tx) {
+    ui.select_pane(Pane::Assistant, tx);
+    super::suggestions::opened_from_sidebar(ui);
+}
+
+/// The mark and what it says: what stopped working, else the update.
+fn marking(ui: &Ui, p: Paint) -> Option<(String, El)> {
+    if super::suggestions::trouble(ui) {
+        let dot = status_dot(p.warning()).key("mark");
+        return Some((tr("Something stopped working").to_owned(), dot));
+    }
+    let version = marked(ui)?;
+    Some((tr_fill("Updated to {}", version), mark(p)))
 }
 
 /// The face as the sidebar shows it: reading while an answer comes.
@@ -79,7 +97,7 @@ pub(in super::super) fn item(ui: &Ui, p: Paint, still: bool) -> Option<El> {
         .focusable(true)
         .focus_ring(2.0, -2.0, c.border_focus)
         .on_drag(select_on_down)
-        .on_press_tx(|ui: &mut Ui, tx: &mut Tx| ui.select_pane(Pane::Assistant, tx))
+        .on_press_tx(open)
         // The slot's hover, drawn on the item.
         .child(
             el().key("hover")
@@ -99,12 +117,13 @@ pub(in super::super) fn item(ui: &Ui, p: Paint, still: bool) -> Option<El> {
                 .truncate()
                 .a11y_hidden(),
         );
-    // After an update, a dot at the row's end until Assistant opens.
-    let item = match marked(ui) {
-        Some(version) => item
-            .description(tr_fill("Updated to {}", version))
+    // After an update, or when something stopped working, a dot at the
+    // row's end until Assistant opens.
+    let item = match marking(ui, p) {
+        Some((why, dot)) => item
+            .description(why)
             .child(el().key("spacer").grow(1.0))
-            .child(mark(p).mr(9.0)),
+            .child(dot.mr(9.0)),
         None => item,
     };
     Some(
@@ -122,7 +141,7 @@ pub(in super::super) fn item(ui: &Ui, p: Paint, still: bool) -> Option<El> {
                 }
             })
             .on_drag(select_on_down)
-            .on_press_tx(|ui: &mut Ui, tx: &mut Tx| ui.select_pane(Pane::Assistant, tx))
+            .on_press_tx(open)
             .child(item),
     )
 }
@@ -151,7 +170,7 @@ pub(in super::super) fn rail_item(
         .focusable(true)
         .focus_ring(2.0, -2.0, c.border_focus)
         .on_drag(select_on_down)
-        .on_press_tx(|ui: &mut Ui, tx: &mut Tx| ui.select_pane(Pane::Assistant, tx))
+        .on_press_tx(open)
         .on_hover_change(|ui: &mut Ui, inside, tx: &mut Tx| {
             if inside {
                 ui.assistant.face.blink(tx);
@@ -161,10 +180,12 @@ pub(in super::super) fn rail_item(
             }
         })
         .child(glyph(ui, p, on, still));
-    let button = match marked(ui) {
-        Some(version) => button
-            .description(tr_fill("Updated to {}", version))
-            .child(mark(p).pin(None, Some(4.0), Some(4.0), None)),
+    let button = match marking(ui, p) {
+        Some((why, dot)) => {
+            button
+                .description(why)
+                .child(dot.pin(None, Some(4.0), Some(4.0), None))
+        }
         None => button,
     };
     Some(

@@ -46,6 +46,7 @@ mod returning;
 mod settings;
 pub(super) mod setup_fixture;
 pub(super) mod strong;
+pub(super) mod suggestions;
 mod terms;
 pub(super) mod terms_fixture;
 mod tick;
@@ -57,6 +58,7 @@ mod web;
 pub(super) mod whats_new;
 
 pub(super) use keys::recorded;
+pub(super) use suggestions::scenes as suggested;
 pub(super) use value::ValueAt;
 
 use rune::{El, ScrollSpec, TextEdit, Tx, col};
@@ -171,6 +173,9 @@ pub(in super::super) struct AssistantPane {
     pub(super) mark: Option<String>,
     /// Whether the mark was read this run.
     mark_read: bool,
+    /// The start page's suggestions, what was hidden, and the sidebar's
+    /// mark for what stopped working (`suggestions`).
+    pub(super) suggestions: suggestions::Suggestions,
 }
 
 /// A scroll offset the feed keeps up to date.
@@ -348,9 +353,11 @@ pub(super) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
     changed |= ui.assistant.dots.poll(live, tx);
     changes::follow_open(ui);
     if ui.is_fixture() || ui.assistant.fixture {
-        return changed | whats_new::opened(ui);
+        return changed | whats_new::opened(ui) | suggestions::poll(ui);
     }
     whats_new::look(ui);
+    // What stopped working marks the sidebar wherever the window is.
+    changed |= suggestions::watch(ui);
     if !ui.assistant.loaded {
         if ui.pane != Pane::Assistant {
             return changed;
@@ -358,7 +365,7 @@ pub(super) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
         changed |= load(ui);
     }
     // Opened after an update: on the start page, before it draws.
-    changed |= whats_new::opened(ui);
+    changed |= whats_new::opened(ui) | suggestions::poll(ui);
     // A card waits on a Codex row: look whether Codex is installed and
     // signed in, as Output does while it shows Codex.
     if ui.pane != Pane::Output {
@@ -420,6 +427,7 @@ fn load(ui: &mut Ui) -> bool {
     pane.updated = crate::assistant::releases::history::fresh(pane.now_ms());
     pane.kept = keep;
     pane.loaded = true;
+    suggestions::load(ui);
     true
 }
 
@@ -434,6 +442,8 @@ pub(in super::super) fn set_up(ui: &mut Ui, tx: &mut Tx) {
     ui.assistant.view = View::Chat;
     load(ui);
     whats_new::opened(ui);
+    suggestions::by_link(ui);
+    suggestions::landed(ui);
     ui.assistant.open = None;
     ask::begin(ui);
 }
