@@ -130,6 +130,7 @@ pub struct HistoryRead {
 impl HistoryRead {
     /// A dictation's record from its context and what its cleanup was given;
     /// `None` when it read nothing, so the entry is what it was before.
+    #[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
     pub fn of(context: &ContextSnapshot, given: &Given) -> Option<Self> {
         Self {
             screen_terms: context.screen_terms.clone(),
