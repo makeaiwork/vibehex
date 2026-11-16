@@ -123,9 +123,32 @@ fn keeps(ui: &Ui) -> bool {
     ui.live() && !ui.assistant.fixture
 }
 
-/// Reads what was hidden, once a run: as the pane's store loads, or the
-/// first time the sidebar's mark is read.
-pub(super) fn load(ui: &mut Ui) {
+/// What a Labs feature dismissed on Labs' Fits you is kept under, before
+/// its switch's key.
+const FIT: &str = "fit:";
+
+/// The Labs switches dismissed on Labs' Fits you.
+pub(in crate::rune_ui) fn dismissed(ui: &Ui) -> Vec<String> {
+    let hidden = &ui.assistant.suggestions.hidden;
+    hidden.under(FIT).map(str::to_owned).collect()
+}
+
+/// "Not for me" on a Fits you card: the feature behind `key` isn't
+/// offered on its own again, here or in Assistant.
+pub(in crate::rune_ui) fn dismiss(ui: &mut Ui, key: &str) {
+    load(ui);
+    let state = &mut ui.assistant.suggestions;
+    let new = state.hidden.hide(format!("{FIT}{key}"));
+    state.labs = None;
+    state.stale = true;
+    if new {
+        save(ui);
+    }
+}
+
+/// Reads what was hidden, once a run: as the pane's store loads, the
+/// first time the sidebar's mark is read, or when Labs' Fits you is.
+pub(in crate::rune_ui) fn load(ui: &mut Ui) {
     let keeps = keeps(ui);
     let state = &mut ui.assistant.suggestions;
     if std::mem::replace(&mut state.hidden_read, true) {

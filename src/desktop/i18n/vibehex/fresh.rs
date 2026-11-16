@@ -99,6 +99,7 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
     ("Click the field and press the keys", ["Kliknij pole i naciśnij klawisze", "点击这个字段，然后按下按键", "欄をクリックしてキーを押してください", "Klicke auf das Feld und drücke die Tasten", "Haz clic en el campo y pulsa las teclas", "Клацніть поле й натисніть клавіші"]),
     ("Fits you", ["Pasuje do ciebie", "适合你", "あなたに合うもの", "Passt zu dir", "Para ti", "Вам підходить"]),
     ("Choose with Assistant", ["Wybierz z Asystentem", "让助手帮你选", "アシスタントと選ぶ", "Mit dem Assistenten auswählen", "Elegir con el asistente", "Обрати з асистентом"]),
+    ("Not for me", ["Nie dla mnie", "不适合我", "自分には不要", "Nichts für mich", "No es para mí", "Не для мене"]),
     ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", ["Wybrane na podstawie twoich ustawień i tego, jak używasz VibeHex. Każda karta mówi, co się dla ciebie zmieni. Nic nie zostanie włączone, dopóki tego nie zechcesz.", "根据你的设置和你使用 VibeHex 的方式挑选。每张卡片都写明会为你带来什么变化。在你确认之前，什么都不会开启。", "あなたの設定と VibeHex の使い方から選びました。各カードに、あなたにとって何が変わるかを書いています。あなたが決めるまで、何もオンになりません。", "Ausgewählt nach deinen Einstellungen und deiner Nutzung von VibeHex. Jede Karte sagt, was sich für dich ändert. Nichts wird eingeschaltet, bevor du es willst.", "Elegidas según tus ajustes y cómo usas VibeHex. Cada tarjeta dice qué cambia para ti. Nada se activa hasta que tú lo digas.", "Дібрано за вашими налаштуваннями і тим, як ви користуєтеся VibeHex. Кожна картка каже, що зміниться для вас. Нічого не ввімкнеться, доки ви не скажете."]),
     ("For you: {}", ["Dla ciebie: {}", "对你来说：{}", "あなたには：{}", "Für dich: {}", "Para ti: {}", "Для вас: {}"]),
 ];
@@ -196,6 +197,7 @@ pub(super) const FRENCH: &[(&str, &str)] = &[
     ("Click the field and press the keys", "Cliquez sur le champ et appuyez sur les touches"),
     ("Fits you", "Pour vous"),
     ("Choose with Assistant", "Choisir avec l'Assistant"),
+    ("Not for me", "Pas pour moi"),
     ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", "Choisies d'après vos réglages et votre usage de VibeHex. Chaque carte dit ce qui change pour vous. Rien n'est activé tant que vous ne le décidez pas."),
     ("For you: {}", "Pour vous : {}"),
 ];
@@ -293,6 +295,7 @@ pub(super) const PORTUGUESE: &[(&str, &str)] = &[
     ("Click the field and press the keys", "Clique no campo e pressione as teclas"),
     ("Fits you", "Combina com você"),
     ("Choose with Assistant", "Escolher com o Assistente"),
+    ("Not for me", "Não é para mim"),
     ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", "Escolhidos a partir dos seus ajustes e de como você usa o VibeHex. Cada cartão diz o que muda para você. Nada é ligado até você decidir."),
     ("For you: {}", "Para você: {}"),
 ];
@@ -390,6 +393,7 @@ pub(super) const RUSSIAN: &[(&str, &str)] = &[
     ("Click the field and press the keys", "Щёлкните по полю и нажмите клавиши"),
     ("Fits you", "Вам подходит"),
     ("Choose with Assistant", "Выбрать с ассистентом"),
+    ("Not for me", "Не для меня"),
     ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", "Подобраны по вашим настройкам и тому, как вы используете VibeHex. На каждой карточке сказано, что изменится для вас. Ничего не включится, пока вы не решите."),
     ("For you: {}", "Для вас: {}"),
 ];

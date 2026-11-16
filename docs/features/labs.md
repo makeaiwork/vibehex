@@ -353,15 +353,28 @@ Settings › Labs                          // labs.page, a store (labs/store.rs)
 │   (labs/group.rs; a group this OS has no lab in hides)
 ├── Discover, no chip or search -> Fits you (below), New in Labs: the two newest labs, then every
 │   other lab under its group's header; a lab added on the newest date among those shown carries New
-├── Fits you (labs/fits.rs; only where Assistant's pane shows) -> heading, a neutral count tag and
-│   Choose with Assistant (opens Assistant's "New for you" picker); one muted line ("Picked from your
-│   settings…"); up to four of the labs "New for you" picks (assistant::setup::fresh: they fit the
-│   answers a setup would start from now, are off, and work here), two per row, each the page's own
-│   card with its switch plus "For you: …" (the pick's counted "Now", else its "With it"). They aren't
-│   repeated in New in Labs or below; a lab turned on leaves the group; nothing fits -> no group.
-│   Read when the page opens and again when the settings or the setups change, never per frame;
-│   it reads what came since the last setup, never the person's use (so "For you" is "With it").
-│   // checks: the_group_shows_the_picks_and_loses_one_turned_on (labs/fits.rs); scene mac-labs-fits
+├── Fits you (labs/fits.rs; only where Assistant's pane shows) -> heading, a neutral count tag, a
+│   chevron, and Choose with Assistant with Assistant's face (opens Assistant's "New for you"
+│   picker); one muted line ("Picked from your settings…"); up to four of the labs "New for you"
+│   picks (assistant::setup::fresh: they fit the answers a setup would start from now, are off, and
+│   work here), two per row, each the page's own card with its switch. They aren't repeated in New
+│   in Labs or below; a lab turned on leaves the group; nothing fits -> no group.
+│   ├── A card's line from Assistant (key for-you) -> Assistant's face under the lab's tile, then
+│   │   what changes for the person (the pick's counted "Now", else its "With it") on ONE line, cut
+│   │   with an ellipsis; pressed, it opens to the whole sentence, pressed again it closes (kept
+│   │   while the window is open, not saved)
+│   ├── × after the switch (key fits-dismiss, "Not for me") -> the lab leaves the group for its own
+│   │   place below and is kept as dismissed (`fit:<key>` in <support>/assistant/suggestions.json):
+│   │   Fits you, "New for you" and setup's follow-up questions don't offer it on their own again
+│   │   (`State::dismissed`, `Gate::ask`); it still turns on from its card, and stays under More to try
+│   ├── The heading (key fits-fold) -> folds the group to its heading and button, saved in
+│   │   labs.groups as "fits" like the groups below; folded, its labs stand in their own places
+│   └── Read when the page opens and again when the settings or the setups change, never per
+│       frame; it reads what came since the last setup, never the person's use (so the line is
+│       "With it")
+│   // checks: the_group_shows_the_picks_and_loses_one_turned_on,
+│   // a_card_s_line_opens_and_its_cross_dismisses_the_lab,
+│   // the_group_folds_and_its_labs_keep_their_places (labs/fits.rs); scene mac-labs-fits
 ├── Group header (key group-<id>) -> name, card count, chevron; a group with no card here hides
 │   ├── Press -> folds or unfolds it, saved at once in labs.groups (settings.json, not a hex settings key)
 │   ├── Never pressed -> open while it holds a lab that's on, folded otherwise

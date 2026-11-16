@@ -338,13 +338,14 @@ fn chip(p: Paint, key: &str, label: &str, count: usize, selected: bool, pick: Ch
 /// under the description may run to three lines, so a caveat such as where
 /// the text goes is never cut short. `featured` cards sit under New in Labs
 /// or Fits you, so they carry no New tag; one under Fits you says what it
-/// changes for the person (`for_you`).
+/// changes for the person (`for_you`), as one line that opens, and has a
+/// quiet × that takes it out of the group.
 pub(super) fn card(
     ui: &Ui,
     p: Paint,
     entry: &Row,
     (new, featured): (bool, bool),
-    for_you: Option<&str>,
+    for_you: Option<super::fits::ForYou>,
     layer: &mut Vec<El>,
 ) -> El {
     let c = &p.k.c;
@@ -377,7 +378,12 @@ pub(super) fn card(
         ))
         .children(tags)
         .child(el().key("spacer").grow(1.0).min_w(8.0))
-        .child(lab_switch(p, entry).key(row_key(lab)));
+        .child(lab_switch(p, entry).key(row_key(lab)))
+        .children(
+            for_you
+                .as_ref()
+                .map(|fit| super::fits::dismiss_button(p, fit)),
+        );
     // The description runs under the switch too.
     let mut copy = col()
         .key("copy")
@@ -402,23 +408,13 @@ pub(super) fn card(
                 .max_lines(3),
         );
     }
-    if let Some(line) = for_you {
-        copy = copy.child(
-            text(tr_fill("For you: {}", line))
-                .key("for-you")
-                .font(DESCRIPTION)
-                .color(p.accent())
-                .wrap()
-                .mt(4.0),
-        );
-    }
     if let Some(extras) = extras(ui, p, entry, layer) {
         copy = copy.child(extras.mt(8.0));
     }
-    let key = match (for_you, featured) {
-        (Some(_), _) => format!("lab-fits-{}", lab.id()),
-        (None, true) => format!("lab-featured-{}", lab.id()),
-        (None, false) => format!("lab-card-{}", lab.id()),
+    let key = match (for_you.is_some(), featured) {
+        (true, _) => format!("lab-fits-{}", lab.id()),
+        (false, true) => format!("lab-featured-{}", lab.id()),
+        (false, false) => format!("lab-card-{}", lab.id()),
     };
     // The lab an answer's link opened: a soft warm tint and a ring, so it
     // shows among its neighbours (never a side bar).
@@ -431,16 +427,24 @@ pub(super) fn card(
     } else {
         ((c.bg_base, p.hair), c.border_weak)
     };
-    row()
-        .key(key)
+    let top = row()
+        .gap(10.0)
+        .items_start()
+        .child(crate::rune_ui::icons::tile(p, entry.icon, TILE))
+        .child(copy);
+    // Under Fits you the card is its usual row, then Assistant's line.
+    let card = match for_you {
+        Some(fit) => col()
+            .gap(6.0)
+            .child(top.key("top"))
+            .child(super::fits::line(p, lab, &fit)),
+        None => top,
+    };
+    card.key(key)
         .role("group")
         .label(entry.title)
         .padding(CARD_PADDING)
-        .gap(10.0)
-        .items_start()
         .radius(p.k.radius.lg)
-        .child(crate::rune_ui::icons::tile(p, entry.icon, TILE))
-        .child(copy)
         .fill(fill.0)
         .border(
             fill.1,
@@ -470,7 +474,7 @@ fn vibehex_star(p: Paint) -> El {
 }
 
 const CARD_PADDING: f32 = 12.0;
-const TILE: f32 = 32.0;
+pub(super) const TILE: f32 = 32.0;
 
 /// A lab's switch: it flips the lab; a locked lab's is disabled.
 fn lab_switch(p: Paint, entry: &Row) -> El {

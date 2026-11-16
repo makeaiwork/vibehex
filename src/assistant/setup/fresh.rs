@@ -433,6 +433,20 @@ mod tests {
         assert!(since.more.iter().all(|more| more.key != last));
     }
 
+    /// A feature dismissed on Labs' Fits you isn't picked again.
+    #[test]
+    fn what_was_dismissed_is_not_picked_again() {
+        let settings = AppSettings::default();
+        let all = fresh(&coder(), &settings, &state(), None, &[]);
+        let gone = all.picks[0].key.clone();
+        let state = State {
+            dismissed: vec![gone.clone()],
+            ..state()
+        };
+        let rest = fresh(&coder(), &settings, &state, None, &[]);
+        assert!(rest.picks.iter().all(|pick| pick.key != gone));
+    }
+
     /// The person's use speaks only where the app counted something, and
     /// only for the feature it is about.
     #[test]
