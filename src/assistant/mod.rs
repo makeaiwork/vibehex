@@ -31,5 +31,6 @@ pub mod retrieve;
 mod settle;
 pub mod setup;
 pub mod store;
+pub mod suggest;
 pub mod web;
 pub mod worker;
