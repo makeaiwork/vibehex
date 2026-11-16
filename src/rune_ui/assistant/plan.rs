@@ -364,30 +364,52 @@ fn line(
         );
     }
     // "New for you": how it goes now and with it on, and its key, set in
-    // the row rather than "then" somewhere else.
-    words = words.children(super::fresh::pair(p, item));
+    // the row rather than "then" somewhere else. They stand under the
+    // row at its full width, the same in every row whatever its values
+    // take at the right.
+    let pair = super::fresh::pair(p, item);
     let open = matches!(shown, Row::Open { .. });
     let key = super::fresh::shortcut_line(ui, p, at, (index, item), open);
     let then = key.is_none();
-    words = words.children(key);
     words = words.children(notes(p, item, shown, then));
     words = words.children(takes(ui, p, (at, item), shown, included));
     // Cleanup on this computer: its models to pick from.
     if matches!(shown, Row::Open { .. }) {
         words = words.children(super::built_in::choices(ui, p, at, index, item));
     }
-    row()
+    let top = row()
+        .gap(10.0)
+        .items_start()
+        .child(row().key("lead").pt(2.0).child(lead))
+        .child(words)
+        .child(change(ui, p, at, (index, item), shown, layer));
+    if pair.is_none() && key.is_none() {
+        return top
+            .key(format!("row{index}"))
+            .role("group")
+            .label(name)
+            .px(14.0)
+            .py(9.0);
+    }
+    col()
         .key(format!("row{index}"))
         .role("group")
         .label(name)
         .px(14.0)
         .py(9.0)
-        .gap(10.0)
-        .items_start()
-        .child(row().key("lead").pt(2.0).child(lead))
-        .child(words)
-        .child(change(ui, p, at, (index, item), shown, layer))
+        .child(top.key("top"))
+        // Under the words: past the tick and its gap.
+        .child(
+            col()
+                .key("changes")
+                .pl(LEAD + 10.0)
+                .children(pair)
+                .children(key),
+        )
 }
+
+/// A row's tick, or the mark of how it went.
+const LEAD: f32 = 16.0;
 
 /// From → to, and the companion beside them ("after [15 min ▾]"), or
 /// under them when the two stand one under the other.
