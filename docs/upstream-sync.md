@@ -27,6 +27,8 @@ standing decisions are answers the owner has already given, and each sync gets o
 - New upstream strings that name Hex: `python3 scripts/vibehex-names.py` rewrites them to VibeHex and
   adds their rows in every language from Hex's own translations (`--check` only lists them).
 - A finished meeting has both `transcript.ndjson` and `transcript.md`; test fixtures need both.
+- The first push of a sync branch carries upstream's history and the regenerated images and can end
+  with HTTP 408: `git -c http.postBuffer=1048576000 -c http.version=HTTP/1.1 push`.
 - The owner's builds share one data folder. An older build drops settings it does not know, so the
   owner's `settings.json` is copied aside before a merged build first starts, and the build in
   `/Applications` is replaced soon after.
@@ -134,6 +136,15 @@ standing decisions are answers the owner has already given, and each sync gets o
   the fork's model step, Back, Skip and Set up with Assistant in the first run; Keep audio and Export
   in Meetings settings.
 - `python3 scripts/vibehex-names.py --check`: nothing left to rename. `git diff --check`: clean.
+- The owner's `settings.json` (a copy) through this build's launch-time load: no existing value
+  changes. New settings arrive with their defaults; the three retired meeting switches leave `labs`
+  and their values move to `meetings.export`, `meetings.stop_when_call_ends` and the audio retention
+  already under `meetings`; `migrations` gains its mark.
+- The fork's `dev` moved during the sync (#42, documents only) and was merged into the branch; the
+  macOS check was run again after it.
+- `rune_ui::assistant::flow_pins::a_first_setup_then_a_returning_one` fails on the fork's `dev` at
+  6c218b7c without this sync: the release notes for 3.3.0-vibe.7 moved two labs into a dated release
+  after the pin was last written. This branch updates the pin.
 - Not run: Windows (no machine), the first-run walkthrough that downloads a model
   (`scripts/check-onboarding.sh`), a real meeting and a real dictation in the merged build. The owner
   tries the build before this PR is merged.
