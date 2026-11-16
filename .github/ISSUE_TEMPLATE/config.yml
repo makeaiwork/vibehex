@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Installation and troubleshooting
-    url: https://anoma.ly/hex/
-    about: Download the macOS app, check permissions, and find troubleshooting steps.
-  - name: Linux beta requirements
-    url: https://github.com/anomalyco/hex/blob/dev/docs/linux.md
-    about: Check supported X11/Wayland environments and installation requirements.
+  - name: Installation
+    url: https://github.com/makeaiwork/vibehex#download
+    about: Download the macOS app and see what it needs to run.
+  - name: A problem that also happens in Hex
+    url: https://github.com/anomalyco/hex/issues/new/choose
+    about: VibeHex is a fork of Hex. If the original app does the same thing, report it there; the fix reaches VibeHex with the next merge.
   - name: Security vulnerabilities
-    url: https://github.com/anomalyco/hex/blob/dev/SECURITY.md
+    url: https://github.com/makeaiwork/vibehex/blob/dev/SECURITY.md
     about: Follow the security reporting instructions rather than opening a public issue.

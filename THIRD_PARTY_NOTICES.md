@@ -1,8 +1,12 @@
 # Third-Party Notices
 
-Hex's own source is covered by the root `LICENSE`. The following notices cover
-vendored icon assets and the speech models Hex downloads under their own
-licences. Dependencies retain their respective upstream licenses.
+VibeHex is a fork of Hex (https://github.com/anomalyco/hex). Hex's source and
+VibeHex's changes to it are both covered by the root `LICENSE`, which carries
+both copyright notices. In the notices below, "Hex" also means VibeHex.
+
+The following notices cover vendored icon assets and the speech models Hex
+downloads under their own licences. Dependencies retain their respective
+upstream licenses.
 
 ## Parakeet Ultra
 
