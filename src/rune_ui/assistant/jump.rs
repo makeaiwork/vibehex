@@ -39,6 +39,11 @@ use crate::desktop::i18n::{tr, tr_fill, tr_named};
 const PLACE_TOP: f32 = 120.0;
 /// The pane's header, over the scrolling text.
 const HEADER: f32 = 52.0;
+/// The bar between places.
+const BAR_H: f32 = 30.0;
+/// What the pinned bar takes over the scrolling text: its height and the
+/// gap `list_detail::card_pinned` leaves above it.
+const BAR_ROOM: f32 = BAR_H + 12.0;
 /// What the scroll lands on: the current place's first lit words, else
 /// the line holding it.
 pub(in super::super) const NOW_KEY: &str = "cited-now";
@@ -356,11 +361,19 @@ fn row_key(id: &str) -> String {
 /// the way down what shows, whatever the window's height.
 pub(in super::super) fn place_top(ui: &Ui) -> f32 {
     let panel = ui.assistant.panel_h;
-    if panel > HEADER * 2.0 {
+    let top = if panel > HEADER * 2.0 {
         ((panel - HEADER) / 3.0).round()
     } else {
         PLACE_TOP
-    }
+    };
+    // The bar, pinned over the text, moves the scrolling text down by its
+    // room; the place still lands where it did without it.
+    let bar = ui
+        .came_from
+        .as_ref()
+        .and_then(|from| from.cited.as_ref())
+        .is_some_and(|cited| cited.places.len() > 1);
+    if bar { (top - BAR_ROOM).max(0.0) } else { top }
 }
 
 /// Keeps the pane's height for [`place_top`].
@@ -761,7 +774,7 @@ pub(in super::super) fn bar(ui: &Ui, p: Paint, kind: Kind, id: &str) -> Option<E
     Some(
         row()
             .key("cited-bar")
-            .h(30.0)
+            .h(BAR_H)
             .pl(10.0)
             .pr(6.0)
             .gap(8.0)

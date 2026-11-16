@@ -206,6 +206,7 @@ pub(super) fn view(ui: &Ui, p: Paint, record: &FileRecord, layer: &mut Vec<El>) 
         ));
     }
     let mut ask = None;
+    let mut cited_bar = None;
     match (tab, version) {
         (Some(Tab::Task(id)), _) => {
             if let Some(task) = tasks.iter().find(|task| task.id == id) {
@@ -258,7 +259,8 @@ pub(super) fn view(ui: &Ui, p: Paint, record: &FileRecord, layer: &mut Vec<El>) 
                 )));
             } else {
                 if version.kind == VersionKind::Original {
-                    body = body.children(jump::bar(ui, p, Kind::File, &record.id));
+                    // Stays over the text as it scrolls.
+                    cited_bar = jump::bar(ui, p, Kind::File, &record.id).map(ld::card_pinned);
                 }
                 body = body.child(content(ui, p, version));
                 ask = Some(actions::ask_area(ui, p, None, layer));
@@ -281,7 +283,8 @@ pub(super) fn view(ui: &Ui, p: Paint, record: &FileRecord, layer: &mut Vec<El>) 
         .grow(1.0)
         .shrink()
         .min_h(0.0)
-        .child(header);
+        .child(header)
+        .children(cited_bar);
     match ask {
         Some(ask) => detail.child(floating(p, pane, body, ask)),
         // The editor takes the whole pane and scrolls inside itself. The

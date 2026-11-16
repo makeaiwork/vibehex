@@ -111,3 +111,25 @@ fn a_citation_of_notes_opens_them_with_nothing_current() {
     assert!(rt.find("cited-now").is_none(), "nothing lands");
     assert!(rt.find("turn0").is_none(), "the transcript stays shut");
 }
+
+/// The bar between places stays under the header while the transcript
+/// scrolls deep into a long passage, not scrolled away with it.
+#[test]
+fn the_bar_between_places_stays_in_view_while_the_transcript_scrolls() {
+    let mut state = Ui::with(AppSettings::default(), Service::Fixture(Vec::new()));
+    assistant::fixture::meeting_cited_long(&mut state);
+    let mut rt = runtime_for(state, true, (980.0, 760.0));
+    settle(&mut rt);
+    let panel = element(&rt, "panel").rect;
+    let bar = element(&rt, "cited-bar").rect;
+    let header = element(&rt, "detail-header").rect;
+    assert!(
+        bar[1] >= header[1] + header[3] && bar[1] + bar[3] <= panel[1] + panel[3],
+        "the bar {bar:?} shows under the header {header:?}"
+    );
+    let top = element(&rt, "turn4").rect[1];
+    assert!(
+        top < bar[1],
+        "the transcript scrolled under the bar ({top})"
+    );
+}
