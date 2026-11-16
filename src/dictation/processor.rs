@@ -574,37 +574,38 @@ impl Profiles {
         };
         // VibeHex: Labs › Rewrite reads nearby text on every engine
         // (`caret_prompt::cleanup`).
-        let nearby = crate::dictation::caret_prompt::cleanup::Nearby::new(context, source);
+        let nearby =
+            crate::dictation::caret_prompt::cleanup::Nearby::new(context, source, server.as_ref());
         // In pieces of a few minutes' speech, each within the deadline, so a
         // dictation of any length is cleaned whole (`cleanup_pieces`).
         let cleaned = crate::dictation::cleanup_pieces::clean(
             &corrected,
             cancelled,
             |piece, stop, streamed| {
-                // VibeHex: the part of the nearby text this piece borders.
-                let (context, piece) = (nearby.context(piece), piece.text);
-                let answer = match &server {
+                // VibeHex: asked with the part of the nearby text this
+                // piece borders, and again without it if the answer repeats it.
+                let answer = nearby.asked(piece, |context, piece| match &server {
                     Some(server) => {
                         let (instructions, transcript) =
-                            prompt_parts(profile, piece, &context, &vocabulary);
+                            prompt_parts(profile, piece, context, &vocabulary);
                         crate::dictation::cleanup_server::generate(
                             server,
                             &instructions,
                             &transcript,
                             deadline,
                             stop,
-                            streamed,
+                            streamed.clone(),
                         )
                     }
                     None => generate_cancellable(
-                        &prompt(profile, piece, &context, &vocabulary, source),
+                        &prompt(profile, piece, context, &vocabulary, source),
                         profile.model.as_ref(),
                         profile.deadline,
                         stop,
                     )
                     .map(|generated| generated.text),
-                };
-                answer.map(|answer| guarded.check(&guard, piece, answer))
+                });
+                answer.map(|answer| guarded.check(&guard, piece.text, answer))
             },
         );
         guarded.log(&profile.name);

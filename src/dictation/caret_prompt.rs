@@ -4,6 +4,7 @@
 
 // VibeHex: the section on every cleanup engine, and secrets cut from it.
 pub(crate) mod cleanup;
+pub(crate) mod echo;
 pub(crate) mod secrets;
 
 use std::borrow::Cow;

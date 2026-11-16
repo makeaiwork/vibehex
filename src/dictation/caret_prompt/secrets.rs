@@ -57,7 +57,7 @@ static PATTERNS: LazyLock<Patterns> = LazyLock::new(|| {
         ),
         bearer: regex(r"(?i)\b(bearer\s+)[A-Za-z0-9._~+/-]{20,}=*"),
         assignment: regex(
-            r#"(?i)\b([A-Za-z0-9_.-]*(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|client[_-]?secret)[A-Za-z0-9_.-]*["']?\s*[:=]\s*)("[^"\n]*"|'[^'\n]*'|[^\s"'`,;(){}\[\]<>=][^\s"'`,;(){}\[\]<>]*)"#,
+            r#"(?i)\b((?:[A-Za-z0-9_.-]*(?:password|passwd|passphrase|secret|token|credentials?|api[_-]?key|access[_-]?key|private[_-]?key)[A-Za-z0-9_.-]*|(?:(?:[A-Za-z0-9_.-]*[_.-])?(?:pass|pwd)|[A-Za-z0-9_.-]*[_-]key)(?:[_.-][A-Za-z0-9_.-]*)?)["']?\s*[:=]\s*)("[^"\n]*"|'[^'\n]*'|[^\s"'`,;(){}\[\]<>=][^\s"'`,;(){}\[\]<>]*)"#,
         ),
         token: regex(concat!(
             r"\b(?:sk-[A-Za-z0-9_-]{16,}",
@@ -283,6 +283,15 @@ mod tests {
     fn values_assigned_to_a_secrets_name_are_cut() {
         for (line, expected) in [
             ("password=hunter2", "password=[removed]"),
+            // Short names an .env file uses: a whole word of the name.
+            ("DB_PASS=hunter2", "DB_PASS=[removed]"),
+            ("ADMIN_PWD=s3cret!", "ADMIN_PWD=[removed]"),
+            ("STRIPE_KEY=abc123def", "STRIPE_KEY=[removed]"),
+            ("PGPASSWORD=pg-pass-1", "PGPASSWORD=[removed]"),
+            (
+                "ssh_passphrase: \"correct horse\"",
+                "ssh_passphrase: \"[removed]\"",
+            ),
             ("DB_PASSWD: s3cret!", "DB_PASSWD: [removed]"),
             (
                 "export GITHUB_TOKEN=ghp_x1",
@@ -324,6 +333,9 @@ mod tests {
             "ThisIsAVeryLongCamelCaseIdentifierWithoutAnyDigitsInside",
             "test_parses_42_lines_of_input_in_under_100_ms_on_a_laptop",
             "the bearer token goes in the header",
+            "tests passed: 12, skipped: 3",
+            "compass = north-east",
+            "bypass=1",
             "ssh-ed25519 is the key type we use",
             "",
         ] {

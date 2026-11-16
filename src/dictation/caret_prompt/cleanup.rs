@@ -95,25 +95,70 @@ pub(crate) struct Nearby<'a> {
     context: &'a ContextSnapshot,
     /// The text around the cursor this cleanup is given, if any.
     caret: Option<&'a CaretText>,
+    /// A built-in model on this computer cleans up: it gets less of the
+    /// text ([`part`]).
+    small: bool,
 }
 
+/// The most of the text before the cursor a built-in model is given, in
+/// characters: enough for the sentence being continued and the names in it.
+const SMALL_BEFORE: usize = 300;
+
 impl<'a> Nearby<'a> {
-    /// The lab is read here: on, whatever engine runs the cleanup.
-    pub(crate) fn new(context: &'a ContextSnapshot, source: Source) -> Self {
-        Self::when(crate::labs::cursor_context(), context, source)
+    /// The lab is read here: on, whatever engine runs the cleanup
+    /// (`server`; `None` is OpenCode).
+    pub(crate) fn new(
+        context: &'a ContextSnapshot,
+        source: Source,
+        server: Option<&Server>,
+    ) -> Self {
+        Self {
+            small: server.is_some_and(|server| server.provider == Provider::Local),
+            ..Self::when(crate::labs::cursor_context(), context, source)
+        }
+    }
+
+    /// Cleanup's answer for `piece`, asked with the nearby text the piece
+    /// borders. An answer that repeats that text instead of what was said
+    /// (`echo`) is asked again without it, so a model that can't keep the
+    /// two apart still cleans the dictation up.
+    pub(crate) fn asked<E>(
+        &self,
+        piece: Piece<'_>,
+        ask: impl Fn(&ContextSnapshot, &str) -> Result<String, E>,
+    ) -> Result<String, E> {
+        let context = self.context(piece);
+        let answer = ask(&context, piece.text)?;
+        let echoed = context
+            .caret_text
+            .as_ref()
+            .is_some_and(|caret| super::echo::echoes(caret, piece.text, &answer));
+        if !echoed {
+            return Ok(answer);
+        }
+        tracing::info!("cleanup repeated the nearby text; asked again without it");
+        let bare = ContextSnapshot {
+            caret_text: None,
+            ..self.context.clone()
+        };
+        ask(&bare, piece.text)
     }
 
     /// [`Self::new`] with the lab given. Typed text never takes it.
     pub(crate) fn when(used: bool, context: &'a ContextSnapshot, source: Source) -> Self {
         let caret = super::for_source(context, source).filter(|_| used);
-        Self { context, caret }
+        Self {
+            context,
+            caret,
+            small: false,
+        }
     }
 
     /// The context `piece`'s prompt reads: its caret text is the part that
     /// borders `piece`, or none. The dictation's own context while that is
     /// all of it, so a one-piece prompt is exactly Hex's.
     pub(crate) fn context(&self, piece: Piece<'_>) -> Cow<'a, ContextSnapshot> {
-        let part = self.caret.map(|caret| part(caret, piece));
+        let part = self.caret.map(|caret| part(caret, piece, self.small));
         if part.as_ref() == self.context.caret_text.as_ref() {
             return Cow::Borrowed(self.context);
         }
@@ -125,8 +170,25 @@ impl<'a> Nearby<'a> {
 }
 
 /// What of `caret` borders `piece`: before the cursor and the selection for
-/// the first piece, after the cursor for the last.
-fn part(caret: &CaretText, piece: Piece<'_>) -> CaretText {
+/// the first piece, after the cursor for the last. A built-in model
+/// (`small`) gets the end of the text before the cursor and none of the text
+/// after it: beside a short transcript it returned the text after the cursor
+/// in place of what was said, and that text only helps fit the last
+/// punctuation mark.
+fn part(caret: &CaretText, piece: Piece<'_>, small: bool) -> CaretText {
+    if small {
+        return CaretText {
+            before: match piece.first {
+                true => tail(&caret.before, SMALL_BEFORE).to_owned(),
+                false => String::new(),
+            },
+            selected: match piece.first {
+                true => caret.selected.clone(),
+                false => String::new(),
+            },
+            after: String::new(),
+        };
+    }
     let keep = |borders: bool, text: &str| {
         if borders {
             text.to_owned()
@@ -139,6 +201,16 @@ fn part(caret: &CaretText, piece: Piece<'_>) -> CaretText {
         selected: keep(piece.first, &caret.selected),
         after: keep(piece.last, &caret.after),
     }
+}
+
+/// The last `most` characters of `text`, from the start of a word.
+fn tail(text: &str, most: usize) -> &str {
+    let Some((start, _)) = text.char_indices().rev().nth(most) else {
+        return text;
+    };
+    let cut = &text[start..];
+    cut.find(char::is_whitespace)
+        .map_or(cut, |space| cut[space..].trim_start())
 }
 
 /// `context` as a prompt for `source` reads it: typed text has no caret
@@ -287,12 +359,12 @@ mod tests {
         let given = Nearby::when(true, &context, Source::Dictation);
         assert!(matches!(given.context(whole), Cow::Borrowed(_)));
         crate::labs::apply(&AppSettings::default().labs);
-        let off = Nearby::new(&context, Source::Dictation);
+        let off = Nearby::new(&context, Source::Dictation, None);
         assert_eq!(off.context(whole).caret_text, None, "the lab is off");
         let mut settings = AppSettings::default();
         settings.labs.cursor_context = true;
         crate::labs::apply(&settings.labs);
-        let on = Nearby::new(&context, Source::Dictation);
+        let on = Nearby::new(&context, Source::Dictation, None);
         assert_eq!(
             on.context(whole).caret_text.is_some(),
             crate::labs::Feature::CursorContext.on_this_os()
@@ -349,5 +421,68 @@ mod tests {
             section_in(&context),
             super::super::section(context.caret_text.as_ref().unwrap())
         );
+    }
+    /// An answer that repeats the nearby text is asked again without it,
+    /// once; an honest answer is asked once.
+    #[test]
+    fn an_answer_that_repeats_the_nearby_text_is_asked_again_without_it() {
+        use std::cell::RefCell;
+        let context = ContextSnapshot {
+            caret_text: Some(caret(
+                "Она использует ",
+                "",
+                "? И второе, вот этот вот Cursor контекст используется или нет?",
+            )),
+            ..ContextSnapshot::default()
+        };
+        let nearby = Nearby::when(true, &context, Source::Dictation);
+        let whole = Piece {
+            text: "Screen vocabulary",
+            first: true,
+            last: true,
+        };
+        let asked = RefCell::new(Vec::new());
+        // A model that returns the text after the cursor whenever it has it.
+        let echoing = |context: &ContextSnapshot, heard: &str| -> Result<String, ()> {
+            asked.borrow_mut().push(context.caret_text.is_some());
+            Ok(match &context.caret_text {
+                Some(caret) => caret.after.clone(),
+                None => heard.to_owned(),
+            })
+        };
+        assert_eq!(nearby.asked(whole, echoing), Ok("Screen vocabulary".into()));
+        assert_eq!(*asked.borrow(), [true, false]);
+        asked.borrow_mut().clear();
+        let honest = |context: &ContextSnapshot, heard: &str| -> Result<String, ()> {
+            asked.borrow_mut().push(context.caret_text.is_some());
+            Ok(heard.to_owned())
+        };
+        assert_eq!(nearby.asked(whole, honest), Ok("Screen vocabulary".into()));
+        assert_eq!(*asked.borrow(), [true]);
+    }
+
+    /// A built-in model gets the end of the text before the cursor, from a
+    /// word's start, the selection, and none of the text after the cursor.
+    #[test]
+    fn a_built_in_model_gets_less_of_the_nearby_text() {
+        let long = "слово ".repeat(120);
+        let text = caret(&long, "выделено", " после курсора.");
+        let small = part(&text, piece(true, true), true);
+        assert!(small.after.is_empty());
+        assert_eq!(small.selected, "выделено");
+        assert!(small.before.chars().count() <= SMALL_BEFORE);
+        assert!(small.before.starts_with("слово") && long.ends_with(&small.before));
+        // Short text is given whole; another engine gets all of it.
+        assert_eq!(
+            part(&caret("Привет, ", "", " мир"), piece(true, true), true).before,
+            "Привет, "
+        );
+        assert_eq!(part(&text, piece(true, true), false), text);
+        let local = server(Provider::Local, "");
+        let context = ContextSnapshot::default();
+        assert!(Nearby::new(&context, Source::Dictation, Some(&local)).small);
+        let codex = server(Provider::Codex, "");
+        assert!(!Nearby::new(&context, Source::Dictation, Some(&codex)).small);
+        assert!(!Nearby::new(&context, Source::Dictation, None).small);
     }
 }

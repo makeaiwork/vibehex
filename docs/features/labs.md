@@ -619,9 +619,11 @@ tokens by prefix (`sk-`, `sk-ant-`, `sk-or-`, `ghp_`/`gho_`/`ghu_`/`ghs_`/`ghr_`
 `pypi-`, Stripe's `sk_`/`rk_`/`pk_` live and test keys), JSON Web Tokens,
 `Authorization:` Bearer/Basic/token values and a long `Bearer` token, a
 password in a URL (scheme, user and host kept), the value assigned to a name
-holding password, passwd, secret, token, api key, access key, private key or
-client secret (quoted values always; unquoted ones with a digit or a symbol,
-so `password: String` stays), and runs of 40 or more base64 characters with
+holding password, passwd, passphrase, secret, token, credentials, api key,
+access key or private key, or having `pass` or `pwd` as a whole word of it or
+ending in `_key` (`DB_PASS`, `ADMIN_PWD`, `STRIPE_KEY`; quoted values always;
+unquoted ones with a digit or a symbol, so `password: String` and
+`tests passed: 12` stay), and runs of 40 or more base64 characters with
 at least three digits and few `-`, `_` or `/`, or 32 or more hex characters
 with letters and digits (so a git hash is cut too). Each becomes
 `[removed]`. It is best effort: anything else near the cursor may be sent.
@@ -635,7 +637,17 @@ follow it. `prompt` joins the same two parts, so Hex's OpenCode prompt is byte
 for byte what it was, with and without the text. A long dictation cleaned in
 pieces (`cleanup_pieces::Piece`) gives its first piece the text before the
 cursor and the selection, its last the text after the cursor, and a piece
-between them none; a one-piece dictation gets all of it. The card
+between them none; a one-piece dictation gets all of it. A built-in model
+(`Provider::Local`) gets less (`part`): the last 300 characters before the
+cursor, from a word's start, the selection, and none of the text after the
+cursor, because beside a two-word transcript Gemma 4 E4B returned the text
+after the cursor in place of what was said (the owner's dictations of
+2026-11-16). Whatever the engine, an answer that repeats the nearby text is
+caught in code (`caret_prompt::echo`: a run of four words that stand together
+near the cursor and were not said that way, in an answer three or more words
+longer than its transcript, or a run of eight whatever the lengths) and the
+piece is asked again without the nearby text (`Nearby::asked`), so the
+dictation is still cleaned up; only a count is logged. The card
 (`rune_ui/labs/cursor_context.rs`) shows, while the lab is on, one muted line
 naming where the text goes with the engine chosen now (`destination`,
 `chosen(settings)`): "…stays on this Mac" for the built-in model or an own
