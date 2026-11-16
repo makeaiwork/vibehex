@@ -105,7 +105,6 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
     ("a deleted tab", ["usuniętej karty", "已删除的标签页", "削除したタブ", "einem gelöschten Tab", "una pestaña eliminada", "видаленої вкладки"]),
     ("{done} of {total}", ["{done} z {total}", "{done} / {total}", "{done} / {total}", "{done} von {total}", "{done} de {total}", "{done} з {total}"]),
     ("{} isn't an audio or video file Hex can read.", ["{} nie jest plikiem audio ani wideo, który Hex odczyta.", "{} 不是 Hex 能读取的音频或视频文件。", "{} は Hex が読める音声・動画ファイルではありません。", "{} ist keine Audio- oder Videodatei, die Hex lesen kann.", "{} no es un archivo de audio o vídeo que Hex pueda leer.", "{} — не аудіо- чи відеофайл, який Hex може прочитати."]),
-    ("Stopped", ["Zatrzymano", "已停止", "停止しました", "Angehalten", "Detenido", "Зупинено"]),
     ("The transcription stopped before it finished.", ["Przepisywanie zatrzymało się przed końcem.", "转写在完成前停止了。", "文字起こしは終わる前に止まりました。", "Die Transkription hat vor dem Ende angehalten.", "La transcripción se detuvo antes de terminar.", "Розпізнавання зупинилося, не завершившись."]),
     ("Requests", ["Polecenia", "请求", "依頼", "Anfragen", "Peticiones", "Запити"]),
     ("Versions", ["Wersje", "版本", "バージョン", "Versionen", "Versiones", "Версії"]),

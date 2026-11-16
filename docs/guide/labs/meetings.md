@@ -17,8 +17,8 @@ computer, and saves turns labelled You and Them. Turning it on adds a Meetings
 pane to the sidebar.
 
 **Turn it on when.** You want transcripts of Zoom, Meet, Teams, FaceTime (Mac),
-WhatsApp, Slack, Discord, Gather, or Telemost calls; Labs › More call apps adds
-Signal, Telegram, and more. VibeHex offers to record when it notices a call,
+WhatsApp, Slack, Discord, Gather, Telemost, Signal, Telegram, WeChat, LINE,
+Webex, Element, or Phone calls. VibeHex offers to record when it notices a call,
 and starts by itself only for apps set to Always record.
 
 **Leave it off when.** You never record calls. Off, nothing watches the
@@ -39,4 +39,4 @@ On Windows and Linux, `hex labs on meetings` is refused; use
 **Asked as.** "Can it record my Zoom calls?"; "Where do I turn on meeting
 transcripts?"; «Как записывать созвонки»; «Как включить расшифровку встреч».
 
-<!-- sources: docs/features/meetings.md:1-12,100-116,128-170; src/rune_ui/labs.rs:360-367,426-447,478-485; src/rune_ui/platform.rs:72-118; src/labs.rs:460-467; src/labs/cli.rs:106-120; src/control/settings.rs:679-682,945-955; src/app_settings/meetings.rs:253-267; src/microphone_activity.rs:281-290,296-300; src/meeting/linux.rs:27-35; src/meeting/watcher.rs:887; src/meeting/detection.rs:229; src/rune_ui/platform_settings.rs:944-977 -->
+<!-- sources: upstream docs/features/meetings.md:403-435 (more call apps always on); docs/features/meetings.md:1-12,100-116,128-170; src/rune_ui/labs.rs:360-367,426-447,478-485; src/rune_ui/platform.rs:72-118; src/labs.rs:460-467; src/labs/cli.rs:106-120; src/control/settings.rs:679-682,945-955; src/app_settings/meetings.rs:253-267; src/microphone_activity.rs:281-290,296-300; src/meeting/linux.rs:27-35; src/meeting/watcher.rs:887; src/meeting/detection.rs:229; src/rune_ui/platform_settings.rs:944-977 -->

@@ -7,7 +7,7 @@ os: macOS (Labs)
 
 # Files
 
-Files turns a recording you already have, a voice memo, a lecture, a video, into text. You drop it in, VibeHex transcribes it on this Mac, and you can then clean the text up or ask questions about it. It is a Labs feature, off by default, macOS only.
+Files turns a recording you already have, a voice memo, a lecture, a video, into text. You drop it in, VibeHex transcribes it on this Mac, and you can then clean the text up or ask questions about it. It is a Labs feature, off by default, macOS only. On every system, without the pane, `hex transcribe <file>` prints any common audio or video file's text in a terminal (see "The hex command").
 
 ## Turn it on and add a file
 

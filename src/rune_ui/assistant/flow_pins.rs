@@ -318,55 +318,55 @@ const FIRST: [&[&str]; 10] = [
     // Change answers, files too, Continue
     &[
         "now since facts asks(use=dictation_any+dictation_code+files*! language=en*! cleanup=none*! notes=apple!)",
-        "asks(labs.cleanup_progress= labs.live_text= labs.recent_dictations= labs.spoken_symbols= labs.caps_lock_dictation=yes~ labs.failure_notices=no~) more(8)",
+        "asks(labs.cleanup_progress= labs.live_text= labs.recent_dictations= labs.spoken_symbols=) more(8)",
         "kept: answers(use language cleanup labs.caps_lock_dictation labs.failure_notices labs.filler_words) asked(3) applied(1) declined(2) decided",
         "kept: answers(use language cleanup notes) asked(0) applied(0) declined(0)",
     ],
     // Continue to the plan
     &[
         "now since facts asks(use=dictation_any+dictation_code+files*! language=en*! cleanup=none*! notes=apple!)",
-        "asks(labs.cleanup_progress=! labs.live_text=! labs.recent_dictations=! labs.spoken_symbols=! labs.caps_lock_dictation=yes~! labs.failure_notices=no~!) more(8)",
-        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.screenshots=!) more(4)",
-        "asks(paste_with_shift=! labs.playback=! labs.keep_on_clipboard=! labs.keep_recordings=!)",
-        "answer answers(use language cleanup notes labs.caps_lock_dictation labs.failure_notices) plan(1/1 open)",
+        "asks(labs.cleanup_progress=! labs.live_text=! labs.recent_dictations=! labs.spoken_symbols=!) more(8)",
+        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.screen_vocabulary=!) more(4)",
+        "asks(labs.screenshots=! paste_with_shift=! labs.playback=! labs.history_multi_select=!)",
+        "answer answers(use language cleanup notes) plan(1/1 open)",
         "kept: answers(use language cleanup labs.caps_lock_dictation labs.failure_notices labs.filler_words) asked(3) applied(1) declined(2) decided",
-        "kept: answers(use language cleanup notes labs.caps_lock_dictation labs.failure_notices) asked(2) applied(0) declined(1)",
+        "kept: answers(use language cleanup notes) asked(0) applied(0) declined(0)",
     ],
     // Not now
     &[
         "now since facts asks(use=dictation_any+dictation_code+files*! language=en*! cleanup=none*! notes=apple!)",
-        "asks(labs.cleanup_progress=! labs.live_text=! labs.recent_dictations=! labs.spoken_symbols=! labs.caps_lock_dictation=yes~! labs.failure_notices=no~!) more(8)",
-        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.screenshots=!) more(4)",
-        "asks(paste_with_shift=! labs.playback=! labs.keep_on_clipboard=! labs.keep_recordings=!)",
-        "answer answers(use language cleanup notes labs.caps_lock_dictation labs.failure_notices) plan(1/1 declined)",
+        "asks(labs.cleanup_progress=! labs.live_text=! labs.recent_dictations=! labs.spoken_symbols=!) more(8)",
+        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.screen_vocabulary=!) more(4)",
+        "asks(labs.screenshots=! paste_with_shift=! labs.playback=! labs.history_multi_select=!)",
+        "answer answers(use language cleanup notes) plan(1/1 declined)",
         "kept: answers(use language cleanup labs.caps_lock_dictation labs.failure_notices labs.filler_words) asked(3) applied(1) declined(2) decided",
         // Put off, and kept as decided: a scene's clock stands still, and this plan
         // once passed for the first setup's, made at the same moment.
-        "kept: answers(use language cleanup notes labs.caps_lock_dictation labs.failure_notices) asked(2) applied(0) declined(1) decided",
+        "kept: answers(use language cleanup notes) asked(0) applied(0) declined(0) decided",
     ],
 ];
 
 const PRESET: [&[&str]; 5] = [
     // Or set it up like Denis
-    &["answer preset=settings plan(133/134 open)"],
+    &["answer preset=settings plan(129/130 open)"],
     // Not now
     &[
-        "answer preset=settings plan(133/134 declined)",
+        "answer preset=settings plan(129/130 declined)",
         "answer preset=shortcuts shortcuts(3/8 open)",
     ],
     // Use these
     &[
-        "answer preset=settings plan(133/134 declined)",
+        "answer preset=settings plan(129/130 declined)",
         "answer preset=shortcuts shortcuts(3/8 applied)",
     ],
     // Undo
     &[
-        "answer preset=settings plan(133/134 declined)",
+        "answer preset=settings plan(129/130 declined)",
         "answer preset=shortcuts shortcuts(3/8 undone)",
     ],
     // again: Apply, Keep mine
     &[
-        "answer preset=settings plan(133/134 applied)",
+        "answer preset=settings plan(129/130 applied)",
         "answer preset=shortcuts shortcuts(3/8 declined)",
     ],
 ];

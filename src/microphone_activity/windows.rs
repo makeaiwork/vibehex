@@ -4,32 +4,50 @@
 
 use color_eyre::eyre::{Result, eyre};
 use windows::Win32::Media::Audio::{
-    AudioSessionStateActive, DEVICE_STATE_ACTIVE, IAudioSessionControl2, IAudioSessionManager2,
-    IMMDeviceEnumerator, MMDeviceEnumerator, eCapture,
+    AudioSessionStateActive, DEVICE_STATE_ACTIVE, EDataFlow, IAudioSessionControl2,
+    IAudioSessionManager2, IMMDeviceEnumerator, MMDeviceEnumerator, eCapture,
 };
 use windows::Win32::System::Com::{
-    CLSCTX_ALL, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx,
+    CLSCTX_ALL, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx, CoTaskMemFree,
 };
 use windows::core::Interface;
 
-use super::{ActiveMicrophoneApplication, deduplicated};
+use super::{ActiveMicrophoneApplication, canonical_bundle_id_for, deduplicated};
 
-/// The processes capturing from a microphone now.
-pub fn active_microphone_applications() -> Result<Vec<ActiveMicrophoneApplication>> {
-    // SAFETY: Joins this thread to the multithreaded apartment; a thread
-    // already in it gets `S_FALSE`, which is fine.
+/// One active endpoint and the pids with an active session on it.
+pub(crate) struct EndpointSessions {
+    pub(crate) endpoint_id: String,
+    pub(crate) pids: Vec<u32>,
+}
+
+/// Every active endpoint of `flow` and the pids with an active
+/// (`AudioSessionStateActive`) session on it, its own pid excluded.
+pub(crate) fn active_endpoint_sessions(flow: EDataFlow) -> Result<Vec<EndpointSessions>> {
+    // SAFETY: Joins this thread to the multithreaded apartment. A thread
+    // already in it gets `S_FALSE` and a thread already in a single-threaded
+    // apartment gets `RPC_E_CHANGED_MODE`; both are fine, because the calls
+    // below need no message pump and do not depend on the apartment.
     let _ = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
     let own_pid = std::process::id();
-    let mut applications = Vec::new();
-    let sessions = (|| -> windows::core::Result<Vec<u32>> {
-        // SAFETY: Plain COM calls on interfaces this function owns.
+    let endpoints = (|| -> windows::core::Result<Vec<EndpointSessions>> {
+        // SAFETY: Plain COM calls on interfaces this function owns. `GetId`
+        // hands back a `CoTaskMemAlloc` string that is read once into a
+        // `String` and freed once with `CoTaskMemFree`, never used after.
         unsafe {
             let enumerator: IMMDeviceEnumerator =
                 CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL)?;
-            let devices = enumerator.EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE)?;
-            let mut pids = Vec::new();
+            let devices = enumerator.EnumAudioEndpoints(flow, DEVICE_STATE_ACTIVE)?;
+            let mut endpoints = Vec::new();
             for device in 0..devices.GetCount()? {
                 let Ok(device) = devices.Item(device) else {
+                    continue;
+                };
+                let Ok(id) = device.GetId() else {
+                    continue;
+                };
+                let endpoint_id = id.to_string();
+                CoTaskMemFree(Some(id.as_ptr().cast_const().cast()));
+                let Ok(endpoint_id) = endpoint_id else {
                     continue;
                 };
                 let Ok(manager) = device.Activate::<IAudioSessionManager2>(CLSCTX_ALL, None) else {
@@ -38,6 +56,7 @@ pub fn active_microphone_applications() -> Result<Vec<ActiveMicrophoneApplicatio
                 let Ok(sessions) = manager.GetSessionEnumerator() else {
                     continue;
                 };
+                let mut pids = Vec::new();
                 for session in 0..sessions.GetCount()? {
                     let Ok(control) = sessions.GetSession(session) else {
                         continue;
@@ -47,52 +66,76 @@ pub fn active_microphone_applications() -> Result<Vec<ActiveMicrophoneApplicatio
                     }
                     if let Ok(control) = control.cast::<IAudioSessionControl2>()
                         && let Ok(pid) = control.GetProcessId()
+                        && pid != 0
+                        && pid != own_pid
                     {
                         pids.push(pid);
                     }
                 }
+                endpoints.push(EndpointSessions { endpoint_id, pids });
             }
-            Ok(pids)
+            Ok(endpoints)
         }
     })()
-    .map_err(|error| eyre!("could not read microphone sessions: {error}"))?;
+    .map_err(|error| eyre!("could not read audio sessions: {error}"))?;
+    Ok(endpoints)
+}
+
+/// The processes capturing from a microphone now. A Telemost call's
+/// microphone session belongs to its Qt WebEngine helper, so the helper is
+/// reported as the Telemost process that started it.
+pub fn active_microphone_applications() -> Result<Vec<ActiveMicrophoneApplication>> {
+    let mut applications = Vec::new();
     let mut parents = None;
-    for pid in sessions {
-        if pid == 0 || pid == own_pid {
-            continue;
-        }
-        let Some(mut path) = process_path(pid) else {
-            continue;
-        };
-        let mut owner_pid = pid;
-        if super::telemost::is_qt_helper(&path) {
-            let parents = parents.get_or_insert_with(process_parents);
-            let Some((owner, owner_path)) = super::telemost::resolve_windows_helper(pid, |child| {
-                let parent = *parents.get(&child)?;
-                Some((parent, process_path(parent)?))
-            }) else {
+    for endpoint in active_endpoint_sessions(eCapture)? {
+        for pid in endpoint.pids {
+            let Some(mut path) = process_path(pid) else {
                 continue;
             };
-            owner_pid = owner;
-            path = owner_path;
+            let mut owner_pid = pid;
+            if super::telemost::is_qt_helper(&path) {
+                let parents = parents.get_or_insert_with(process_parents);
+                let Some((owner, owner_path)) =
+                    super::telemost::resolve_windows_helper(pid, |child| {
+                        let parent = *parents.get(&child)?;
+                        Some((parent, process_path(parent)?))
+                    })
+                else {
+                    continue;
+                };
+                owner_pid = owner;
+                path = owner_path;
+            }
+            let Some(executable) = path
+                .file_name()
+                .map(|name| name.to_string_lossy().into_owned())
+            else {
+                continue;
+            };
+            let name = path
+                .file_stem()
+                .map(|stem| stem.to_string_lossy().into_owned())
+                .unwrap_or_else(|| executable.clone());
+            applications.push(ActiveMicrophoneApplication {
+                pid: owner_pid as i32,
+                bundle_id: executable,
+                name,
+            });
         }
-        let Some(executable) = path
-            .file_name()
-            .map(|name| name.to_string_lossy().into_owned())
-        else {
-            continue;
-        };
-        let name = path
-            .file_stem()
-            .map(|stem| stem.to_string_lossy().into_owned())
-            .unwrap_or_else(|| executable.clone());
-        applications.push(ActiveMicrophoneApplication {
-            pid: owner_pid as i32,
-            bundle_id: executable,
-            name,
-        });
     }
     Ok(deduplicated(applications))
+}
+
+/// The canonical bundle identifier of `pid`'s executable, when Hex knows it.
+/// A Telemost Qt helper is not resolved to Telemost here, so a Telemost
+/// call's loopback hears every output (the route's fallback).
+pub(crate) fn process_canonical_bundle_id(pid: u32) -> Option<&'static str> {
+    let path = process_path(pid)?;
+    let executable = path.file_name()?.to_string_lossy().into_owned();
+    let name = path
+        .file_stem()
+        .map(|stem| stem.to_string_lossy().into_owned());
+    canonical_bundle_id_for(&executable, name.as_deref())
 }
 
 fn process_path(pid: u32) -> Option<std::path::PathBuf> {

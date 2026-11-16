@@ -45,8 +45,8 @@ use std::time::{Duration, Instant};
 use color_eyre::eyre::{Result, WrapErr, eyre};
 use scrawl_capture::audio::RecordedAudio;
 use scrawl_capture::capture::{
-    AudioIn, ConfigSource, Event, Host, InputSink, OwnWindows, SharedCaptureTelemetry,
-    SharedResources, Stage, Start, Target,
+    AudioIn, ConfigSource, Event, Host, InputSink, MovieQuality, OwnWindows,
+    SharedCaptureTelemetry, SharedResources, Stage, Start, Target,
 };
 use scrawl_capture::handoff::EngineConfig;
 use scrawl_capture::hosted_input::{HostInput, HostedInput, Modifiers};
@@ -84,15 +84,16 @@ mod timeline;
 pub use library::{
     explain as explain_capture, list as list_captures, send as send_capture, show as show_capture,
 };
+#[cfg(target_os = "macos")]
+pub use permissions::report_screenshots as report_screenshot_permission;
 #[cfg_attr(not(target_os = "macos"), allow(unused_imports))]
 pub use permissions::{
-    CaptureNeed, NeedState, allow as allow_permission, on_missing,
-    report as report_missing_permission, restart as restart_for_permission,
-    state_of as permission_state,
+    AskedBy, CaptureNeed, NeedState, allow as allow_permission, on_missing,
+    restart as restart_for_permission, state_of as permission_state,
 };
 pub use replay::available as replay_available;
 pub use routing::CaptureRoute;
-pub use routing::{RouteAnswer, RouteDelivery, RouteDest};
+pub use routing::{RouteAnswer, RouteDelivery, RouteDest, SEND_HOLD};
 #[cfg(target_os = "macos")]
 pub use routing::{recent_sessions, send_image};
 #[cfg(target_os = "macos")]
@@ -420,8 +421,10 @@ fn scrawl_engine(
 }
 
 /// What the capture asks for: `target`, on the clock the dictation timeline
-/// shares, with Hex's audio and Hex's folder.
-fn start_request(t0: CaptureInstant, bundle: PathBuf, target: Target) -> Start {
+/// shares, with Hex's audio and Hex's folder. A Screenshots recording is for
+/// people, so its movie keeps every pixel; an Annotate capture's stays sized
+/// for agents.
+fn start_request(t0: CaptureInstant, bundle: PathBuf, target: Target, clip: bool) -> Start {
     Start {
         t0_boot_ns: t0.as_nanos(),
         target,
@@ -429,6 +432,11 @@ fn start_request(t0: CaptureInstant, bundle: PathBuf, target: Target) -> Start {
         audio: AudioIn::External,
         window_log: true,
         note: None,
+        movie: if clip {
+            MovieQuality::Full
+        } else {
+            MovieQuality::Compact
+        },
     }
 }
 
@@ -468,13 +476,10 @@ impl Host for HexHost {
 /// looks through for clicks: the ink overlay, and the capsule's panel, which
 /// lets clicks through everywhere but its pill. Clicks on the pill never
 /// reach the engine ([`CapsulePill`]).
-fn own_windows_of(own: &[Option<u32>; 3]) -> OwnWindows {
+fn own_windows_of(own: &OwnWindowIds) -> OwnWindows {
     OwnWindows {
-        excluded: own.iter().flatten().copied().collect(),
-        passthrough: [OwnWindow::Ink, OwnWindow::Capsule]
-            .into_iter()
-            .filter_map(|role| own[role as usize])
-            .collect(),
+        excluded: own.excluded(),
+        passthrough: [own.ink, own.capsule].into_iter().flatten().collect(),
         recorded: Arc::clone(&OWN_WINDOWS_RECORDED),
     }
 }
@@ -543,7 +548,8 @@ impl CapsulePill {
         };
         let Some(window) = OWN_WINDOWS
             .lock()
-            .unwrap_or_else(|error| error.into_inner())[OwnWindow::Capsule as usize]
+            .unwrap_or_else(|error| error.into_inner())
+            .capsule
         else {
             return false;
         };
@@ -579,7 +585,31 @@ fn on_pill(origin: [f64; 2], pill: [f32; 4], x: f64, y: f64) -> bool {
 
 /// Hex's windows a capture leaves out of its recording, one per role. A
 /// capture reads them when it starts.
-static OWN_WINDOWS: Mutex<[Option<u32>; 3]> = Mutex::new([None, None, None]);
+static OWN_WINDOWS: Mutex<OwnWindowIds> = Mutex::new(OwnWindowIds {
+    capsule: None,
+    ink: None,
+    picker: None,
+});
+
+/// The window holding each [`OwnWindow`] role.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct OwnWindowIds {
+    capsule: Option<u32>,
+    ink: Option<u32>,
+    picker: Option<u32>,
+}
+
+impl OwnWindowIds {
+    /// Every window held, which a recording leaves out.
+    fn excluded(self) -> Vec<u32> {
+        let Self {
+            capsule,
+            ink,
+            picker,
+        } = self;
+        [capsule, ink, picker].into_iter().flatten().collect()
+    }
+}
 
 /// Which of Hex's windows a capture leaves out.
 #[derive(Clone, Copy, Debug)]
@@ -600,7 +630,11 @@ pub fn exclude_window(role: OwnWindow, window: u32) {
     let mut own = OWN_WINDOWS
         .lock()
         .unwrap_or_else(|error| error.into_inner());
-    own[role as usize] = Some(window);
+    *match role {
+        OwnWindow::Capsule => &mut own.capsule,
+        OwnWindow::Ink => &mut own.ink,
+        OwnWindow::Picker => &mut own.picker,
+    } = Some(window);
     let joined = own_windows_of(&own);
     drop(own);
     let Some(source) = ink_source() else { return };
@@ -1101,6 +1135,9 @@ pub struct SettledCapture {
     pub missing_transcript: Option<String>,
     /// Why a capture failed, when Hex knows.
     pub error: Option<String>,
+    /// Why a written capture's summary didn't reach the clipboard; `None`
+    /// once it did (or for a capture that isn't copied).
+    pub copy_error: Option<String>,
     /// Where a written capture goes, while captures are sent to OpenCode
     /// (`capture.routing`'s `autoSend`).
     pub route: Option<CaptureRoute>,
@@ -1342,11 +1379,11 @@ impl Outcomes {
     }
 
     fn settle(&mut self, bundle: PathBuf, stage: Stage, written: Option<Written>) {
-        self.settle_with(bundle, stage, written, None, None);
+        self.settle_with(bundle, stage, written, None, None, None);
     }
 
     fn fail(&mut self, bundle: PathBuf, error: String) {
-        self.settle_with(bundle, Stage::Failed, None, Some(error), None);
+        self.settle_with(bundle, Stage::Failed, None, Some(error), None, None);
     }
 
     /// A switch discarded `bundle` and then could not start: its outcome,
@@ -1359,6 +1396,7 @@ impl Outcomes {
             gaps: None,
             missing_transcript: None,
             error: Some(error),
+            copy_error: None,
             route: None,
         });
         self.publish();
@@ -1388,6 +1426,7 @@ impl Outcomes {
         stage: Stage,
         written: Option<Written>,
         error: Option<String>,
+        copy_error: Option<String>,
         route: Option<CaptureRoute>,
     ) {
         let discarded = self
@@ -1403,6 +1442,7 @@ impl Outcomes {
                 gaps: written.as_ref().map(|written| written.gaps),
                 missing_transcript: written.and_then(|written| written.missing_transcript),
                 error,
+                copy_error,
                 route,
             });
         }
@@ -2013,7 +2053,9 @@ impl CaptureHost {
         if !cfg!(test)
             && let Some((need, _)) = permissions::missing(target != CaptureTarget::Phone)
         {
-            permissions::report(need);
+            // A Screenshots recording (`clip`) goes back to its picker once
+            // the grant is made; any other capture records the screen.
+            permissions::report_capture(need, clip);
             return Ok(ControlReply::error(
                 "permission",
                 format!("{} is off for Hex", need.name()),
@@ -2049,7 +2091,7 @@ impl CaptureHost {
                 .spawn(move || {
                     let start = engine
                         .target(target)
-                        .map(|target| start_request(now, recording.clone(), target));
+                        .map(|target| start_request(now, recording.clone(), target, clip));
                     collect(
                         &*engine, start, &recording, chunks, sealed, &jobs, &outcomes, &input,
                     );
@@ -3332,9 +3374,22 @@ fn finish_captures(
                     missing_transcript = written.missing_transcript.as_deref(),
                     "capture finished"
                 );
-                copy_to_clipboard(&bundle);
+                let copy_error = if crate::capture_zip::copy_as_zip(&bundle) {
+                    None
+                } else {
+                    copy_to_clipboard(&bundle)
+                        .err()
+                        .map(|error| format!("{error:#}"))
+                };
                 let route = look.as_ref().map(|_| CaptureRoute::looking());
-                lock(outcomes).settle_with(bundle.clone(), Stage::Done, Some(written), None, route);
+                lock(outcomes).settle_with(
+                    bundle.clone(),
+                    Stage::Done,
+                    Some(written),
+                    None,
+                    copy_error,
+                    route,
+                );
                 if let Some(look) = look {
                     let job = routing::Job::Written {
                         bundle: bundle.clone(),
@@ -3442,32 +3497,18 @@ fn summary(bundle: &Path) -> anyhow::Result<String> {
 /// The process's one paster for captures. On X11 it serves the clipboard
 /// for as long as it lives, so a copied capture stays pasteable.
 #[cfg(target_os = "linux")]
-fn with_linux_paster(
+pub(crate) fn with_linux_paster(
     use_it: impl FnOnce(&mut crate::linux::paste::LinuxPaster) -> Result<()>,
 ) -> anyhow::Result<()> {
-    static PASTER: Mutex<Option<crate::linux::paste::LinuxPaster>> = Mutex::new(None);
-    let mut paster = PASTER.lock().unwrap_or_else(|error| error.into_inner());
-    if paster.is_none() {
-        let shift = crate::app_settings::AppSettings::load()
-            .map(|settings| settings.paste_with_shift)
-            .unwrap_or(false);
-        *paster = Some(
-            crate::linux::paste::LinuxPaster::new(
-                Arc::default(),
-                Arc::new(AtomicBool::new(shift)),
-                Default::default(),
-            )
-            .map_err(|error| anyhow::anyhow!("{error:#}"))?,
-        );
-    }
-    use_it(paster.as_mut().expect("made above")).map_err(|error| anyhow::anyhow!("{error:#}"))
+    crate::linux::paste::with_paster(use_it).map_err(|error| anyhow::anyhow!("{error:#}"))
 }
 
 /// Copies a written capture to the clipboard, as Scrawl does: its summary,
-/// ready to paste into an agent.
-fn copy_to_clipboard(bundle: &Path) {
+/// ready to paste into an agent. The capsule says "Summary copied" only
+/// once this is `Ok`.
+fn copy_to_clipboard(bundle: &Path) -> anyhow::Result<()> {
     if cfg!(test) {
-        return;
+        return Ok(());
     }
     #[cfg(target_os = "macos")]
     let copied =
@@ -3477,9 +3518,10 @@ fn copy_to_clipboard(bundle: &Path) {
         summary(bundle).and_then(|summary| with_linux_paster(|paster| paster.copy(&summary)));
     #[cfg(target_os = "windows")]
     let copied = scrawl_capture::handoff::copy_bundle_to_clipboard(bundle);
-    if let Err(error) = copied {
+    if let Err(error) = &copied {
         tracing::warn!(error = format!("{error:#}"), "could not copy the capture");
     }
+    copied.map_err(|error| anyhow::anyhow!("{error:#}"))
 }
 
 /// One capture's audio thread: starts the engine, collects until the sink
@@ -3766,7 +3808,11 @@ mod tests {
             window(capsule, own, [544.0, 0.0, 640.0, 424.0], 27),
             window(app, own + 1, [0.0, 0.0, 1728.0, 1117.0], 0),
         ];
-        let roles = [Some(capsule), Some(ink), None];
+        let roles = OwnWindowIds {
+            capsule: Some(capsule),
+            ink: Some(ink),
+            picker: None,
+        };
         let OwnWindows {
             excluded,
             passthrough,
@@ -3805,6 +3851,14 @@ mod tests {
             .unwrap()
             .as_nanos();
         std::env::temp_dir().join(format!("hex-capture-{name}-{unique}"))
+    }
+
+    #[test]
+    fn a_screenshots_recording_keeps_every_pixel_and_a_capture_stays_compact() {
+        let t0 = CaptureInstant::now();
+        let movie = |clip| start_request(t0, PathBuf::new(), Target::ActiveDisplay, clip).movie;
+        assert_eq!(movie(true), MovieQuality::Full);
+        assert_eq!(movie(false), MovieQuality::Compact);
     }
 
     #[test]
@@ -4157,6 +4211,7 @@ mod tests {
         // Hex's audio, on Hex's clock, into Hex's folder; nothing else.
         let start = engine.starts.lock().unwrap()[0].clone();
         assert_eq!(start.audio, AudioIn::External);
+        assert_eq!(start.movie, MovieQuality::Compact);
         assert!(matches!(start.target, Target::ActiveDisplay));
         assert_eq!(start.bundle_dir.as_ref(), Some(&bundle));
         assert_eq!(start.t0_boot_ns, t0.as_nanos());

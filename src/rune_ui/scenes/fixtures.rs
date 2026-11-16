@@ -19,19 +19,19 @@ pub(in crate::rune_ui) fn mac_fixture() -> Ui {
             policy: crate::app_settings::MeetingPolicy::AlwaysRecord,
         },
         crate::app_settings::MeetingProviderChoice {
-            key: "problems.kitlangton.com".into(),
-            label: "problems.kitlangton.com".into(),
+            key: "example.com".into(),
+            label: "example.com".into(),
             policy: crate::app_settings::MeetingPolicy::NeverOffer,
         },
     ];
     ui.settings.experimental.hex_microphone = true;
     ui.microphones = Ok(crate::audio::InputDevices {
         names: vec![
-            "Kit Pods".into(),
+            "Alex Pods".into(),
             "MacBook Pro Microphone".into(),
             "Studio Display Microphone".into(),
         ],
-        system_default: Some("Kit Pods".into()),
+        system_default: Some("Alex Pods".into()),
         default_is_hex_microphone: false,
         ..Default::default()
     });
@@ -57,7 +57,9 @@ pub(in crate::rune_ui) fn portal_fixture() -> Ui {
 /// Deterministic settings and service state matching a typical Wayland
 /// desktop with the shortcuts portal.
 pub(in crate::rune_ui) fn fixture(shortcuts: DesktopShortcuts) -> Ui {
-    crate::desktop::i18n::apply(Some("en"));
+    // English, unless a render names another language to check its copy in.
+    let language = std::env::var("HEX_RENDER_LANGUAGE").unwrap_or_else(|_| "en".into());
+    crate::desktop::i18n::apply(Some(&language));
     let settings = AppSettings {
         dictation_hotkey: HotkeyBinding {
             modifiers: HotkeyModifiers::default(),
@@ -78,7 +80,7 @@ pub(in crate::rune_ui) fn fixture(shortcuts: DesktopShortcuts) -> Ui {
         listener: DesktopListenerSnapshot {
             running: true,
             warming: false,
-            status: "Enabled".into(),
+            status: crate::desktop::host::ListenerStatus::Enabled,
             warning: None,
             notice: None,
             last_failure: None,

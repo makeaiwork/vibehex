@@ -7,6 +7,7 @@ pub(crate) mod hardware;
 pub(crate) mod host;
 pub(crate) mod i18n;
 pub(crate) mod instance;
+pub(crate) mod log_trim;
 #[cfg_attr(target_os = "linux", allow(dead_code))]
 pub(crate) mod login_item;
 #[cfg_attr(any(target_os = "linux", target_os = "windows"), allow(dead_code))]

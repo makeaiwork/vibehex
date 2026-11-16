@@ -5,7 +5,7 @@ title: Keep dictation on clipboard
 for: [dictation]
 ask: Leave each dictation on the clipboard after it's pasted?
 group: Output
-os: [macOS, Windows]
+os: every OS
 vibehex: false
 ---
 
@@ -22,7 +22,7 @@ else, or use a clipboard manager that should record dictations.
 **Leave it off when.** You copy something, dictate, and expect to paste the
 copied thing afterwards.
 
-**Needs.** macOS or Windows. Nothing else. Linux has no such lab.
+**Needs.** Nothing else.
 
 **Good to know.** The dictation is saved as an ordinary clipboard entry, so
 clipboard managers may record it; on Windows that includes Win+V history and
@@ -35,4 +35,4 @@ pasted; to only copy, use Labs › Copy dictation only.
 dictation again"; «Хочу, чтобы надиктованный текст оставался в буфере
 обмена»; «После диктовки пропадает то, что я копировал».
 
-<!-- sources: docs/features/labs.md:55,183-197; src/labs.rs:492-494; src/rune_ui/labs.rs:440-460; src/paste.rs:259,342; src/windows/paste.rs:18,157,178-198 -->
+<!-- sources: upstream docs/features/labs.md:734-756 (every OS, Linux included); upstream src/labs/catalog.rs (EVERY); docs/features/labs.md:55,183-197; src/labs.rs:492-494; src/rune_ui/labs.rs:440-460; src/paste.rs:259,342; src/windows/paste.rs:18,157,178-198 -->

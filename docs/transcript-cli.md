@@ -15,7 +15,7 @@ hex meetings show 1790000500000-1002 --json
 hex meetings show 1790000500000-1002 --from 113:03 --to 120:43 --md
 hex meetings chapters latest --json
 hex meetings show 1790003000000-1005 --chapter 2
-hex meetings show latest --srt > call.srt   # Labs › Subtitle export
+hex meetings show latest --srt > call.srt
 hex meetings search 'release schedule'
 ```
 
@@ -24,7 +24,9 @@ hex meetings search 'release schedule'
 `history` returns successful retained results, including Send and Voice Action.
 Each result has a timestamp, application, recorded processing mode if present,
 and final text. `--raw` adds the stored pre-processing transcript. Older entries
-may have no app or mode; Hex does not infer missing metadata.
+may have no app or mode; Hex does not infer missing metadata. With Labs › Keep
+recordings on, an entry whose WAV is still beside the store adds its absolute
+path as `recording` in JSON; every other entry omits it.
 
 - `--since` is inclusive and `--until` is exclusive. A date alone means local
   midnight; `--until 2026-10-20` includes all of October 20.
@@ -104,11 +106,8 @@ and `chapter` in JSON; it cannot be combined with `--from`/`--to`, and a number
 outside the list is an error. Plain `show` Markdown adds a `## Chapters` list
 when there are any.
 
-`show --srt` and `show --vtt` (Labs › Subtitle export, `hex labs on
-subtitle-export`, off by default) write timed subtitles to stdout instead,
-for example `hex meetings show latest --vtt > call.vtt`. With the toggle off
-they fail, naming the command that turns it on, before any meeting is read.
-They take the same IDs, `--from`/`--to`, and `--chapter` as the other outputs
+`show --srt` and `show --vtt` write timed subtitles to stdout instead, for
+example `hex meetings show latest --vtt > call.vtt`. They take the same IDs, `--from`/`--to`, and `--chapter` as the other outputs
 and conflict with `--md`, `--json`, and each other. Each transcript entry (a
 speaker turn) becomes one cue timed by its offsets from the meeting's start,
 not by word timings: SRT numbers its cues, uses `HH:MM:SS,mmm` times, and
@@ -156,7 +155,9 @@ Every JSON response has integer `version: 1`. Consumers should ignore unknown
 fields; incompatible field changes require a new version. All `*_ms` fields are
 integer milliseconds. Absolute timestamps use Unix time. Nullable fields are
 present as `null`, except `raw_text`, which is omitted without `--raw`,
-`score` and `snippet`, which are omitted without `--search`, `range`, which
+`score` and `snippet`, which are omitted without `--search`, `recording`, which
+is omitted unless Labs › Keep recordings still holds the entry's audio file,
+`range`, which
 is omitted without `--from` or `--to`, `chapters`, which is omitted when a
 meeting has none, and `chapter`, which is omitted without `--chapter`.
 JSON goes to stdout; errors go to stderr with a nonzero exit status. Empty
@@ -178,6 +179,7 @@ type History = {
     raw_text?: string // present only with --raw
     score?: number // present only with --search; higher is more relevant
     snippet?: string // present only with --search; matches wrapped in **
+    recording?: string // absolute path to the kept WAV; only while Labs › Keep recordings has it
   }[]
 }
 

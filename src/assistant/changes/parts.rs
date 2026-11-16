@@ -45,10 +45,9 @@ pub fn part(key: &str, settings: &AppSettings) -> Option<Part> {
 
 /// Every call service Detected calls lists, then the ones chosen for.
 fn providers(settings: &AppSettings) -> Vec<(String, String)> {
-    let mut all: Vec<(String, String)> =
-        crate::app_settings::known_meeting_providers(settings.labs.more_call_apps)
-            .map(|(key, label)| (key.to_owned(), label.to_owned()))
-            .collect();
+    let mut all: Vec<(String, String)> = crate::app_settings::known_meeting_providers()
+        .map(|(key, label)| (key.to_owned(), label.to_owned()))
+        .collect();
     for choice in &settings.meetings.providers {
         if !all.iter().any(|(key, _)| *key == choice.key) {
             all.push((choice.key.clone(), choice.label.clone()));

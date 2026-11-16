@@ -6,6 +6,8 @@
 //! trusted, and an unfinished draft is shown as interrupted, as the app does.
 //! Unreadable folders and lines are skipped and reported, never repaired.
 
+mod passage_hits;
+pub use passage_hits::search_passages;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write as _;
 use std::fs::{self, File};
@@ -338,7 +340,16 @@ impl Library {
         let retention = crate::app_settings::meeting_retention();
         let now_ms = crate::desktop::events::now_ms();
         meetings.retain(|meeting| {
-            !super::expired(&meeting.manifest, meeting.status, retention, now_ms)
+            super::retention::readable(
+                &meeting.manifest,
+                meeting.status,
+                self.root
+                    .join(&meeting.id)
+                    .join(super::FINAL_PENDING_FILE)
+                    .exists(),
+                retention,
+                now_ms,
+            )
         });
         meetings.sort_by_key(|meeting| std::cmp::Reverse(meeting.start_ms()));
         skipped.sort_by(|left, right| left.id.cmp(&right.id));
@@ -706,7 +717,7 @@ fn recorder_holds_lock(directory: &Path) -> bool {
             let _ = fs2::FileExt::unlock(&file);
             false
         }
-        Err(error) => super::lock_contended(&error),
+        Err(error) => crate::durable::lock_contended(&error),
     }
 }
 
@@ -723,13 +734,9 @@ fn load(directory: &Path, id: &str, in_progress: bool) -> Result<Meeting> {
             .ok()
             .map(|error| error.trim().to_string());
     let final_path = directory.join("transcript.ndjson");
-    // A recorder publishes the final NDJSON before the Markdown; without one,
-    // the NDJSON alone is the finished publication.
-    let final_ready = if in_progress {
-        final_path.exists() && directory.join("transcript.md").exists()
-    } else {
-        final_path.exists()
-    };
+    // Read-only readers never repair the second publication rename. Until
+    // both files exist, every reader uses the retained rolling transcript.
+    let final_ready = super::final_transcript_exists(directory);
     let status = if in_progress {
         manifest.status
     } else {
@@ -1572,43 +1579,6 @@ fn score(
     hits
 }
 
-/// One passage [`search_passages`] found: a turn's text or a meeting's notes.
-pub struct PassageHit {
-    pub meeting: Arc<Meeting>,
-    /// Into the meeting; 0 for its notes.
-    pub start_ms: u64,
-    pub notes: bool,
-    /// `Me`, `Them`, or `Notes`.
-    pub speaker: &'static str,
-    /// The meeting's transcript entries it joins; none for its notes.
-    pub entries: std::ops::Range<usize>,
-}
-
-/// The passages of `meetings` matching `query` or `vocabulary`'s spellings, best first (for Assistant).
-pub fn search_passages(
-    meetings: &[Arc<Meeting>],
-    query: &str,
-    vocabulary: &[VocabularyEntry],
-) -> Vec<PassageHit> {
-    let parsed = ParsedQuery::parse(query);
-    if parsed.is_empty() {
-        return Vec::new();
-    }
-    rank(meetings, &parsed, true, vocabulary)
-        .into_iter()
-        .map(|hit| {
-            let passage = &hit.meeting.passages[hit.passage];
-            PassageHit {
-                start_ms: passage.start_ms,
-                notes: passage.kind == PassageKind::Notes,
-                speaker: passage.speaker(),
-                entries: passage.entries.clone(),
-                meeting: hit.meeting.clone(),
-            }
-        })
-        .collect()
-}
-
 /// One ranked document from [`search_texts`], through its best text.
 #[derive(Debug)]
 pub struct TextHit {
@@ -2140,7 +2110,7 @@ fn local_to_ms(
     u64::try_from(seconds).ok().map(|seconds| seconds * 1_000)
 }
 
-fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
+pub(crate) fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
     let year = if month <= 2 { year - 1 } else { year };
     let era = year.div_euclid(400);
     let year_of_era = year - era * 400;

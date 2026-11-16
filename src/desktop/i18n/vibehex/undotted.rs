@@ -25,8 +25,10 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
     ("{audio} ms audio", ["{audio} ms dźwięku", "音频 {audio} 毫秒", "音声 {audio} ms", "{audio} ms Audio", "{audio} ms de audio", "{audio} мс аудіо"]),
     ("{inference} ms inference", ["{inference} ms wnioskowania", "推理 {inference} 毫秒", "推論 {inference} ms", "{inference} ms Inferenz", "{inference} ms de inferencia", "{inference} мс обробки"]),
     ("Language: {language}", ["Język: {language}", "语言：{language}", "言語: {language}", "Sprache: {language}", "Idioma: {language}", "Мова: {language}"]),
-    ("Started automatically", ["Rozpoczęto automatycznie", "已自动开始", "自動で開始", "Automatisch gestartet", "Iniciada automáticamente", "Розпочато автоматично"]),
     ("VibeHex records automatically", ["VibeHex nagra automatycznie", "VibeHex 会自动录制", "VibeHex が自動で録音します", "VibeHex nimmt automatisch auf", "VibeHex grabará automáticamente", "VibeHex записує автоматично"]),
+    ("Recording: {title} ({elapsed})", ["Nagrywanie: {title} ({elapsed})", "录音中：{title}（{elapsed}）", "録音中: {title}（{elapsed}）", "Aufnahme: {title} ({elapsed})", "Grabando: {title} ({elapsed})", "Запис: {title} ({elapsed})"]),
+    ("Recording: {title} ({elapsed}), microphone is silent", ["Nagrywanie: {title} ({elapsed}), mikrofon milczy", "录音中：{title}（{elapsed}），麦克风没有声音", "録音中: {title}（{elapsed}）、マイクが無音です", "Aufnahme: {title} ({elapsed}), Mikrofon ist stumm", "Grabando: {title} ({elapsed}), el micrófono está en silencio", "Запис: {title} ({elapsed}), мікрофон мовчить"]),
+    ("Now: {}", ["Teraz: {}", "现在：{}", "進行中: {}", "Jetzt: {}", "Ahora: {}", "Зараз: {}"]),
 ];
 
 #[rustfmt::skip]
@@ -48,8 +50,10 @@ pub(super) const FRENCH: &[(&str, &str)] = &[
     ("{audio} ms audio", "{audio} ms d'audio"),
     ("{inference} ms inference", "{inference} ms d'inférence"),
     ("Language: {language}", "Langue : {language}"),
-    ("Started automatically", "Démarré automatiquement"),
     ("VibeHex records automatically", "VibeHex enregistre automatiquement"),
+    ("Recording: {title} ({elapsed})", "Enregistrement : {title} ({elapsed})"),
+    ("Recording: {title} ({elapsed}), microphone is silent", "Enregistrement : {title} ({elapsed}), le micro est muet"),
+    ("Now: {}", "Maintenant : {}"),
 ];
 
 #[rustfmt::skip]
@@ -71,8 +75,10 @@ pub(super) const PORTUGUESE: &[(&str, &str)] = &[
     ("{audio} ms audio", "{audio} ms de áudio"),
     ("{inference} ms inference", "{inference} ms de inferência"),
     ("Language: {language}", "Idioma: {language}"),
-    ("Started automatically", "Iniciada automaticamente"),
     ("VibeHex records automatically", "O VibeHex grava automaticamente"),
+    ("Recording: {title} ({elapsed})", "Gravando: {title} ({elapsed})"),
+    ("Recording: {title} ({elapsed}), microphone is silent", "Gravando: {title} ({elapsed}), o microfone está sem som"),
+    ("Now: {}", "Agora: {}"),
 ];
 
 #[rustfmt::skip]
@@ -94,8 +100,10 @@ pub(super) const RUSSIAN: &[(&str, &str)] = &[
     ("{audio} ms audio", "{audio} мс звука"),
     ("{inference} ms inference", "{inference} мс обработки"),
     ("Language: {language}", "Язык: {language}"),
-    ("Started automatically", "Запущено автоматически"),
     ("VibeHex records automatically", "VibeHex записывает автоматически"),
+    ("Recording: {title} ({elapsed})", "Запись: {title} ({elapsed})"),
+    ("Recording: {title} ({elapsed}), microphone is silent", "Запись: {title} ({elapsed}), микрофон молчит"),
+    ("Now: {}", "Сейчас: {}"),
 ];
 
 #[cfg(test)]
@@ -118,6 +126,7 @@ mod tests {
         "src/rune_ui/story_link.rs",
         "src/rune_ui/hud_stories.rs",
         "src/rune_ui/onboarding_kit/stories.rs",
+        "src/rune_ui/onboarding_kit/stories/",
         "src/rune_ui/capture_capsule/playground.rs",
         "src/rune_ui/capture_capsule/playground/",
         "src/rune_ui/capture_capsule/tuning.rs",

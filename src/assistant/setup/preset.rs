@@ -305,7 +305,7 @@ mod tests {
             assert!(!text.contains(never), "{never}");
         }
         // Call services only as one listed app's choice, never the list.
-        let listed: Vec<String> = crate::app_settings::known_meeting_providers(true)
+        let listed: Vec<String> = crate::app_settings::known_meeting_providers()
             .map(|(key, _)| format!("meetings.providers.{key}.policy"))
             .collect();
         for key in preset
@@ -372,23 +372,22 @@ mod tests {
         assert!(!named.iter().any(|term| term.eq_ignore_ascii_case("monki")));
     }
 
-    /// The Labs switches the owner had turned on by 2026-11-12, when the
-    /// preset was written again from his settings, go through the gate
-    /// like every other line: a row exactly where this VibeHex and this
-    /// computer can take the feature, a name under "Not available here"
-    /// where they can't, and on a computer the feature doesn't fit (a
-    /// notch, a mouse with side buttons), no row either.
+    /// The switches the owner had turned on by 2026-11-12, when the preset
+    /// was written again from his settings, go through the gate like every
+    /// other line: a row exactly where this VibeHex and this computer can
+    /// take the feature, a name under "Not available here" where they
+    /// can't, and on a computer the feature doesn't fit (a notch, a mouse
+    /// with side buttons), no row either. Two of them were Labs that became
+    /// Meetings › Settings rows; the meeting Labs Hex made normal behaviour
+    /// are no lines at all.
     #[test]
     fn the_switches_turned_on_since_pass_the_same_gate() {
-        const SINCE: [&str; 8] = [
+        const SINCE: [&str; 5] = [
             "labs.failure_notices",
             "labs.filler_words",
-            "labs.follow_live_transcript",
-            "labs.meeting_descriptive_filenames",
-            "labs.more_call_apps",
-            "labs.movable_meeting_capsules",
             "labs.spoken_symbols",
-            "labs.stop_when_call_ends",
+            "meetings.export.descriptive_filenames",
+            "meetings.stop_when_call_ends",
         ];
         let preset = denis();
         let settings = AppSettings::default();

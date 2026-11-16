@@ -213,6 +213,20 @@ Accessibility access again. Settings, History, Vocabulary and models are
 shared with Hex, since both use the same data folder. Run one of them at a
 time.
 
+## Command line
+
+`hex transcribe meeting.m4a` prints a recording's transcript, whether or not
+the app is running. It reads WAV, AIFF, CAF, FLAC, MP3, Ogg, WebM, and
+MP4/M4A/MOV, including a video's soundtrack. The same `hex` controls the
+running app (`hex status`, `hex dictation`, `hex settings`); see
+[`docs/cli.md`](docs/cli.md).
+
+The CLI is inside the app. Link it somewhere on your `PATH` that you own:
+
+```sh
+ln -s /Applications/VibeHex.app/Contents/MacOS/hex ~/.local/bin/hex
+```
+
 More docs are in [`docs/`](docs/README.md).
 
 ## License

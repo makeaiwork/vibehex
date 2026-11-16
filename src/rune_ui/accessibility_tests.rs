@@ -171,6 +171,14 @@ fn the_sidebar_says_which_pane_shows_and_switches_through_accessibility() {
     assert!(states(&node(&rt, "nav-history")).contains(&"selected"));
     assert!(!states(&node(&rt, "nav-general")).contains(&"selected"));
     assert_eq!(name(&node(&rt, "pane-title")), "History");
+
+    // VibeHex leaves Hex's What's new row out of the sidebar: Assistant
+    // tells what is new.
+    assert!(rt.find("nav-whats-new").is_none());
+
+    assert!(rt.accessibility_action("nav-labs", Action::Click, None));
+    settle(&mut rt);
+    assert!(states(&node(&rt, "nav-labs")).contains(&"selected"));
 }
 
 /// History's list says how many entries it holds and each row its place,

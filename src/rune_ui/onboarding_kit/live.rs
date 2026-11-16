@@ -15,26 +15,26 @@
 //! another model picked. "Continue without a model" is there from the start.
 
 use crate::desktop::i18n::tr;
-use std::sync::OnceLock;
+use std::sync::Mutex;
 use std::time::Instant;
 
-use rune::{El, TextEdit, Transition, Tx, text};
+use rune::{El, TextEdit, Transition, Tx, row, text};
+use rune_kit::{Button, ButtonVariant};
 
-use super::super::controls::Paint;
+use super::super::controls::{Paint, PushSize};
 use super::super::paste_access::{self, PasteAccess};
 use super::super::platform::Os;
 use super::super::sidebar::Pane;
 use super::super::{Ui, onboarding};
 use super::choice::{self, Shown};
 use super::fixture::{Language, Speech};
+use super::permissions::{FLOAT_OFF, GRANTED_BEAT};
 use super::stories::{FRAME, Flow, Onboard, Step, advance_to};
 use crate::desktop::onboarding::{
     Decision, Input, ItemStatus, Pick, Practice, Remembered, SetupItem, SetupStatus,
     Step as TourStep, model_choice,
 };
 
-/// How long both permission checks show before the page moves on.
-const GRANTED_BEAT: f64 = 0.7;
 /// How often the first run looks at the model on disk and the permissions.
 const CHECK_EVERY: f64 = 0.25;
 /// A download that gained no bytes for this long has stalled.
@@ -92,7 +92,10 @@ pub(crate) struct Live {
     here: Vec<Pick>,
     pub(crate) practice: Practice,
     granted_at: Option<f64>,
+    mic_granted_at: Option<f64>,
     checked: Option<Checked>,
+    /// A scene: the game deals the same messages every time.
+    pub(crate) fixture: bool,
     /// Dictation streams send their live words to the practice field.
     _live_words: crate::dictation::live_text::Demand,
 }
@@ -111,6 +114,13 @@ pub(crate) enum ModelStep {
 }
 
 impl Live {
+    /// macOS keeps showing the mic in use: Hex holds it open between
+    /// dictations unless "Turn off the mic when not dictating" is on. A
+    /// listener that failed to start holds nothing.
+    pub(crate) fn mic_stays_open(&self) -> bool {
+        self.accessibility_row && !self.release_microphone && !self.reopen && !self.relaunch_failed
+    }
+
     /// The story waits on the model step until the person decides.
     pub(crate) fn holds(&self) -> bool {
         self.model_step == ModelStep::Choosing
@@ -132,21 +142,85 @@ impl Live {
     }
 
     pub(crate) fn granted_for(&self, now: f64) -> bool {
-        self.granted_at.is_some_and(|at| now - at >= GRANTED_BEAT)
+        self.granted_at
+            .is_some_and(|at| now - at >= GRANTED_BEAT + FLOAT_OFF)
+    }
+
+    pub(crate) fn mic_granted_for(&self, now: f64) -> bool {
+        self.mic_granted_at
+            .is_some_and(|at| now - at >= GRANTED_BEAT + FLOAT_OFF)
+    }
+
+    /// How far an allowed permission's card has floated off at `now`.
+    pub(crate) fn floated(&self, accessibility: bool, now: f64) -> f32 {
+        let at = if accessibility {
+            self.granted_at
+        } else {
+            self.mic_granted_at
+        };
+        at.map_or(0.0, |at| {
+            ((now - at - GRANTED_BEAT) / FLOAT_OFF).clamp(0.0, 1.0) as f32
+        })
     }
 }
 
 /// Where a fixture's clock starts.
 const FIXTURE_START: f64 = 100.0;
 
+/// The most one drawn frame moves the first run's clock: two 30 Hz frames.
+const MAX_STEP: f64 = 1.0 / 15.0;
+
+/// The first run's clock, which runs on drawn frames rather than the wall.
+/// It stands still until the window draws its first frame, and a slow frame
+/// moves it at most [`MAX_STEP`]. A cold launch spends most of a second on
+/// its first frames (the GPU's pipelines, fonts and glyphs), and a beat's
+/// first frame can be slow the same way; on the wall's time the opening
+/// and the Launch Room's growth would play out unseen behind them and jump.
+struct StoryClock {
+    /// Story seconds at `last`.
+    story: f64,
+    last: Option<Instant>,
+}
+
+impl StoryClock {
+    fn frame_drawn(&mut self, at: Instant) {
+        self.story = self.at(at);
+        self.last = Some(at);
+    }
+
+    /// Story seconds at `at`, after the last drawn frame.
+    fn at(&self, at: Instant) -> f64 {
+        self.story
+            + self.last.map_or(0.0, |last| {
+                at.saturating_duration_since(last)
+                    .as_secs_f64()
+                    .min(MAX_STEP)
+            })
+    }
+}
+
+static STORY_CLOCK: Mutex<StoryClock> = Mutex::new(StoryClock {
+    story: 0.0,
+    last: None,
+});
+
+/// The window drew a frame.
+pub(in crate::rune_ui) fn frame_drawn() {
+    if let Ok(mut clock) = STORY_CLOCK.lock() {
+        clock.frame_drawn(Instant::now());
+    }
+}
+
 /// Seconds on the first run's own clock. Fixtures keep the story's own
 /// time, so a scene shows one settled moment.
 fn clock(ui: &Ui) -> f64 {
-    static START: OnceLock<Instant> = OnceLock::new();
     if ui.is_fixture() {
         return ui.first_run.as_ref().map_or(FIXTURE_START, |s| s.now);
     }
-    START.get_or_init(Instant::now).elapsed().as_secs_f64() + 1.0
+    STORY_CLOCK
+        .lock()
+        .map_or(0.0, |clock| clock.at(Instant::now()))
+        + 1.0
 }
 
 /// Every permission is ready, the desktop's paste permission included
@@ -174,6 +248,7 @@ pub(in crate::rune_ui) fn open(ui: &mut Ui) {
     let had_model = ui.picker.selected_installed(&ui.settings);
     let status = ui.platform.setup_status(had_model);
     let granted = granted(status, ui.platform.paste);
+    let mic_granted = status.microphone == crate::desktop::onboarding::PermissionState::Ready;
     // A run that goes on without a model, with nothing left to allow, is
     // over: the launch after macOS's own restart lands here.
     if !had_model && choice.without() && granted {
@@ -194,10 +269,12 @@ pub(in crate::rune_ui) fn open(ui: &mut Ui) {
     } else {
         Language::Other
     };
+    s.toggle = ui.settings.shortcut_mode == crate::dictation::ShortcutMode::Toggle;
     s.caps = ui.settings.dictation_hotkey.keycaps();
     // Without a model there is no download to show either.
     s.had_model = had_model || choice.without();
     s.granted = granted;
+    s.mic_granted = mic_granted;
     s.home = match ui.platform.caps.os {
         Os::Macos => super::landing::Home::MenuBar,
         Os::Windows => super::landing::Home::Tray,
@@ -228,15 +305,19 @@ pub(in crate::rune_ui) fn open(ui: &mut Ui) {
         here: Vec::new(),
         practice: Practice::Waiting,
         granted_at: None,
+        mic_granted_at: None,
         checked: None,
+        fixture: ui.is_fixture(),
         _live_words: crate::dictation::live_text::demand(),
     });
     let now = clock(ui);
     s.now = now;
     match tour_step {
         _ if model_step == ModelStep::Choosing => s.begin_live(now),
+        // Without a model only the permissions are left, never a wait for one.
+        _ if choice.without() => s.resume_setup(),
         TourStep::Welcome => s.begin_live(now),
-        TourStep::Setup => s.jump_to_permissions(),
+        TourStep::Setup => s.resume_setup(),
         TourStep::TryIt if had_model => s.jump_to_try(),
         TourStep::TryIt => s.jump_to_waiting(),
         TourStep::Done => s.jump_to_ready(),
@@ -254,8 +335,10 @@ pub(in crate::rune_ui) fn open(ui: &mut Ui) {
 pub(in crate::rune_ui) enum Page {
     /// The model step: `"Choose a speech model"`.
     Download,
-    /// The demo, finished: `"Twice as fast"` and Continue.
+    /// The demo, finished: `"With Hex"`'s happy ending.
     Demo,
+    /// The first permission the run still asks for: the microphone, else
+    /// Accessibility (or the desktop's paste permission).
     Permissions,
     /// `"Almost ready"`: the model still downloads.
     Waiting,
@@ -270,7 +353,7 @@ pub(in crate::rune_ui) fn page(ui: &Ui) -> Option<Page> {
     Some(match ui.first_run.as_ref()?.step {
         Step::Pick | Step::Started => Page::Download,
         Step::Parked | Step::YourTurn | Step::Hearing | Step::Heard | Step::Done => Page::Demo,
-        Step::Permissions => Page::Permissions,
+        Step::Microphone | Step::Accessibility => Page::Permissions,
         Step::Waiting => Page::Waiting,
         Step::Try | Step::TryHearing | Step::TryHeard => Page::Try,
         Step::Ready => Page::Ready,
@@ -301,8 +384,8 @@ pub(in crate::rune_ui) fn fixture_resume(ui: &mut Ui, page: Page) {
     };
     let reached = |s: &Onboard| match page {
         Page::Download => matches!(s.step, Step::Pick | Step::Started),
-        Page::Demo => s.step == Step::Done,
-        Page::Permissions => s.step == Step::Permissions,
+        Page::Demo => s.step == Step::Heard,
+        Page::Permissions => matches!(s.step, Step::Microphone | Step::Accessibility),
         Page::Waiting => s.step == Step::Waiting,
         Page::Try => s.step == Step::Try,
         Page::Ready => s.step == Step::Ready,
@@ -373,6 +456,8 @@ pub(in crate::rune_ui) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
     let now = clock(ui);
     let view = ui.tour.as_ref().map(|tour| tour.flow.view());
     let tour_model = view.as_ref().map_or(ItemStatus::Todo, |view| view.model);
+    let toggle = ui.settings.shortcut_mode == crate::dictation::ShortcutMode::Toggle;
+    let release_microphone = ui.settings.release_microphone_while_idle;
     let decision = view
         .as_ref()
         .map_or(Decision::Undecided, |view| view.choice.decision());
@@ -438,6 +523,7 @@ pub(in crate::rune_ui) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
         onboarding::input(ui, Input::Continue);
     }
     let asks_permissions = ui.platform.caps.permissions;
+    let login = super::login::of(&ui.platform);
     let accessibility_renamed = ui.platform.accessibility_renamed;
     let relaunch_failed = ui.platform.relaunch_failed;
     let paste = ui.platform.paste;
@@ -446,6 +532,9 @@ pub(in crate::rune_ui) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
     let Some(s) = ui.first_run.as_mut() else {
         return false;
     };
+    if s.login.set(login, now) {
+        s.sfx.on_login(now);
+    }
     let Some(live) = s.live.as_mut() else {
         return false;
     };
@@ -470,10 +559,19 @@ pub(in crate::rune_ui) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
             }
         }
         live.restart = view.restart;
+        if view.practice == Practice::TooShort && live.practice != Practice::TooShort {
+            s.taps = s.taps.saturating_add(1);
+        }
         live.accessibility_renamed = accessibility_renamed;
         live.relaunch_failed = relaunch_failed;
         live.reopen = view.reopen;
         live.practice = view.practice;
+    }
+    let mic_granted = status.microphone == crate::desktop::onboarding::PermissionState::Ready;
+    if mic_granted {
+        live.mic_granted_at.get_or_insert(now);
+    } else {
+        live.mic_granted_at = None;
     }
 
     live.choice = shown;
@@ -508,7 +606,10 @@ pub(in crate::rune_ui) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
     live.failure = failure;
     live.using_file = using_file;
     s.granted = granted;
+    s.mic_granted = mic_granted;
     s.caps = caps;
+    s.toggle = toggle;
+    live.release_microphone = release_microphone;
     if let Some(download) = s.download.as_mut() {
         if let Some(total) = model.and_then(|m| m.download_bytes()) {
             download.total = total;
@@ -520,13 +621,25 @@ pub(in crate::rune_ui) fn poll(ui: &mut Ui, tx: &mut Tx) -> bool {
         } else if !started {
             download.downloaded = 0;
         }
+        s.replay.show(download, now);
     }
 
     // Hex's state arrives between frames, so the first run keeps polling;
     // a fixture shows one moment and stays still.
     advance_to(s, now, tx);
+    let ready = s.step == Step::Ready;
     if live_window {
         tx.wake_after(FRAME);
+    }
+    // Hex is ready ends the tour's practice too, so a run quit on it
+    // resumes there rather than at the practice.
+    if ready
+        && ui
+            .tour
+            .as_ref()
+            .is_some_and(|tour| tour.flow.step() == TourStep::TryIt)
+    {
+        onboarding::input(ui, Input::Skip);
     }
     true
 }
@@ -538,8 +651,13 @@ pub(in crate::rune_ui) fn overlay(ui: &Ui, p: Paint, reduced: bool, layer: &mut 
         return;
     };
     s.reduced.set(reduced);
+    // Scenes are the release first run, without the replay strip.
+    let strip = (!ui.is_fixture())
+        .then(|| super::stories::strip(p, s))
+        .flatten();
     layer.push(
         super::flows::view(p, s)
+            .children(strip)
             .key("first-run")
             .role("dialog")
             .label(tr("Setting up VibeHex"))
@@ -624,7 +742,9 @@ pub(in crate::rune_ui) fn continue_without_model(ui: &mut Ui) {
             live.model_step = ModelStep::Chosen;
             live.language_open = false;
         }
-        s.jump_to_permissions();
+        // The first permission still missing; once all are on, the poll
+        // finishes the run, never waiting on `"Almost ready"` for a model.
+        s.resume_setup();
     }
 }
 
@@ -632,14 +752,8 @@ pub(in crate::rune_ui) fn continue_without_model(ui: &mut Ui) {
 fn finish_without_model(ui: &mut Ui) {
     if ui.live() {
         model_choice::forget();
-        if !crate::desktop::onboarding::completion_recorded()
-            && let Err(error) = crate::desktop::onboarding::record_completion()
-        {
-            tracing::warn!(%error, "could not record onboarding completion");
-        }
     }
-    ui.first_run = None;
-    ui.tour = None;
+    onboarding::close(ui, true);
 }
 
 /// Whether finishing now counts setup as finished: the permissions ready
@@ -657,15 +771,8 @@ pub(in crate::rune_ui) fn completes(ui: &Ui) -> bool {
 /// a download still running goes on, and a launch that interrupts it
 /// resumes it.
 pub(super) fn finish(ui: &mut Ui) {
-    if ui.live()
-        && completes(ui)
-        && !crate::desktop::onboarding::completion_recorded()
-        && let Err(error) = crate::desktop::onboarding::record_completion()
-    {
-        tracing::warn!(%error, "could not record onboarding completion");
-    }
-    ui.first_run = None;
-    ui.tour = None;
+    let finished = completes(ui);
+    onboarding::close(ui, finished);
 }
 
 /// "Set up with Assistant", beside Start using VibeHex: everything Start
@@ -718,6 +825,28 @@ pub(in crate::rune_ui) fn back_to_models(ui: &mut Ui) {
 /// "Reopen Hex" once the listener failed and Hex won't relaunch itself.
 pub(super) fn reopen(ui: &mut Ui) {
     onboarding::input(ui, Input::Reopen);
+}
+
+/// Hex's shortcut didn't start, and Reopen Hex: what a page shows instead
+/// of asking for the shortcut until the listener is ready.
+pub(super) fn recovery(p: Paint) -> El {
+    row()
+        .key("reopen")
+        .gap(10.0)
+        .center_y()
+        .child(
+            text(tr("The VibeHex shortcut didn't start."))
+                .key("why")
+                .font(super::landing::LEAD)
+                .color(p.muted()),
+        )
+        .child(
+            Button::new(tr("Reopen VibeHex"))
+                .variant(ButtonVariant::Neutral)
+                .on_press(reopen)
+                .build_push(p.k)
+                .key("reopen-hex"),
+        )
 }
 
 /// "Use a model file…" when the download is blocked: a GGUF chosen here is
@@ -784,7 +913,7 @@ pub(super) fn warming_copy() -> &'static str {
 /// What the practice dictation's last try needs said.
 pub(super) fn hint_copy(live: &Live) -> Option<&'static str> {
     Some(match live.practice {
-        Practice::TooShort => tr("Hold the shortcut a little longer while you speak."),
+        Practice::TooShort => tr("Keep holding the shortcut while you talk, then let go."),
         Practice::NothingHeard => tr("VibeHex didn't hear any words. Try again a little louder."),
         Practice::Failed => tr("That didn't work. Try again."),
         Practice::Transcribing => tr("Typing what you said…"),
@@ -792,8 +921,21 @@ pub(super) fn hint_copy(live: &Live) -> Option<&'static str> {
     })
 }
 
+/// The practice's `Use tap to start`: the shortcut starts and stops
+/// dictation from now on, as General's setting would.
+pub(super) fn use_toggle(ui: &mut Ui) {
+    ui.update(|settings| settings.shortcut_mode = crate::dictation::ShortcutMode::Toggle);
+    if let Some(s) = ui.first_run.as_mut() {
+        s.toggle = true;
+        s.practice.focused = true;
+    }
+}
+
 /// [`hint_copy`] under the practice field.
 pub(super) fn hint(p: Paint, live: &Live) -> Option<El> {
+    if live.reopen {
+        return None;
+    }
     let copy = hint_copy(live)?;
     Some(
         text(copy)
@@ -802,4 +944,35 @@ pub(super) fn hint(p: Paint, live: &Live) -> Option<El> {
             .color(p.muted())
             .transition(Transition::opacity()),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{Duration, Instant};
+
+    #[test]
+    fn the_story_waits_for_the_first_frame_and_slow_frames_dont_skip_it() {
+        let open = Instant::now();
+        let mut clock = StoryClock {
+            story: 0.0,
+            last: None,
+        };
+        // A cold first frame takes most of a second: the story stands still.
+        assert_eq!(clock.at(open + Duration::from_millis(700)), 0.0);
+        let first = open + Duration::from_millis(700);
+        clock.frame_drawn(first);
+        assert_eq!(clock.story, 0.0);
+        // Frames at 60 Hz move it on the wall's time.
+        let frame = Duration::from_micros(16_667);
+        clock.frame_drawn(first + frame);
+        assert!((clock.story - frame.as_secs_f64()).abs() < 1e-9);
+        // A 400 ms frame moves it one step, and time between frames
+        // never runs ahead of the next frame.
+        let slow = first + frame + Duration::from_millis(400);
+        let between = clock.at(slow);
+        clock.frame_drawn(slow);
+        assert!((clock.story - (frame.as_secs_f64() + MAX_STEP)).abs() < 1e-9);
+        assert!(between <= clock.story);
+    }
 }

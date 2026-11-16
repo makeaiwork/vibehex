@@ -1,7 +1,7 @@
 ---
 topic: dictation-shortcuts
 title: Dictation shortcut, HUD, and pasting
-keys: [dictation_hotkey, shortcut_mode, double_tap_lock, double_tap_only, cancel_hotkey, paste_last_hotkey, indicator_position, labs.keep_on_clipboard, labs.copy_only, labs.terminal_paste_shortcut, terminal_paste_hotkey, labs.caps_lock_dictation]
+keys: [dictation_hotkey, shortcut_mode, double_tap_lock, double_tap_only, cancel_hotkey, paste_last_hotkey, indicator_position, labs.keep_on_clipboard, labs.copy_only, labs.terminal_paste_shortcut, terminal_paste_hotkey, labs.caps_lock_dictation, labs.second_dictation_shortcut, second_dictation_hotkey, labs.more_dictation_shortcuts, labs.double_tap_modifiers]
 os: every OS
 ---
 
@@ -18,6 +18,10 @@ cancels). The default is Option on a Mac, Ctrl+Space on Windows, and Alt+Space
 on Linux (Ctrl+Alt+Space on GNOME and KDE). On Linux Wayland without shortcut
 support there is no recorder: bind the `hex dictation` commands in your
 desktop's keyboard settings.
+
+A shortcut row whose keys differ from the default shows **Reset**, which
+brings the default back. While recording an optional shortcut (Paste last
+dictation, a second shortcut and the like), Backspace turns it off.
 
 ## Set them with Assistant
 
@@ -36,18 +40,24 @@ General › Shortcut mode:
 - **Hold**: only hold and release.
 - **Tap**: press to start, press again to finish and paste.
 - **Double-tap**: only the double-tap; the shortcut must include a key, such
-  as Option+Space, not a lone modifier.
+  as Option+Space, unless Labs › Double-tap on a lone modifier is on (Mac).
 
 A press shorter than about a third of a second is thrown away as an accident.
 With a lone modifier such as Option, pressing any other key while it is held
-drops the dictation, so your normal keyboard shortcut still works.
+drops the dictation, so your normal keyboard shortcut still works. On a Mac,
+Return pressed after that first third of a second goes to the app and the
+dictation goes on.
+
+Labs › Second dictation shortcut adds a key that follows this mode; on a Mac,
+Labs › More dictation shortcuts adds up to four, each with its own mode.
 
 ## Cancel a dictation
 
-Only Tap mode can cancel. A Cancel row appears under Shortcut mode, Escape by
-default; it discards the recording, pasting and saving nothing. In the other
-modes Escape goes to your app and every dictation is pasted. The exception is
-Labs › Caps Lock dictation (Mac): Escape cancels it in any shortcut mode.
+In Tap mode a Cancel row appears under Shortcut mode, Escape by default; it
+discards the recording, pasting and saving nothing. In Hold mode on a Mac,
+Escape while you still hold the shortcut cancels too. Otherwise Escape goes to
+your app and the dictation is pasted. Labs › Caps Lock dictation (Mac) cancels
+with Escape in any shortcut mode.
 
 ## The indicator
 
@@ -67,8 +77,8 @@ VibeHex puts the text on the clipboard, sends the paste keystroke, and about
 half a second later restores what you had copied, unless you copied something
 new meanwhile. On Windows the dictation stays out of Win+V history. Terminals
 need Ctrl+Shift+V: General › Advanced › Output › Terminal paste on Linux, Labs ›
-Terminal paste on Windows. On a Mac or Windows, Labs › Keep dictation on clipboard
-leaves the text there (on Windows it then shows in Win+V history), and Labs ›
+Terminal paste on Windows. Labs › Keep dictation on clipboard leaves the text
+there (on Windows it then shows in Win+V history); on a Mac or Windows, Labs ›
 Copy dictation only copies without pasting.
 
 ## A separate shortcut for terminals
@@ -87,8 +97,8 @@ Choosing a model that lacks your language switches to English when the model
 has it, else to its first language, and says so under Language; pick the model
 first.
 
-**Asked as.** "How do I change the dictation shortcut?"; "Cancel a dictation";
+**Asked as.** "How do I change the dictation shortcut?"; "Cancel a dictation"; "Reset a shortcut to its default";
 «Как сменить горячую клавишу?»; «Как отменить диктовку?»; «Как говорить без удержания кнопки?»; «Вставить
 последнюю диктовку ещё раз».
 
-<!-- sources: docs/features/dictation.md:15-30,444-568,1143-1182; docs/features/labs.md:607-640; docs/guide/labs/terminal-paste-shortcut.md; src/rune_ui/labs.rs:520-535,860-882; src/rune_ui/general.rs:44-95,955-975,350-376; src/transcription/models.rs:309-326; src/rune_ui/picker.rs:375-430; src/recognition.rs:306-315; src/labs.rs:478-495; src/windows/paste.rs:157-200; docs/features/README.md:625-707; src/rune_ui/general.rs:60-130,920-1030; src/rune_ui/shortcut_mode.rs; src/app_settings/hotkeys.rs:619-751; src/windows/paste.rs; src/linux/paste.rs; src/paste.rs:362-390; src/macos_rune/status_item.rs:242 -->
+<!-- sources: upstream docs/features/dictation.md (Reset and Backspace rows, Hold and short taps: held Return and Escape, t1561); upstream docs/features/README.md:836-863, 897; docs/features/dictation.md:15-30,444-568,1143-1182; docs/features/labs.md:607-640; docs/guide/labs/terminal-paste-shortcut.md; src/rune_ui/labs.rs:520-535,860-882; src/rune_ui/general.rs:44-95,955-975,350-376; src/transcription/models.rs:309-326; src/rune_ui/picker.rs:375-430; src/recognition.rs:306-315; src/labs.rs:478-495; src/windows/paste.rs:157-200; docs/features/README.md:625-707; src/rune_ui/general.rs:60-130,920-1030; src/rune_ui/shortcut_mode.rs; src/app_settings/hotkeys.rs:619-751; src/windows/paste.rs; src/linux/paste.rs; src/paste.rs:362-390; src/macos_rune/status_item.rs:242 -->

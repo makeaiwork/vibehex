@@ -26,7 +26,6 @@ const ADVANCE_BEAT: Duration = Duration::from_millis(700);
 pub(super) struct Tour {
     pub(super) flow: Flow,
     advance_at: Option<Instant>,
-    completed: bool,
     /// The model last asked of the service for the person's pick.
     asked: Option<TranscriptionModelId>,
     /// The saved selection when the person started their pick: a model
@@ -39,11 +38,10 @@ pub(super) struct Tour {
 }
 
 impl Tour {
-    fn new(flow: Flow, completed: bool, chooses: bool) -> Self {
+    fn new(flow: Flow, chooses: bool) -> Self {
         Self {
             flow,
             advance_at: None,
-            completed,
             asked: None,
             started_from: None,
             chooses,
@@ -61,7 +59,6 @@ impl Tour {
                 platform.caps.practice_dictation,
             )
             .preselect(&settings.transcription),
-            false,
             !installed,
         )
     }
@@ -95,7 +92,6 @@ impl Tour {
                     Some(remembered) => flow.resume(remembered),
                     None => flow,
                 },
-                completed,
                 !installed,
             )
         })
@@ -196,12 +192,6 @@ pub(super) fn poll(ui: &mut Ui) -> bool {
             effect = tour.flow.on(Input::Continue);
         }
     }
-    if status.ready() && !tour.completed {
-        tour.completed = true;
-        if live && let Err(error) = crate::desktop::onboarding::record_completion() {
-            tracing::warn!(%error, "could not record onboarding completion");
-        }
-    }
     // The model the person asked for is here: nothing is left to resume.
     if live && installed && tour.flow.choice().started().is_some() {
         model_choice::forget();
@@ -268,10 +258,7 @@ fn apply(ui: &mut Ui, effect: Effect) {
             crate::desktop::onboarding::PermissionAction::ResetAndPrompt(kind),
         )),
         Effect::Relaunch => ui.ask(PlatformRequest::Relaunch),
-        Effect::Finish => {
-            ui.tour = None;
-            ui.first_run = None;
-        }
+        Effect::Finish => close(ui, true),
         Effect::None => {}
     }
 }
@@ -400,6 +387,19 @@ fn resume_after_setup(ui: &mut Ui) {
     }
 }
 
+/// Closes onboarding. Only a `finished` tour is recorded complete; until
+/// then its saved step is the record, so a relaunch resumes there.
+pub(super) fn close(ui: &mut Ui, finished: bool) {
+    if finished
+        && ui.live()
+        && let Err(error) = crate::desktop::onboarding::record_completion()
+    {
+        tracing::warn!(%error, "could not record onboarding completion");
+    }
+    ui.tour = None;
+    ui.first_run = None;
+}
+
 /// A first run at `step`, with the selected model not yet installed; with
 /// `downloading`, the person pressed Download on the preselected row.
 pub(super) fn fixture(ui: &mut Ui, step: Step, downloading: bool) {
@@ -415,7 +415,7 @@ pub(super) fn fixture(ui: &mut Ui, step: Step, downloading: bool) {
     if step != Step::Welcome {
         flow.on(Input::Continue);
     }
-    ui.tour = Some(Tour::new(flow, false, true));
+    ui.tour = Some(Tour::new(flow, true));
     if downloading {
         input(ui, Input::Grant(SetupItem::Model));
         set_downloaded(ui, 62);
@@ -452,6 +452,8 @@ pub(super) enum MacStep {
     SetupDenied,
     /// Every permission on, Accessibility waiting for a restart.
     SetupRestart,
+    /// Every permission on, the model still downloading.
+    SetupWaiting,
     TryIt,
     /// The shortcut listener failed after setup.
     TryItReopen,
@@ -483,6 +485,11 @@ pub(super) fn mac_fixture(ui: &mut Ui, state: MacStep) {
             accessibility: NeedsRestart,
             ..fresh
         },
+        MacStep::SetupWaiting => crate::desktop::onboarding::SetupStatus {
+            microphone: Ready,
+            accessibility: Ready,
+            ..fresh
+        },
         _ => crate::desktop::onboarding::SetupStatus {
             microphone: Ready,
             accessibility: Ready,
@@ -493,7 +500,6 @@ pub(super) fn mac_fixture(ui: &mut Ui, state: MacStep) {
     ui.picker.installed = Some(Vec::new());
     ui.tour = Some(Tour::new(
         Flow::new(Step::Welcome, fresh, true, true).preselect(&ui.settings.transcription),
-        false,
         true,
     ));
     poll(ui);

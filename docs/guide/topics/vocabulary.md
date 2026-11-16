@@ -1,7 +1,7 @@
 ---
 topic: vocabulary
 title: Vocabulary
-keys: [vocabulary_boost, labs.vocabulary_biasing, labs.vocabulary_paste_list, labs.vocabulary_quick_add, labs.russian_vibe_coding]
+keys: [vocabulary_boost, labs.vocabulary_biasing, labs.vocabulary_paste_list, labs.vocabulary_quick_add, labs.russian_vibe_coding, labs.screen_vocabulary]
 os: every OS
 ---
 
@@ -32,6 +32,10 @@ edit the same list through the running VibeHex, on macOS, Windows, and Linux.
 - **GigaAM, Granite Speech 5.0, SenseVoice, Cohere** don't use it in
   transcription. The row says so; fix words with AI cleanup or word fixes
   (Output article).
+- **Meeting titles and summaries** read its first 30 terms.
+
+On a Mac, **Labs › Screen vocabulary** adds names seen in the window you
+dictate into, for that dictation only.
 
 ## What "sounds like" does
 
@@ -87,12 +91,12 @@ shows and changes its spellings before you add it.
 
 **Labs › Russian vibe coding** adds a starter list of 90 terms (Claude Code, GitHub,
 MCP, Docker, and so on, with how Russian speech models hear them), plus Russian word fixes and
-cleanup instructions, and turns on Clean up with AI, **Labs › Vocabulary in meeting
-notes** (so meeting titles and summaries use the terms), and the other VibeHex
-Labs features except Stop shortcut. Turning it off removes what it added and you
+cleanup instructions, and turns on Clean up with AI and the other VibeHex Labs
+features except Stop shortcut. Meeting titles and summaries use your Vocabulary
+anyway. Turning it off removes what it added and you
 didn't change; the Labs it turned on stay on. Terms with dots or slashes (file
 names) sit at the end, past what Parakeet biasing takes.
 
 **Asked as.** "Why does it write the wrong spelling of my product name?"; "How do I add a word?"; «Как добавить слово в словарь»; «Почему пишет Кубер вместо Kubernetes»; «Словарь не работает».
 
-<!-- sources: docs/features/vocabulary.md:65-80,84-96,177-183; src/rune_ui/vocabulary.rs:143-172,451-480; src/dictation/vocabulary.rs:19-26,230-258,263-296; src/dictation/processor.rs:984-1000; src/transcription/models.rs:348-375; src/transcription/gguf_session.rs:131-157; src/control/cli.rs:155-158,378-402; src/control/host.rs:236-247; src/control.rs:920-955; src/dictation/presets.rs:1-14,59-70; src/rune_ui/labs.rs:456-461,788-799; docs/vocabulary/vibe-coding-ru.txt; src/assistant/recordings/sounds.rs; src/assistant/setup/spellings.rs -->
+<!-- sources: upstream docs/features/meetings.md:1672-1675 (notes vocabulary graduated); docs/features/vocabulary.md:65-80,84-96,177-183; src/rune_ui/vocabulary.rs:143-172,451-480; src/dictation/vocabulary.rs:19-26,230-258,263-296; src/dictation/processor.rs:984-1000; src/transcription/models.rs:348-375; src/transcription/gguf_session.rs:131-157; src/control/cli.rs:155-158,378-402; src/control/host.rs:236-247; src/control.rs:920-955; src/dictation/presets.rs:1-14,59-70; src/rune_ui/labs.rs:456-461,788-799; docs/vocabulary/vibe-coding-ru.txt; src/assistant/recordings/sounds.rs; src/assistant/setup/spellings.rs -->

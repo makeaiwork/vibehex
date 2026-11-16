@@ -32,14 +32,16 @@ and nothing downloads until you press **Download** there:
   model offers Download or Add model file….
 
 After Download the setup goes on while the model arrives (its name and
-percent show on top): a demo, the permissions your system needs, and a
+percent show on top): a short story (a group chat typed with typos, then the
+same reply spoken), then one page per permission your system needs, then a
 practice game, "Your turn". Only the practice waits for the model, on
 "Almost ready". Back returns to the list with the download still running; ×
 on its row cancels it, and Download on another row replaces it. Skip exists
-on the demo, the practice, and Almost ready (the download goes on, and
-Settings › General shows it). If you quit part-way, setup resumes. At the
-end, "VibeHex is ready" says where VibeHex lives: the menu bar, system tray,
-or app launcher. **Set up with Assistant** there starts VibeHex and opens
+on the story, the practice, and Almost ready (the download goes on, and
+Settings › General shows it). If you quit part-way, setup resumes where you
+left. At the end, "VibeHex is ready" says where VibeHex lives (the menu bar,
+system tray, or app launcher) and asks whether to open VibeHex when your
+computer starts, with a **Launch at login** switch. **Set up with Assistant** there starts VibeHex and opens
 Assistant's few questions about how you work, then one list of changes;
 it needs no model connected.
 
@@ -48,9 +50,11 @@ permissions stay.
 
 ## Permissions
 
-- **macOS** asks for Microphone, so it can hear you, and Accessibility, so
-  VibeHex notices the shortcut and pastes into other apps (macOS 27 calls it
-  "Device Control and Data Access"). It never asks for Input Monitoring. If a
+- **macOS** asks on two pages: "Let VibeHex hear you" for the Microphone, then
+  "Make it work everywhere" for Accessibility, so VibeHex notices the shortcut
+  and pastes into other apps (macOS 27 calls it "Device Control and Data
+  Access"). Allow one in System Settings and VibeHex comes back to the front
+  while System Settings still is. It never asks for Input Monitoring. If a
   row stays grey after you switched it on, press "Still grey? Fix it"; if it
   says "Needs a restart", press Restart VibeHex. A permission that goes missing
   later shows under General › Permissions needed.
@@ -106,4 +110,4 @@ feedback.
 Accessibility?"; «Зачем VibeHex просит универсальный доступ?»; «Как пройти
 настройку заново?».
 
-<!-- sources: docs/features/README.md:157-243; AGENTS.md:687-724; src/rune_ui/platform_settings.rs:28-131; src/rune_ui/onboarding_kit/permissions.rs:190-330; src/rune_ui/onboarding_kit/first_run.rs:505-540; src/rune_ui/onboarding_kit/landing.rs:150-210; src/rune_ui/sidebar.rs:71-147, 270-300, 440-490; src/rune_ui/labs.rs:31-48, 360-366, 610-616, 801-805; src/rune_ui/labs/store.rs:1-60, 150-250, 410-475; src/rune_ui/labs/group.rs:10-20; src/rune_ui/general.rs:1000-1115; src/desktop/i18n.rs:26-42; src/rune_ui/files.rs:139; src/rune_ui/meetings.rs:158; src/labs.rs:460-495 -->
+<!-- sources: upstream docs/features/README.md:229-303 (story, one permission page each, practice, launch-at-login ask); docs/features/README.md:157-243; AGENTS.md:687-724; src/rune_ui/platform_settings.rs:28-131; src/rune_ui/onboarding_kit/permissions.rs:190-330; src/rune_ui/onboarding_kit/first_run.rs:505-540; src/rune_ui/onboarding_kit/landing.rs:150-210; src/rune_ui/sidebar.rs:71-147, 270-300, 440-490; src/rune_ui/labs.rs:31-48, 360-366, 610-616, 801-805; src/rune_ui/labs/store.rs:1-60, 150-250, 410-475; src/rune_ui/labs/group.rs:10-20; src/rune_ui/general.rs:1000-1115; src/desktop/i18n.rs:26-42; src/rune_ui/files.rs:139; src/rune_ui/meetings.rs:158; src/labs.rs:460-495 -->

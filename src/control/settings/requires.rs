@@ -81,11 +81,6 @@ const RULES: &[Rule] = &[
     rule(CLEANUP_SERVER[6], When::Any, "labs.ai_cleanup_server"),
     rule("meetings.", When::Any, "meetings.enabled"),
     rule(
-        "meetings.audio_retention",
-        When::Set,
-        "labs.expire_meeting_audio",
-    ),
-    rule(
         "meetings.questions.enabled",
         When::Set,
         "labs.ai_cleanup_server",
@@ -100,6 +95,11 @@ const RULES: &[Rule] = &[
         "vocabulary_add_hotkey",
         When::Set,
         "labs.vocabulary_quick_add",
+    ),
+    rule(
+        "extra_dictation_hotkeys",
+        When::Set,
+        "labs.more_dictation_shortcuts",
     ),
     rule("typed_text_hotkey", When::Set, "labs.typed_text"),
     rule(
@@ -229,7 +229,7 @@ pub fn companions() -> Vec<(&'static str, &'static str)> {
         let Some(key) = kind(rule.key).filter(|_| !rule.key.ends_with('.')) else {
             continue;
         };
-        let super::Kind::Choice(choices) = key.kind else {
+        let (super::Kind::Choice(choices) | super::Kind::NumberChoice(choices)) = key.kind else {
             continue;
         };
         let every = choices.iter().all(|choice| {

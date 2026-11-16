@@ -54,6 +54,9 @@ impl Made {
         // Every line ended, as a finished recording's are.
         let transcript: String = entries.iter().map(|entry| format!("{entry}\n")).collect();
         std::fs::write(folder.join("transcript.ndjson"), transcript).unwrap();
+        // A finished recording has both: readers take the NDJSON only once
+        // the Markdown beside it is published too.
+        std::fs::write(folder.join("transcript.md"), "# Standup\n").unwrap();
     }
 
     fn sources(&self) -> Sources {

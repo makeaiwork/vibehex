@@ -107,12 +107,15 @@ pub(super) enum Pane {
     /// Questions about VibeHex, answered from its guide: at the bottom,
     /// apart from the navigation (on by default, not in Labs).
     Assistant,
+    /// Hex's feed of featured features. VibeHex never lists it
+    /// ([`LISTS_WHATS_NEW`]): Assistant tells what changed after an update.
+    WhatsNew,
 }
 
 /// The open pane's actions for its title bar, and its body.
 pub(super) fn body(ui: &Ui, p: Paint, reduced: bool, layer: &mut Vec<El>) -> (Vec<El>, El) {
     match ui.pane {
-        _ if ui.labs_open => (vec![labs::tabs(ui, p)], labs::page(ui, p)),
+        _ if ui.labs_open => (vec![labs::tabs(ui, p)], labs::page(ui, p, layer)),
         Pane::General => (Vec::new(), general::pane(ui, p, layer)),
         Pane::Output => (Vec::new(), output::pane(ui, p, reduced, layer)),
         Pane::Modes => modes::pane(ui, p, layer),
@@ -128,6 +131,7 @@ pub(super) fn body(ui: &Ui, p: Paint, reduced: bool, layer: &mut Vec<El>) -> (Ve
         Pane::Activity => activity::pane(ui, p),
         Pane::About => (Vec::new(), about::pane(ui, p)),
         Pane::Assistant => assistant::pane(ui, p, reduced, layer),
+        Pane::WhatsNew => (Vec::new(), super::whats_new::feed(ui, p)),
     }
 }
 
@@ -165,6 +169,7 @@ impl Pane {
             #[cfg(hex_capture)]
             Pane::Captures => ui.settings.labs.screenshots,
             Pane::Assistant => ui.settings.assistant.enabled,
+            Pane::WhatsNew => LISTS_WHATS_NEW,
             _ => true,
         }
     }
@@ -186,6 +191,7 @@ impl Pane {
             Pane::Activity => tr("Activity"),
             Pane::About => tr("About"),
             Pane::Assistant => tr("Assistant"),
+            Pane::WhatsNew => tr("What's new"),
         }
     }
 
@@ -206,6 +212,7 @@ impl Pane {
             Pane::Activity => "nav-activity",
             Pane::About => "nav-about",
             Pane::Assistant => "nav-assistant",
+            Pane::WhatsNew => "nav-whats-new",
         }
     }
 
@@ -226,6 +233,7 @@ impl Pane {
             Pane::Activity => &ACTIVITY_ICON,
             Pane::About => &super::icons::INFO,
             Pane::Assistant => &super::assistant::face::FACE,
+            Pane::WhatsNew => &super::icons::BOOK,
         }
     }
 }
@@ -244,6 +252,12 @@ pub(super) const NAV_ROW_HEIGHT: f32 = 28.0;
 pub(super) const NAV_ROW_GAP: f32 = 4.0;
 /// Between groups: the brand and the items, Assistant and Quit.
 const GROUP_GAP: f32 = 10.0;
+
+/// Hex's What's new row, a feed of featured features (`whats_new`). VibeHex
+/// leaves it out of the sidebar, so nothing opens the pane: Assistant tells
+/// what changed after an update. The pane itself still builds and is tested,
+/// for the next merge.
+pub(super) const LISTS_WHATS_NEW: bool = false;
 
 /// The logo's top below the sidebar's top edge, expanded or folded (41 pt
 /// on macOS, 13 elsewhere): the brand row's top, and the mark centred in
@@ -332,6 +346,15 @@ pub(super) fn sidebar(ui: &Ui, p: Paint, still: bool, layer: &mut Vec<El>) -> El
         NAV_ROW_GAP / 2.0,
         NAV_ROW_GAP / 2.0,
     ));
+    if LISTS_WHATS_NEW {
+        nav = nav.child(nav_slot(
+            p,
+            Pane::WhatsNew,
+            ui.pane == Pane::WhatsNew && !ui.labs_open,
+            NAV_ROW_GAP / 2.0,
+            NAV_ROW_GAP / 2.0,
+        ));
+    }
     title_bar(col())
         .key("sidebar")
         .role("navigation")

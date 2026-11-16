@@ -15,6 +15,9 @@ standing decisions are answers the owner has already given, and each sync gets o
 - Checks macOS cannot run: Linux-only code, `rune_ui::tests` and the golden images. GitHub Actions are
   off on the fork, so they run in an arm64 Ubuntu 24.04 container. Golden images take upstream's side
   in the merge and are regenerated there; every changed image is looked at.
+- New upstream strings that name Hex: `python3 scripts/vibehex-names.py` rewrites them to VibeHex and
+  adds their rows in every language from Hex's own translations (`--check` only lists them).
+- A finished meeting has both `transcript.ndjson` and `transcript.md`; test fixtures need both.
 - The owner's builds share one data folder. An older build drops settings it does not know, so the
   owner's `settings.json` is copied aside before a merged build first starts, and the build in
   `/Applications` is replaced soon after.

@@ -113,7 +113,7 @@ fn round(answered: bool) -> Vec<Ask> {
             "Spoken symbols",
         ),
         ask(
-            "labs.stop_when_call_ends",
+            "meetings.stop_when_call_ends",
             "Stop the recording by itself when the call ends?",
             "Stop when the call ends",
         ),
@@ -271,7 +271,7 @@ fn rows(ui: &Ui) -> (Vec<Item>, Vec<Item>) {
         "You said yes to this",
     );
     let calls = item(
-        "labs.stop_when_call_ends",
+        "meetings.stop_when_call_ends",
         json!(false),
         json!(true),
         "You said yes to this",

@@ -66,6 +66,9 @@ pub(super) struct Capabilities {
     /// Input-source changes can operate the installed-model picker (macOS,
     /// Windows, and Linux on X11; Wayland has no general layout protocol).
     pub(super) keyboard_model_switching: bool,
+    /// A mode's speech model and language follow the frontmost application
+    /// (macOS and Windows; Labs › Switch model with app).
+    pub(super) app_model_switching: bool,
     /// Labs › Transform typed text: run Output steps on text already typed in
     /// the focused field and replace it (Linux).
     pub(super) typed_text: bool,
@@ -88,6 +91,7 @@ impl Capabilities {
         fun: true,
         modifier_sides: false,
         keyboard_model_switching: true,
+        app_model_switching: false,
         typed_text: true,
     };
 
@@ -107,6 +111,7 @@ impl Capabilities {
         fun: true,
         modifier_sides: true,
         keyboard_model_switching: true,
+        app_model_switching: true,
         typed_text: false,
     };
 
@@ -126,6 +131,7 @@ impl Capabilities {
         fun: false,
         modifier_sides: true,
         keyboard_model_switching: true,
+        app_model_switching: true,
         typed_text: false,
     };
 
@@ -175,7 +181,7 @@ impl CalendarView {
         Self {
             access: CalendarAccess::FullAccess,
             calendars: vec![
-                calendar("work", "Work", "kit@anoma.ly"),
+                calendar("work", "Work", "alex@example.com"),
                 calendar("home", "Home", "iCloud"),
                 calendar("birthdays", "Birthdays", "Other"),
             ],
@@ -321,6 +327,10 @@ pub(super) struct PlatformState {
     /// A Wayland desktop without data-control (GNOME): a paste can't put
     /// the clipboard back unless Labs › Restore clipboard on GNOME is on.
     pub(super) clipboard_unrestorable: bool,
+    /// This Wayland desktop offers no input-method protocol, so Labs › Live
+    /// typing can't work here (GNOME, KDE): its card says so. Fixtures keep
+    /// it false.
+    pub(super) live_typing_unsupported: bool,
     /// A scene's state: [`Self::setup_status`] reports `permissions` on
     /// every OS rather than asking this computer.
     preview: bool,
@@ -412,6 +422,7 @@ impl PlatformState {
             relaunch_failed: false,
             paste: None,
             clipboard_unrestorable: false,
+            live_typing_unsupported: false,
             preview: false,
             developer: false,
             accessibility_renamed: false,
@@ -887,6 +898,13 @@ const DIFFERENCES: &[(&str, Difference)] = &[
         Difference::Impossible("X11 grabs and the Wayland portal see no sides"),
     ),
     (
+        "app_model_switching",
+        Difference::Pending(
+            "the Linux service has no foreground-mode model switch; X11 could watch the \
+             focused app the way mode matching already does",
+        ),
+    ),
+    (
         "typed_text",
         Difference::OsPattern(
             "the feature reads and replaces text in the focused Linux app; macOS and Windows \
@@ -898,7 +916,7 @@ const DIFFERENCES: &[(&str, Difference)] = &[
 impl Capabilities {
     /// Every capability by name. Destructuring makes a new capability a
     /// compile error here until it is named.
-    pub(super) fn fields(self) -> [(&'static str, bool); 15] {
+    pub(super) fn fields(self) -> [(&'static str, bool); 16] {
         let Self {
             os: _,
             meetings,
@@ -915,6 +933,7 @@ impl Capabilities {
             fun,
             modifier_sides,
             keyboard_model_switching,
+            app_model_switching,
             typed_text,
         } = self;
         [
@@ -932,8 +951,129 @@ impl Capabilities {
             ("fun", fun),
             ("modifier_sides", modifier_sides),
             ("keyboard_model_switching", keyboard_model_switching),
+            ("app_model_switching", app_model_switching),
             ("typed_text", typed_text),
         ]
+    }
+}
+
+/// The window's requests of the OS host, kept beside the state they change.
+impl super::Ui {
+    /// Asks the OS host for something only it can do.
+    pub(super) fn ask(&mut self, request: PlatformRequest) {
+        match &request {
+            PlatformRequest::Permission(
+                crate::desktop::onboarding::PermissionAction::RequestMicrophone,
+            ) => self
+                .platform
+                .note_asked(crate::desktop::onboarding::PermissionKind::Microphone),
+            PlatformRequest::Permission(
+                crate::desktop::onboarding::PermissionAction::ShowGuide(kind),
+            ) => {
+                // Previews grant Screen Recording on the second ask, as for
+                // system audio.
+                #[cfg(hex_capture)]
+                if *kind == crate::desktop::onboarding::PermissionKind::ScreenRecording
+                    && self.host.is_fixture()
+                    && self.platform.asked(*kind)
+                    && let Some(view) = self.platform.scrawl.as_mut()
+                {
+                    view.screen_recording = true;
+                }
+                self.platform.clear_stale(*kind);
+                self.platform.note_asked(*kind);
+            }
+            PlatformRequest::Permission(
+                crate::desktop::onboarding::PermissionAction::ResetAndPrompt(kind),
+            ) => {
+                self.platform.clear_stale(*kind);
+                self.platform.note_asked(*kind);
+            }
+            PlatformRequest::SystemAudio => {
+                let kind = crate::desktop::onboarding::PermissionKind::SystemAudio;
+                // Previews grant on the second ask, so a scene can play
+                // Allow, waiting, and Allowed in turn.
+                if self.host.is_fixture() && self.platform.asked(kind) {
+                    self.platform.system_audio = true;
+                }
+                self.platform.clear_stale(kind);
+                self.platform.note_asked(kind);
+            }
+            #[cfg(hex_capture)]
+            PlatformRequest::Scrawl(ScrawlRequest::QuitScrawl) => {
+                let fixture = self.host.is_fixture();
+                if let Some(view) = self.platform.scrawl.as_mut() {
+                    view.quitting_scrawl = true;
+                    if fixture {
+                        view.scrawl_running = false;
+                    }
+                }
+            }
+            PlatformRequest::SetLaunchAtLogin(enabled) => match &self.host {
+                // Windows (its Run key) and Linux (XDG autostart) write
+                // the login item from the window's own process.
+                PlatformHost::Local(_) => {
+                    let result = super::host::set_launch_at_login(*enabled);
+                    self.platform.set_login_item(Some(result));
+                    return;
+                }
+                // Previews flip at once.
+                PlatformHost::Fixture(_) => {
+                    self.platform.set_login_item(Some(Ok(*enabled)));
+                }
+                // The switch moves now; macOS's answer settles it.
+                PlatformHost::Native(_) => {
+                    self.platform.request_login_item(*enabled);
+                    if let Err(message) = self.host.send(request) {
+                        let failure = crate::desktop::login_item::LoginItemFailure {
+                            status: None,
+                            message,
+                        };
+                        self.platform.login_item_answered(Err(failure), true);
+                    }
+                    return;
+                }
+            },
+            _ => {}
+        }
+        #[cfg(not(target_os = "macos"))]
+        if let PlatformRequest::Meeting(meeting) = &request
+            && matches!(self.host, PlatformHost::Local(_))
+        {
+            if let Err(error) = self.send_meeting(meeting.clone()) {
+                self.error = Some(error);
+            }
+            return;
+        }
+        let is_relaunch = request == PlatformRequest::Relaunch;
+        match self.host.send(request) {
+            // The frame draws right after its actions, before the next poll,
+            // so read the host's answer now (the poll the frame runs anyway,
+            // its refresh moved to now by `send`) rather than show stale
+            // state for a tick.
+            Ok(()) => {
+                self.host.poll(&mut self.platform);
+            }
+            Err(_) if is_relaunch => self.platform.relaunch_failed = true,
+            Err(error) => self.error = Some(error),
+        }
+    }
+
+    /// Sends a meeting request to whoever carries it out: on Linux and
+    /// Windows the meetings this window keeps itself, whose host ignores
+    /// meeting requests; elsewhere the OS host.
+    pub(super) fn send_meeting(&mut self, request: MeetingRequest) -> Result<(), String> {
+        #[cfg(not(target_os = "macos"))]
+        if matches!(self.host, PlatformHost::Local(_)) {
+            let waker = self.modes.waker.clone();
+            let wake = move || {
+                if let Some(waker) = &waker {
+                    waker();
+                }
+            };
+            return self.meetings.local.send(request, wake);
+        }
+        self.host.send(PlatformRequest::Meeting(request))
     }
 }
 
