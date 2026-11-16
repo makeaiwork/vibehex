@@ -19,7 +19,7 @@ vibehex: false
 
 **Needs.** Nothing else. Its card's Longer than picks 1, 2, 3, 5 or 10 seconds, and Only in limits it to apps you choose (empty means every app).
 
-**Good to know.** On a Mac, pressing Escape just after you let go pastes without sending. It never sends from Copy dictation only, Paste last dictation, terminal commands, meetings or Annotate. History marks sent dictations as Send. With apps chosen and the app unknown (some Linux desktops), it never sends.
+**Good to know.** On a Mac, pressing Escape just after you let go pastes without sending. A dictation finished with the Stop shortcut is sent by the same rule as one finished with the dictation shortcut. It never sends from Copy dictation only, Paste last dictation, terminal commands, meetings or Annotate. History marks sent dictations as Send. With apps chosen and the app unknown (some Linux desktops), it never sends.
 
 **Where.** Labs › YOLO mode (`labs.yolo_mode`); Longer than (`labs.yolo_mode_seconds`); Only in (`labs.yolo_mode_apps`).
 

@@ -48,6 +48,9 @@ standing decisions are answers the owner has already given, and each sync gets o
 | First run | The fork's language and model step comes first and nothing downloads before Download is pressed. Upstream's first-run story follows it | 2026-11-16 |
 | Meeting recording pill | Upstream's design as it is, with the fork's wording (VibeHex, any notes writer, no middle dots). No Open button is added back | 2026-11-16 |
 | AI features that only work through OpenCode | They come in hidden from a stable build until they run on the fork's cleanup engines (Codex, OpenRouter, own server, built-in model). A second "clean up" switch is not shown beside AI cleanup: it becomes one more engine | 2026-11-16 |
+| Nearby text and the cloud | A feature that sends more than the dictation to a cleanup engine (the text around the cursor) works on every engine, asks once before a cloud engine gets it, and its card always says where the text goes with the engine chosen now. Terminals are not read unless the person says so | 2026-11-16 |
+| Assistant's setup and new features | Setup asks at most five new questions for the person's profile and lists the rest under "more to try". Settings that left Labs are asked as one step for their area (meetings), only of people who use it. A feature that improves another is offered right after that one is chosen, and again when the person describes the problem it solves | 2026-11-16 |
+| Stop key and YOLO mode | One rule: a dictation long enough for YOLO mode is sent however it ended, by the shortcut or by the Stop key. Escape just after pastes without sending | 2026-11-16 |
 | Assistant's guide | Every feature has an article, upstream's new ones included. A lab that graduates is not dropped from the guide: its article moves to where the feature now lives, with its new setting, and Assistant can still change it and offers it in setup as a setting. Setup's questions follow the new features | 2026-11-16 |
 | Version | `Cargo.toml` follows upstream's `X.Y.Z`. The release counter continues across upstream versions: after 3.3.0-vibe.7 comes 3.4.0-vibe.8 | 2026-11-16 |
 | Updater | VibeHex stages updates in its own folder name, so Hex and VibeHex side by side never delete each other's waiting update | 2026-11-16 |
@@ -115,13 +118,33 @@ standing decisions are answers the owner has already given, and each sync gets o
   moves on (1.3 s), Skip shows on the new sketch scene, the summary model's "none" reads "OpenCode's
   default model", and a meeting's retention note has its own line, which moved the cited passage.
 
-**Follow-up after this sync** (separate PRs)
+**Follow-up after this sync** (separate PRs; the owner's answers of 2026-11-16)
 
-1. Voice prompt and Cursor context run on the chosen cleanup engine; Apple Intelligence becomes an
-   engine in AI cleanup; the three are shown again.
-2. Assistant's setup asks about the new features and offers them where they help (cursor context
-   for more accurate cleanup, and the like).
-3. Whether the Stop key ends a dictation that YOLO mode would send.
+1. The three hidden AI features on the fork's cleanup engines, shown again when they work.
+   - Apple Intelligence is one more engine in Output › AI cleanup › Runs on, and only that: it is
+     not a fallback for an engine that did not answer. It makes its light fixes (misheard words,
+     spoken self-corrections) and the row says the person's instructions are not applied. Its Labs
+     switch stays hidden.
+   - Voice prompt runs on the chosen engine. It works with Clean up with AI off, as long as an
+     engine is set up: the phrase sends that one dictation. The phrase follows the dictation
+     language («перепиши это» for Russian, "rewrite this" for English) and changes with it. My
+     reading, to confirm in the PR: a phrase typed in the card wins over the language's, and with
+     the language on automatic the interface language picks it.
+   - Cursor context works on every engine. Codex and OpenRouter ask once before the nearby text
+     goes to them; the card names where the text goes with the engine chosen now; terminals are not
+     read by default. My reading, to confirm in the PR: an own server asks too unless its address
+     is this computer.
+2. Assistant's setup.
+   - One step for the meeting settings that left Labs (how long audio is kept, stop when the call
+     ends, descriptive file names, notes in their own file), asked only of people who record
+     meetings.
+   - At most five new questions for the person's profile, the rest of the 23 new labs in one "more
+     to try" list at the end. The PR carries the table of which lab is asked of whom.
+   - Cursor context and Voice prompt are offered right after AI cleanup is chosen, with where the
+     nearby text goes for the engine chosen, and suggested in conversation when the person
+     describes what they fix ("it misspells names from my document").
+3. Stop key and YOLO mode: decided, stays as it is (the table above). Done in this branch: the two
+   guide articles say it.
 
 **Checks**
 

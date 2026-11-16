@@ -27,7 +27,9 @@ Return is always the app's.
 **Good to know.** It acts only while a dictation is recording; otherwise Return
 works normally. It also works while holding the shortcut's modifier. Shift
 plus Return and other keys behave as before. The shortcut itself still
-finishes too. VibeHex refuses a key another VibeHex shortcut uses.
+finishes too. VibeHex refuses a key another VibeHex shortcut uses. With YOLO
+mode on, a dictation long enough for it is pasted and sent, whichever key
+finished it.
 
 **Where.** Labs › Stop shortcut (`labs.stop_shortcut`), marked as added in
 VibeHex. The key: General › Stop shortcut (`stop_hotkey`), with a restore
