@@ -14,6 +14,7 @@ use super::Item;
 use crate::app_settings::{AppSettings, HotkeyBinding};
 
 /// The switch whose row carries the key.
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
 pub const SWITCH: &str = "labs.more_dictation_shortcuts";
 /// Where the key is saved.
 pub const KEY: &str = "extra_dictation_hotkeys";
@@ -21,6 +22,7 @@ pub const KEY: &str = "extra_dictation_hotkeys";
 /// Whether `item` offers a key in its row: it turns the switch on, on a
 /// Mac (`os`), while no extra shortcut has a key yet (one set before in
 /// General is the person's own, and stays).
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
 pub fn offered(item: &Item, settings: &AppSettings, os: &str) -> bool {
     item.key == SWITCH
         && item.to == Value::Bool(true)
