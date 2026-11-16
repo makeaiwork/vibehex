@@ -132,6 +132,7 @@ fn history_stats_parse_sum_retained_entries_and_need_the_labs_toggle() {
         language: None,
         text_ms: None,
         versions: Vec::new(),
+        read: None,
     };
     let entries = [
         entry(1, 10, "expired by retention", "expired by retention"),
@@ -766,4 +767,45 @@ fn parses_release_commands_and_rejects_invalid_limits_and_times() {
         crate::meeting::query::parse_time("2026-10-20T12:00:00.123456Z", NOW, false).unwrap(),
         second + 123
     );
+}
+
+/// VibeHex: what a dictation read is printed with `--raw`, like the raw
+/// transcript, and never without it.
+#[test]
+fn history_json_prints_what_a_dictation_read_only_with_raw() {
+    use crate::history::read::{HistoryRead, NearbySent, ReadNearby};
+    let mut entries = entries();
+    entries[1].read = Some(HistoryRead {
+        screen_terms: vec!["Qdrant".into(), "Rune".into()],
+        cleanup_terms: vec!["Qdrant".into()],
+        nearby: Some(ReadNearby {
+            before: "We ship on ".into(),
+            selected: String::new(),
+            after: String::new(),
+        }),
+        nearby_sent: NearbySent::All,
+        asked_again: false,
+    });
+    let json = |extra: &[&str]| {
+        let output = history_output(
+            &entries,
+            &args(extra),
+            HistoryRetention::Week,
+            NOW,
+            &[],
+            None,
+        )
+        .unwrap();
+        serde_json::to_value(output).unwrap()["entries"][0].clone()
+    };
+    assert_eq!(
+        json(&["--grep", "problems", "--raw"])["read"],
+        serde_json::json!({
+            "screen_terms": ["Qdrant", "Rune"],
+            "cleanup_terms": ["Qdrant"],
+            "nearby": {"before": "We ship on "},
+            "nearby_sent": "all",
+        })
+    );
+    assert!(json(&["--grep", "problems"]).get("read").is_none());
 }

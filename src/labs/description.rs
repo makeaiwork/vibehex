@@ -22,8 +22,9 @@ impl Feature {
             Self::VocabularyBiasing => {
                 "Help the Parakeet model hear your Vocabulary words; rewriting and search use them anyway"
             }
+            // VibeHex: kept with the dictation in History (`history::read`).
             Self::ScreenVocabulary => {
-                "Names in the window you're dictating into help Hex spell them. Never saved. Parakeet needs Vocabulary biasing, and a dictation with terms runs after release instead of from the live stream."
+                "Names in the window you're dictating into help Hex spell them. Kept with the dictation in History. Parakeet needs Vocabulary biasing, and a dictation with terms runs after release instead of from the live stream."
             }
             Self::TerminalPaste => "Paste with Ctrl+Shift+V, for apps that ignore Ctrl+V",
             Self::KeyboardModelSwitching => {

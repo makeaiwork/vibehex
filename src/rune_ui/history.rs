@@ -24,6 +24,7 @@ use crate::history::{History, HistoryEntry, HistoryKind, HistoryRetention, Trans
 use crate::transcription::models::TranscriptionModelId;
 
 mod audio;
+mod read; // VibeHex: what a dictation read, folded in its detail.
 mod selection;
 
 pub(super) use self::audio::AudioCopy;
@@ -73,6 +74,8 @@ pub(super) struct HistoryPane {
     /// Labs › Copy dictation audio: the entry whose kept audio is going to
     /// the clipboard or last went there.
     pub(super) audio: Option<AudioCopy>,
+    /// VibeHex: the open "What VibeHex read" section, if any.
+    pub(super) read: read::Shown,
 }
 
 /// Transcribe again's chosen model and the language for this one run.
@@ -346,6 +349,7 @@ impl HistoryPane {
                     language: None,
                     text_ms: None,
                     versions: Vec::new(),
+                    read: None,
                 }
             };
         let mut rewritten = entry(
@@ -1132,6 +1136,7 @@ fn detail(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
     if ui.settings.labs.keep_recordings && !entry.versions.is_empty() {
         body = body.child(versions_section(ui, p, entry));
     }
+    body = body.children(read::section(ui, p, entry)); // VibeHex: what it read.
     let armed = pane.delete_armed == Some(id);
     let mut actions = Vec::new();
     let confirm = armed.then(|| {
@@ -1517,6 +1522,7 @@ mod tests {
                     total_ms: 200,
                     recording: None,
                     model: None,
+                    read: None,
                 })
                 .unwrap();
         };

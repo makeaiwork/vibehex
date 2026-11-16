@@ -27,9 +27,12 @@
 //! the cursor, and a piece between them none. A dictation of one piece gets
 //! all of it, as in Hex.
 //!
-//! Nothing here logs or keeps the text.
+//! Nothing here logs the text. What the cleanup was given of it, and whether
+//! it was asked again, is told to History with the dictation ([`Nearby::given`],
+//! `history::read`).
 
 use std::borrow::Cow;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::app_settings::AppSettings;
 use crate::dictation::caret_text::CaretText;
@@ -98,6 +101,11 @@ pub(crate) struct Nearby<'a> {
     /// A built-in model on this computer cleans up: it gets less of the
     /// text ([`part`]).
     small: bool,
+    /// For History ([`Self::given`]): a piece was asked, one was asked with
+    /// the nearby text, and one was asked again without it.
+    asked: AtomicBool,
+    gave: AtomicBool,
+    again: AtomicBool,
 }
 
 /// The most of the text before the cursor a built-in model is given, in
@@ -128,6 +136,9 @@ impl<'a> Nearby<'a> {
         ask: impl Fn(&ContextSnapshot, &str) -> Result<String, E>,
     ) -> Result<String, E> {
         let context = self.context(piece);
+        self.asked.store(true, Ordering::Relaxed);
+        self.gave
+            .fetch_or(context.caret_text.is_some(), Ordering::Relaxed);
         let answer = ask(&context, piece.text)?;
         let echoed = context
             .caret_text
@@ -137,6 +148,7 @@ impl<'a> Nearby<'a> {
             return Ok(answer);
         }
         tracing::info!("cleanup repeated the nearby text; asked again without it");
+        self.again.store(true, Ordering::Relaxed);
         let bare = ContextSnapshot {
             caret_text: None,
             ..self.context.clone()
@@ -151,6 +163,41 @@ impl<'a> Nearby<'a> {
             context,
             caret,
             small: false,
+            asked: AtomicBool::new(false),
+            gave: AtomicBool::new(false),
+            again: AtomicBool::new(false),
+        }
+    }
+
+    /// What this dictation's cleanup was given, for its History entry: the
+    /// screen terms its prompt listed (the context's, `ForCleanup`) once a
+    /// piece was asked, and how much of the nearby text: all of it, a
+    /// built-in model's part (unless that part is all there was), or none.
+    pub(crate) fn given(&self) -> crate::history::read::Given {
+        use crate::history::read::NearbySent;
+        let asked = self.asked.load(Ordering::Relaxed);
+        let nearby = match self.caret {
+            Some(caret) if self.gave.load(Ordering::Relaxed) => {
+                let whole = Piece {
+                    text: "",
+                    first: true,
+                    last: true,
+                };
+                if self.small && part(caret, whole, true) != *caret {
+                    NearbySent::Part
+                } else {
+                    NearbySent::All
+                }
+            }
+            _ => NearbySent::Nothing,
+        };
+        crate::history::read::Given {
+            cleanup_terms: match asked {
+                true => self.context.screen_terms.clone(),
+                false => Vec::new(),
+            },
+            nearby,
+            asked_again: self.again.load(Ordering::Relaxed),
         }
     }
 
@@ -484,5 +531,87 @@ mod tests {
         let codex = server(Provider::Codex, "");
         assert!(!Nearby::new(&context, Source::Dictation, Some(&codex)).small);
         assert!(!Nearby::new(&context, Source::Dictation, None).small);
+    }
+
+    /// VibeHex History: what a dictation's cleanup was given of what it
+    /// read, told once its pieces were asked.
+    #[test]
+    fn what_cleanup_was_given_is_told_to_history() {
+        use crate::history::read::{Given, NearbySent};
+        let whole = Piece {
+            text: "Screen vocabulary",
+            first: true,
+            last: true,
+        };
+        let honest = |_: &ContextSnapshot, heard: &str| -> Result<String, ()> { Ok(heard.into()) };
+        let context = ContextSnapshot {
+            screen_terms: vec!["Qdrant".into()],
+            ..with_caret()
+        };
+        let nearby = Nearby::when(true, &context, Source::Dictation);
+        assert_eq!(nearby.given(), Given::default(), "nothing was asked yet");
+        nearby.asked(whole, honest).unwrap();
+        assert_eq!(
+            nearby.given(),
+            Given {
+                cleanup_terms: vec!["Qdrant".into()],
+                nearby: NearbySent::All,
+                asked_again: false,
+            }
+        );
+
+        // The lab off, or typed text: the text was not given.
+        for nearby in [
+            Nearby::when(false, &context, Source::Dictation),
+            Nearby::when(true, &context, Source::TypedText),
+        ] {
+            nearby.asked(whole, honest).unwrap();
+            assert_eq!(nearby.given().nearby, NearbySent::Nothing);
+            assert!(!nearby.given().asked_again);
+        }
+
+        // A built-in model's part, unless that part is all there was.
+        let long = ContextSnapshot {
+            caret_text: Some(caret(&"слово ".repeat(120), "", "")),
+            ..ContextSnapshot::default()
+        };
+        for (context, sent) in [(&long, NearbySent::Part), (&context, NearbySent::Part)] {
+            let small = Nearby {
+                small: true,
+                ..Nearby::when(true, context, Source::Dictation)
+            };
+            small.asked(whole, honest).unwrap();
+            assert_eq!(small.given().nearby, sent);
+        }
+        let short = ContextSnapshot {
+            caret_text: Some(caret("We ship on ", "Friday", "")),
+            ..ContextSnapshot::default()
+        };
+        let small = Nearby {
+            small: true,
+            ..Nearby::when(true, &short, Source::Dictation)
+        };
+        small.asked(whole, honest).unwrap();
+        assert_eq!(small.given().nearby, NearbySent::All);
+
+        // An answer that repeats the text is told as asked again.
+        let echoed = ContextSnapshot {
+            caret_text: Some(caret(
+                "Она использует ",
+                "",
+                "? И второе, вот этот вот Cursor контекст используется или нет?",
+            )),
+            ..ContextSnapshot::default()
+        };
+        let echoing = |context: &ContextSnapshot, heard: &str| -> Result<String, ()> {
+            Ok(match &context.caret_text {
+                Some(caret) => caret.after.clone(),
+                None => heard.to_owned(),
+            })
+        };
+        let nearby = Nearby::when(true, &echoed, Source::Dictation);
+        assert_eq!(nearby.asked(whole, echoing), Ok("Screen vocabulary".into()));
+        assert!(nearby.given().asked_again);
+        assert_eq!(nearby.given().nearby, NearbySent::All);
     }
 }

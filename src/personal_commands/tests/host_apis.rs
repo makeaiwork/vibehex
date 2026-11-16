@@ -303,6 +303,7 @@ fn a_throwing_or_slow_transformation_pastes_the_text_unchanged() {
             nothing: false,
             observation: None,
             transformations: vec![id.into()],
+            read: Default::default(),
         };
         processed.apply_transformations(
             &client,

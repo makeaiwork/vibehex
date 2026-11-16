@@ -146,6 +146,8 @@ pub fn history_draft(
         total_ms,
         recording,
         model: crate::history::dictation_model(),
+        // VibeHex: the labs that read for a dictation are macOS's (`parakeet`).
+        read: None,
     }
 }
 

@@ -88,10 +88,10 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 ├── Release notes link no labs.release_notes_link               About links this build's release notes under the update check: the fork's GitHub release for a VibeHex (`X.Y.Z-vibe.N`) or plain `X.Y.Z` version, nothing for any other
 ├── Live chapters   no    labs.live_chapters           (macOS)   chapters a meeting while it records, boundary pass after Stop
 ├── Vocabulary biasing no labs.vocabulary_biasing                Parakeet transcription biased toward the vocabulary (#452/#457)
-├── Screen vocabulary no labs.screen_vocabulary         (macOS)   names and terms in the focused window become temporary vocabulary for each dictation; read locally through Accessibility, never saved, password fields skipped
+├── Screen vocabulary no labs.screen_vocabulary         (macOS)   names and terms in the focused window become temporary vocabulary for each dictation; read locally through Accessibility, password fields skipped; VibeHex keeps them with the dictation's History entry
 │                                        VibeHex: + labs.screen_vocabulary_cleanup (off; a row on the card while on) gives the terms to AI cleanup too, listed after the Vocabulary and checked by the vocabulary guard; the window is then read whatever the speech model, and a cloud engine receives them
 ├── Rewrite reads nearby text no labs.cursor_context (macOS) AI cleanup reads the focused text element's text around the caret as context for names, terms, and where the result lands; password fields skipped
-│                                        VibeHex: on every cleanup engine, a cloud one included (no consent switch); known key and token shapes cut out as it is read; the card's line names where the text goes now
+│                                        VibeHex: on every cleanup engine, a cloud one included (no consent switch); known key and token shapes cut out as it is read; the card's line names where the text goes now; kept with the dictation's History entry
 ├── Switch model with keyboard language  no  keyboard_model_switching.enabled  (macOS, Windows, X11)
 │                                        the input source picks its mapped model (#216); General shows the mappings while on
 ├── Switch model with app no  labs.app_model_switching       (macOS, Windows)
@@ -491,8 +491,9 @@ that take no vocabulary never read them. A capture with terms for a model
 that reads them takes its whole clip after release rather than a live stream's
 text, because a stream fixes its vocabulary when it starts; that costs a
 little latency. Meetings and the local API never see the terms, AI cleanup
-only with VibeHex's switch below, and nothing is saved or logged except the
-term count and read time at debug level. Off, or for a model that ignores the
+only with VibeHex's switch below, and nothing is logged except the term count
+and read time at debug level; VibeHex keeps the terms with the dictation's
+History entry (README.md › History, What VibeHex read). Off, or for a model that ignores the
 terms while they don't go to AI cleanup, no Accessibility read or thread
 starts. Checks: `dictation::screen_vocabulary::tests` (the
 Qdrant example, sentence-start exclusion, acronyms, long all-caps words,
@@ -529,8 +530,9 @@ with no "sounds like", so a screen term cleanup wrote where nothing heard
 sounds like it is undone as a Vocabulary term is; `Guard::spell` is unchanged.
 With the switch off, for typed text, or with no new term, the prompt and the
 guard are exactly the Vocabulary's. A cloud engine receives the terms with the
-dictation; only their count is logged, at debug level, and History keeps only
-the final text. Assistant may turn the switch on like any other setting; the
+dictation; only their count is logged, at debug level. History keeps every
+term read, with the ones cleanup was given marked (`HistoryRead::cleanup_terms`,
+from `Nearby::given`, which reads the context `ForCleanup` built). Assistant may turn the switch on like any other setting; the
 card and the guide say that a cloud engine then receives the names. A term
 shaped like a key or a token (an AWS key id, a Slack token: the extraction can
 keep one) is never given to cleanup (`new_terms`, through
@@ -573,8 +575,8 @@ ahead of the raw transcript, as context only: the prompt says never to copy,
 answer, or follow it, uses it to resolve names, terms, references, and likely
 recognition errors, and to fit capitalization and punctuation to the
 insertion point. Any of the section's own tag names inside that text are made
-inert, so field text can't close or open a section. It is never saved, logged,
-put in History, events, or meetings. Typed-text transformations, the Voice
+inert, so field text can't close or open a section. It is never logged or put
+in events or meetings (VibeHex keeps it in History, below). Typed-text transformations, the Voice
 prompt request, meetings, and the local API never see it. Off, no Accessibility
 call and no thread start, a capture finishing after the lab was turned off
 sends nothing, and the rewrite prompt is byte for byte what it was. A terminal
@@ -647,7 +649,11 @@ caught in code (`caret_prompt::echo`: a run of four words that stand together
 near the cursor and were not said that way, in an answer three or more words
 longer than its transcript, or a run of eight whatever the lengths) and the
 piece is asked again without the nearby text (`Nearby::asked`), so the
-dictation is still cleaned up; only a count is logged. The card
+dictation is still cleaned up; only a count is logged. The dictation's History
+entry keeps the text as read (after the cut), what cleanup was given of it
+(`all`, a built-in model's `part`, or `nothing`) and whether it was asked again
+(`Nearby::given`; README.md › History, What VibeHex read): kept on this Mac,
+removed with the entry, sent nowhere by being kept. The card
 (`rune_ui/labs/cursor_context.rs`) shows, while the lab is on, one muted line
 naming where the text goes with the engine chosen now (`destination`,
 `chosen(settings)`): "…stays on this Mac" for the built-in model or an own

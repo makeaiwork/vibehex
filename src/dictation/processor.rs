@@ -535,6 +535,7 @@ impl Profiles {
                 nothing: false,
                 observation,
                 transformations: profile.transformations.clone(),
+                read: Default::default(),
             };
         }
         let vocabulary = crate::dictation::vocabulary::merged(
@@ -638,6 +639,7 @@ impl Profiles {
             nothing: false,
             observation: Some(observation),
             transformations: profile.transformations.clone(),
+            read: nearby.given(), // VibeHex: for History (`history::read`).
         }
     }
 }
@@ -665,6 +667,7 @@ fn voice_prompt_processed(
             nothing: true,
             observation: None,
             transformations: Vec::new(),
+            read: Default::default(),
         };
     }
     let request = voice_prompt_request(
@@ -722,6 +725,7 @@ fn voice_prompt_answer(
         nothing: false,
         observation,
         transformations: transformations.to_vec(),
+        read: Default::default(),
     }
 }
 
@@ -1194,6 +1198,8 @@ pub struct Processed {
     pub nothing: bool,
     pub observation: Option<ProcessingObservation>,
     pub transformations: Vec<String>,
+    /// VibeHex: what cleanup was given of what the dictation read (History).
+    pub read: crate::history::read::Given,
 }
 
 pub type ProcessingObservation = crate::desktop::events::DictationProcessing;
@@ -1208,6 +1214,7 @@ impl Processed {
             nothing: false,
             observation: None,
             transformations: Vec::new(),
+            read: Default::default(),
         }
     }
 
