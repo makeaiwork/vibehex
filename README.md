@@ -229,6 +229,25 @@ ln -s /Applications/VibeHex.app/Contents/MacOS/hex ~/.local/bin/hex
 
 More docs are in [`docs/`](docs/README.md).
 
+## Thanks to Hex
+
+VibeHex stands on [Hex](https://github.com/anomalyco/hex), made by Kit
+Langton, Dax Raad and the team at Anomaly. Hex is a great app: fast, local
+and carefully built. I use it every day, and I started VibeHex to add the
+things I kept wishing for: an assistant, cleanup with no server, and files.
+
+Everything good in the foundation is theirs. VibeHex keeps merging Hex's
+changes, and it is not affiliated with or endorsed by Anomaly. If you want
+the original, [get Hex](https://github.com/anomalyco/hex).
+
+## Contributing
+
+Bugs and ideas go to [issues](https://github.com/makeaiwork/vibehex/issues),
+and small fixes are welcome as pull requests: see
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports follow
+[`SECURITY.md`](SECURITY.md).
+
 ## License
 
-MIT, as Hex is.
+MIT, as Hex is. [`LICENSE`](LICENSE) keeps Hex's copyright notice, with
+VibeHex's beside it for what the fork adds.
