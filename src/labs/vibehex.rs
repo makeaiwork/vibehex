@@ -62,7 +62,8 @@ impl Feature {
     /// developer tools: they repeat something VibeHex already has (About),
     /// the owner chose not to ship them, or they run only on OpenCode while
     /// VibeHex cleans up on its own engines (Apple Intelligence cleanup,
-    /// Voice prompt, Rewrite reads nearby text), until they run there too.
+    /// Voice prompt), until they run there too. Rewrite reads nearby text
+    /// runs on every engine (`dictation::caret_prompt::cleanup`).
     pub const fn vibehex_hides(self) -> bool {
         matches!(
             self,
@@ -72,7 +73,6 @@ impl Feature {
                 | Self::AnnotateReplay
                 | Self::CleanUpWithAppleIntelligence
                 | Self::VoicePrompt
-                | Self::CursorContext
         )
     }
 
@@ -195,6 +195,16 @@ fn screen_vocabulary_cleanup_enabled(settings: &LabsSettings) -> bool {
     settings.screen_vocabulary_cleanup && super::screen_vocabulary_enabled(settings)
 }
 
+/// Labs › Rewrite reads nearby text › Send it to cloud engines: VibeHex's
+/// switch on Hex's lab, written by [`store`] beside [`SWITCHES`].
+static CURSOR_CONTEXT_CLOUD: AtomicBool = AtomicBool::new(false);
+
+/// Whether `settings` let the nearby text go to a cloud cleanup engine: the
+/// switch is on and so is the lab, in this build and unlocked.
+fn cursor_context_cloud_enabled(settings: &LabsSettings) -> bool {
+    settings.cursor_context_cloud && super::cursor_context_enabled(settings)
+}
+
 /// Whether `settings` hold `feature`'s switch on.
 fn saved(settings: &LabsSettings, feature: Feature) -> bool {
     match feature {
@@ -231,6 +241,7 @@ pub(super) fn store(settings: &LabsSettings) {
         screen_vocabulary_cleanup_enabled(settings),
         Ordering::Release,
     );
+    CURSOR_CONTEXT_CLOUD.store(cursor_context_cloud_enabled(settings), Ordering::Release);
 }
 
 /// `feature`'s switch in this process, loading the saved settings first in
@@ -274,6 +285,14 @@ pub fn lower_every_app() -> bool {
 /// its cleanup starts). Only while the lab itself is on.
 pub fn screen_vocabulary_cleanup() -> bool {
     super::screen_vocabulary() && SCREEN_VOCABULARY_CLEANUP.load(Ordering::Acquire)
+}
+
+/// Labs › Rewrite reads nearby text › Send it to cloud engines: the text
+/// around the cursor may go to Codex, OpenRouter, or the person's own server
+/// at another computer's address (macOS; read as the capture becomes real
+/// and as its cleanup starts). Only while the lab itself is on.
+pub fn cursor_context_cloud() -> bool {
+    super::cursor_context() && CURSOR_CONTEXT_CLOUD.load(Ordering::Acquire)
 }
 
 /// Dictation cleanup may run on OpenRouter or the person's own
@@ -338,6 +357,37 @@ mod tests {
             Feature::for_settings_key("labs.screen_vocabulary_cleanup"),
             Some(Feature::ScreenVocabulary)
         );
+    }
+
+    /// Sending the nearby text to a cloud engine is off by default, does
+    /// nothing without Rewrite reads nearby text itself, and is a row of its
+    /// card. The lab shows in a stable build now that it runs on every
+    /// engine.
+    #[test]
+    fn the_nearby_text_reaches_the_cloud_only_with_the_lab_on() {
+        let mut labs = LabsSettings::default();
+        assert!(!labs.cursor_context_cloud);
+        assert!(!cursor_context_cloud_enabled(&labs));
+        labs.cursor_context_cloud = true;
+        assert!(!cursor_context_cloud_enabled(&labs), "the lab is off");
+        labs.cursor_context = true;
+        assert!(cursor_context_cloud_enabled(&labs));
+        labs.cursor_context_cloud = false;
+        assert!(!cursor_context_cloud_enabled(&labs));
+
+        labs.cursor_context_cloud = true;
+        super::super::apply(&labs);
+        assert_eq!(cursor_context_cloud(), Feature::CursorContext.on_this_os());
+        labs.cursor_context = false;
+        super::super::apply(&labs);
+        assert!(!cursor_context_cloud());
+        super::super::apply(&LabsSettings::default());
+        assert!(!cursor_context_cloud());
+        assert_eq!(
+            Feature::for_settings_key("labs.cursor_context_cloud"),
+            Some(Feature::CursorContext)
+        );
+        assert!(!Feature::CursorContext.vibehex_hides());
     }
 
     #[test]

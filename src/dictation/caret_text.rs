@@ -98,6 +98,11 @@ impl CaretTextRead {
         if !pending || !crate::labs::cursor_context() {
             return;
         }
+        // VibeHex: nor when the cleanup engine chosen now may not get the
+        // text, such as a cloud one without consent (`caret_prompt::cleanup`).
+        if !crate::dictation::caret_prompt::cleanup::read_now() {
+            return;
+        }
         let Some(sender) = self.begin(true) else {
             return;
         };

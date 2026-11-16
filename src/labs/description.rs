@@ -194,8 +194,9 @@ impl Feature {
             Self::VoicePrompt => {
                 "Say \"rewrite this\" in a dictation, then an instruction; VibeHex applies it with the mode's OpenCode model"
             }
+            // VibeHex: every cleanup engine uses it, a cloud one with consent.
             Self::CursorContext => {
-                "The mode's OpenCode rewrite uses the text around the cursor to spell names and terms right and fit where it pastes. That text goes to the mode's model, which may be a cloud provider; password fields are never read"
+                "AI cleanup uses the text around the cursor to spell names and terms right and fit where it pastes. A cloud engine gets that text only once labs.cursor_context_cloud is on too; password fields are never read"
             }
             Self::ShellCompletions => {
                 "Print a completion script for bash, zsh, fish, elvish, or PowerShell with hex completions <shell>"

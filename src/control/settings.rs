@@ -858,6 +858,31 @@ mod tests {
         );
     }
 
+    /// VibeHex: Rewrite reads nearby text's consent for cloud engines reads
+    /// and writes as its own key, off by default, and needs the lab.
+    #[test]
+    fn cursor_context_cloud_reads_and_writes() {
+        use serde_json::json;
+        let key = "labs.cursor_context_cloud";
+        let read = |settings: &AppSettings| get(settings, key).unwrap()[0].value.clone();
+        assert_eq!(read(&AppSettings::default()), json!(false));
+        let on = apply(&AppSettings::default(), key, "on", &rules()).unwrap();
+        assert!(on.settings.labs.cursor_context_cloud);
+        assert_eq!(read(&on.settings), json!(true));
+        let off = apply(&on.settings, key, "off", &rules()).unwrap();
+        assert!(!off.settings.labs.cursor_context_cloud);
+        assert_eq!(
+            requires(key, &json!(true)),
+            [("labs.cursor_context", json!(true))]
+        );
+        assert!(requires(key, &json!(false)).is_empty());
+        let refused = unavailable_under(key, crate::policy::Policy::default());
+        assert_eq!(
+            refused.map(|error| error.code),
+            (!cfg!(target_os = "macos")).then_some("unsupported")
+        );
+    }
+
     #[test]
     fn a_labs_switch_for_another_os_is_refused() {
         let refused = unavailable_under("labs.notch_indicator", crate::policy::Policy::default())

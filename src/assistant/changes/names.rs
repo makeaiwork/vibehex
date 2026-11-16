@@ -505,6 +505,7 @@ pub fn place(key: &str, settings: &AppSettings) -> Option<Place> {
                 "labs.unload_idle_minutes" => "Minutes",
                 "labs.caps_lock_light" => "Light",
                 "labs.screen_vocabulary_cleanup" => "Also give them to AI cleanup",
+                "labs.cursor_context_cloud" => "Send it to cloud engines",
                 _ => name,
             };
             return Some(Place {

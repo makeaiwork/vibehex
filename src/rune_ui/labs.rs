@@ -9,6 +9,8 @@
 mod browser_access;
 pub(super) mod fits;
 mod group;
+// VibeHex: where Rewrite reads nearby text's text goes, and its consent.
+mod cursor_context;
 // VibeHex: Screen vocabulary's AI cleanup row.
 mod screen_vocabulary;
 #[cfg(all(target_os = "macos", hex_capture))]
@@ -678,10 +680,8 @@ fn rows(ui: &Ui) -> Vec<Row> {
     // macOS's Accessibility reads the text element's caret and nearby text.
     if caps.os == super::platform::Os::Macos {
         rows.push(Row {
-            note: Some(
-                tr("That text goes to the mode's OpenCode model, which may be a cloud provider. Password fields are never read.")
-                    .to_owned(),
-            ),
+            // VibeHex: where the text goes is the card's own line while on.
+            note: Some(tr("Password fields are never read.").to_owned()),
             ..row(Feature::CursorContext, Some(&BOOK))
         });
     }
@@ -1051,6 +1051,8 @@ fn extras(ui: &Ui, p: Paint, entry: &Row, layer: &mut Vec<El>) -> Option<El> {
         Lab::Feature(Feature::VoicePrompt) => Some(voice_prompt::body(ui, p)),
         // VibeHex: whether AI cleanup gets the window's terms too.
         Lab::Feature(Feature::ScreenVocabulary) => Some(screen_vocabulary::body(ui, p)),
+        // VibeHex: where the nearby text goes, and whether a cloud engine may get it.
+        Lab::Feature(Feature::CursorContext) => Some(cursor_context::body(ui, p)),
         Lab::Feature(Feature::ApiBrowserAccess) => Some(browser_access::body(ui, p)),
         #[cfg(all(target_os = "macos", hex_capture))]
         Lab::Feature(Feature::Screenshots) => Some(screenshots::body(

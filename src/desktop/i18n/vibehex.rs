@@ -14,6 +14,7 @@ pub(super) mod fresh;
 pub(super) mod languages;
 pub(super) mod linked;
 mod naming;
+pub(super) mod nearby;
 pub(super) mod russian;
 pub(super) mod screen;
 pub(super) mod setup;
@@ -42,6 +43,7 @@ pub(super) fn rows() -> impl Iterator<Item = &'static (&'static str, [&'static s
         .chain(web::TRANSLATIONS)
         .chain(agent::TRANSLATIONS)
         .chain(screen::TRANSLATIONS)
+        .chain(nearby::TRANSLATIONS)
         .chain(naming::TRANSLATIONS)
         .chain(undotted::TRANSLATIONS)
 }
@@ -61,6 +63,7 @@ pub(super) fn french() -> impl Iterator<Item = &'static (&'static str, &'static 
         .chain(web::FRENCH)
         .chain(agent::FRENCH)
         .chain(screen::FRENCH)
+        .chain(nearby::FRENCH)
 }
 
 /// VibeHex's Brazilian Portuguese strings, in the same order.
@@ -78,6 +81,7 @@ pub(super) fn portuguese() -> impl Iterator<Item = &'static (&'static str, &'sta
         .chain(web::PORTUGUESE)
         .chain(agent::PORTUGUESE)
         .chain(screen::PORTUGUESE)
+        .chain(nearby::PORTUGUESE)
 }
 
 /// VibeHex's Russian strings, in the same order.
@@ -95,6 +99,7 @@ pub(super) fn russian() -> impl Iterator<Item = &'static (&'static str, &'static
         .chain(web::RUSSIAN)
         .chain(agent::RUSSIAN)
         .chain(screen::RUSSIAN)
+        .chain(nearby::RUSSIAN)
 }
 
 fn pairs(own: Pairs, named: Pairs) -> impl Iterator<Item = &'static (&'static str, &'static str)> {

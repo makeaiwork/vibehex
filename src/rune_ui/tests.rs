@@ -4084,6 +4084,8 @@ mod application_picker;
 mod assistant_coming;
 mod assistant_jump;
 mod assistant_terms;
+// VibeHex: Rewrite reads nearby text's card.
+mod cursor_context;
 mod onboarding_check;
 mod panes;
 

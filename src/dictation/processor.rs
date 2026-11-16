@@ -572,16 +572,21 @@ impl Profiles {
             }
             _ => profile.deadline,
         };
+        // VibeHex: Labs › Rewrite reads nearby text on every engine, where its
+        // text may go (`caret_prompt::cleanup`).
+        let nearby = crate::dictation::caret_prompt::cleanup::Nearby::new(context, source, &server);
         // In pieces of a few minutes' speech, each within the deadline, so a
         // dictation of any length is cleaned whole (`cleanup_pieces`).
         let cleaned = crate::dictation::cleanup_pieces::clean(
             &corrected,
             cancelled,
             |piece, stop, streamed| {
+                // VibeHex: the part of the nearby text this piece borders.
+                let (context, piece) = (nearby.context(piece), piece.text);
                 let answer = match &server {
                     Some(server) => {
                         let (instructions, transcript) =
-                            prompt_parts(profile, piece, context, &vocabulary);
+                            prompt_parts(profile, piece, &context, &vocabulary);
                         crate::dictation::cleanup_server::generate(
                             server,
                             &instructions,
@@ -592,7 +597,7 @@ impl Profiles {
                         )
                     }
                     None => generate_cancellable(
-                        &prompt(profile, piece, context, &vocabulary, source),
+                        &prompt(profile, piece, &context, &vocabulary, source),
                         profile.model.as_ref(),
                         profile.deadline,
                         stop,
@@ -1281,18 +1286,17 @@ fn prompt(
     vocabulary: &[VocabularyEntry],
     source: Source,
 ) -> String {
-    let (instructions, transcript) = prompt_parts(profile, transcript, context, vocabulary);
-    // Labs › Cursor context: the text around the caret, for OpenCode's
-    // rewrite only; a cleanup server's messages never carry it.
-    let caret = crate::dictation::caret_prompt::for_source(context, source)
-        .map(crate::dictation::caret_prompt::section)
-        .unwrap_or_default();
-    format!("{instructions}\n\n{caret}{transcript}")
+    // Labs › Cursor context: the text around the caret, which VibeHex's
+    // `prompt_parts` carries ahead of the transcript for every engine.
+    let context = crate::dictation::caret_prompt::cleanup::for_source(context, source);
+    let (instructions, transcript) = prompt_parts(profile, transcript, &context, vocabulary);
+    format!("{instructions}\n\n{transcript}")
 }
 
 /// The prompt as its instructions (protocol, profile instructions,
 /// vocabulary, and context) and the transcript block, which a chat server
-/// takes as the system and user messages.
+/// takes as the system and user messages. VibeHex: the text around the caret
+/// leads the transcript's part, as in Hex's one prompt.
 fn prompt_parts(
     profile: &Profile,
     transcript: &str,
@@ -1309,7 +1313,10 @@ fn prompt_parts(
             // VibeHex: the screen terms cleanup is given, if any.
             crate::dictation::screen_vocabulary::cleanup::lines(&context.screen_terms)
         ),
-        format!("Raw transcript:\n<transcript>\n{transcript}\n</transcript>"),
+        format!(
+            "{}Raw transcript:\n<transcript>\n{transcript}\n</transcript>",
+            crate::dictation::caret_prompt::cleanup::section_in(context)
+        ),
     )
 }
 
@@ -1945,6 +1952,7 @@ mod tests {
             &text,
             &AtomicBool::new(false),
             |piece, stop, _| {
+                let piece = piece.text;
                 let piece_started = Instant::now();
                 let (instructions, transcript) =
                     prompt_parts(&profile, piece, &context("Code", None), &vocabulary);
@@ -2197,6 +2205,72 @@ mod tests {
             ),
             format!("{instructions}\n\n{transcript}")
         );
+    }
+
+    /// VibeHex: the fork's engines get the text around the caret where Hex's
+    /// prompt has it, in the transcript's part (the user message) ahead of
+    /// the transcript, never among the instructions. The parts still join
+    /// into exactly Hex's prompt, and without caret text they are as they
+    /// were.
+    #[test]
+    fn caret_text_leads_the_transcript_part_on_the_forks_engines() {
+        let profile = Profile::new("default", "Rewrite freely.");
+        let plain = context("Slack", None);
+        let mut with_caret = context("Slack", None);
+        let caret = CaretText {
+            before: "We ship on ".into(),
+            selected: String::new(),
+            after: " morning.".into(),
+        };
+        with_caret.caret_text = Some(caret.clone());
+        let (instructions, transcript) = prompt_parts(&profile, "friday", &with_caret, &[]);
+        let (bare_instructions, bare_transcript) = prompt_parts(&profile, "friday", &plain, &[]);
+        assert_eq!(instructions, bare_instructions);
+        assert!(!instructions.contains("We ship on"), "{instructions}");
+        assert_eq!(
+            bare_transcript,
+            "Raw transcript:\n<transcript>\nfriday\n</transcript>"
+        );
+        assert_eq!(
+            transcript,
+            format!(
+                "{}{bare_transcript}",
+                crate::dictation::caret_prompt::section(&caret)
+            )
+        );
+        assert!(transcript.starts_with("Text around the insertion point (context only;"));
+        assert_eq!(
+            prompt(&profile, "friday", &with_caret, &[], Source::Dictation),
+            format!("{instructions}\n\n{transcript}")
+        );
+    }
+
+    /// VibeHex: a long dictation's pieces, as the processor builds them:
+    /// the first carries the text before the cursor, the last the text
+    /// after it, the one between neither.
+    #[test]
+    fn a_long_dictations_pieces_carry_the_text_they_border() {
+        use crate::dictation::caret_prompt::cleanup::Nearby;
+        let profile = Profile::new("default", "Rewrite freely.");
+        let mut with_caret = context("Notes", None);
+        with_caret.caret_text = Some(CaretText {
+            before: "Dear Anna,".into(),
+            selected: String::new(),
+            after: "Best, Denis".into(),
+        });
+        let words = |n: usize| vec!["word"; n].join(" ");
+        let text = format!("{}. {}. {}.", words(300), words(300), words(300));
+        let nearby = Nearby::when(true, &with_caret, Source::Dictation);
+        let mut sent = Vec::new();
+        crate::dictation::cleanup_pieces::clean(&text, &AtomicBool::new(false), |piece, _, _| {
+            let context = nearby.context(piece);
+            sent.push(prompt_parts(&profile, piece.text, &context, &[]).1);
+            Ok(piece.text.into())
+        });
+        let carries = |sent: &str| (sent.contains("Dear Anna,"), sent.contains("Best, Denis"));
+        let carried: Vec<_> = sent.iter().map(|sent| carries(sent)).collect();
+        assert_eq!(carried, [(true, false), (false, false), (false, true)]);
+        assert!(sent[1].starts_with("Raw transcript:"), "{}", sent[1]);
     }
 
     /// VibeHex: the screen terms cleanup is given follow the Vocabulary in

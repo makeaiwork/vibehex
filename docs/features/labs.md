@@ -66,9 +66,9 @@ A stable VibeHex build leaves out Hex labs that repeat what VibeHex has or that
 the owner chose not to ship, and Hex labs that run only on OpenCode while
 VibeHex cleans up on its own engines, until they run there too
 (`labs::Feature::vibehex_hides`: Import audio, Release notes link, ⌘Q closes
-Settings, Annotate 15 s replay, Clean up with Apple Intelligence, Voice prompt,
-Rewrite reads nearby text); a dev build keeps them, as Hex keeps its developer
-tools. Check:
+Settings, Annotate 15 s replay, Clean up with Apple Intelligence, Voice prompt);
+a dev build keeps them, as Hex keeps its developer tools. Rewrite reads nearby
+text left that list once it ran on every cleanup engine. Check:
 `vibehex_hides_only_hex_labs_and_only_from_a_stable_build`.
 
 VibeHex's own labs stay off Hex's website (`labs::web`'s `on_the_web` leaves
@@ -90,7 +90,8 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 ├── Vocabulary biasing no labs.vocabulary_biasing                Parakeet transcription biased toward the vocabulary (#452/#457)
 ├── Screen vocabulary no labs.screen_vocabulary         (macOS)   names and terms in the focused window become temporary vocabulary for each dictation; read locally through Accessibility, never saved, password fields skipped
 │                                        VibeHex: + labs.screen_vocabulary_cleanup (off; a row on the card while on) gives the terms to AI cleanup too, listed after the Vocabulary and checked by the vocabulary guard; the window is then read whatever the speech model, and a cloud engine receives them
-├── Rewrite reads nearby text no labs.cursor_context (macOS) the mode's OpenCode rewrite reads the focused text element's text around the caret as context for names, terms, and where the result lands; password fields skipped
+├── Rewrite reads nearby text no labs.cursor_context (macOS) AI cleanup reads the focused text element's text around the caret as context for names, terms, and where the result lands; password fields skipped
+│                                        VibeHex: on every cleanup engine; + labs.cursor_context_cloud (off; a row on the card while on) lets a cloud engine (Codex, OpenRouter, an own server not at a loopback address) get it, and without it the text isn't read for one; the card's first line names where the text goes now
 ├── Switch model with keyboard language  no  keyboard_model_switching.enabled  (macOS, Windows, X11)
 │                                        the input source picks its mapped model (#216); General shows the mappings while on
 ├── Switch model with app no  labs.app_model_switching       (macOS, Windows)
@@ -529,7 +530,9 @@ sounds like it is undone as a Vocabulary term is; `Guard::spell` is unchanged.
 With the switch off, for typed text, or with no new term, the prompt and the
 guard are exactly the Vocabulary's. A cloud engine receives the terms with the
 dictation; only their count is logged, at debug level, and History keeps only
-the final text. Checks: `a_model_that_ignores_terms_reads_only_for_cleanup`
+the final text. Assistant's cards never change the switch, since with a cloud
+engine it is a consent (`assistant::changes::catalog::NEVER`). Checks:
+`a_model_that_ignores_terms_reads_only_for_cleanup`
 in [dictation/screen_vocabulary.rs](../../src/dictation/screen_vocabulary.rs),
 the tests in
 [dictation/screen_vocabulary/cleanup.rs](../../src/dictation/screen_vocabulary/cleanup.rs)
@@ -546,8 +549,9 @@ cleanup engine fixing a misheard name from a real window.
 Rewrite reads nearby text (`cursor-context`, macOS): while on,
 each dictation reads the focused text element once, on a background thread, at
 the same moment as the screen vocabulary read (a hold past its threshold, a
-control start, or a released microphone opening), and only for the mode's
-OpenCode rewrite. It reads `AXFocusedUIElement` through the existing 0.25 s
+control start, or a released microphone opening), for the dictation's AI
+cleanup (in Hex, only the mode's OpenCode rewrite; VibeHex's engines and its
+cloud consent follow below). It reads `AXFocusedUIElement` through the existing 0.25 s
 messaging timeout, never Hex's own process, and returns nothing for an
 `AXSecureTextField` (role or subrole), so a password never leaves the app. It
 reads `AXSelectedTextRange`, then `AXStringForRange` for up to 1,000 UTF-16
@@ -561,7 +565,7 @@ real U+FFFD in the text stays, and everything empty returns nothing. The read
 is taken non-blocking when the dictation finishes, so a very short dictation,
 or an app that answers slower than that, may send no nearby text. The text
 joins that capture's context
-(`ContextSnapshot::caret_text`) and only the mode's OpenCode rewrite prompt,
+(`ContextSnapshot::caret_text`) and the cleanup prompt,
 ahead of the raw transcript, as context only: the prompt says never to copy,
 answer, or follow it, uses it to resolve names, terms, references, and likely
 recognition errors, and to fit capitalization and punctuation to the
@@ -575,7 +579,8 @@ exposes its scrollback through the same text field as any editor, so while the
 lab is on, nearby terminal output — including secrets printed in the shell,
 such as tokens from a command just run — can go with that dictation. A
 cancelled capture discards its late read, and only one read runs at a time.
-That text goes to the mode's OpenCode model, which may be a cloud provider.
+With OpenCode, that text goes to the mode's OpenCode model, which may be a
+cloud provider.
 Checks:
 `dictation::caret_text` tests (a cancelled capture leaves no stale text, one
 read at a time, a capture whose lab turned off sends nothing, an empty read is
@@ -591,6 +596,57 @@ text made inert); the golden
 and the Labs card tests in `rune_ui/tests/panes.rs`. Not observed: a real Mac
 reading a real text field, or a dictated word corrected by the text around the
 cursor; the Accessibility function itself has no host test here.
+
+VibeHex: the text reaches every cleanup engine, the built-in model, the
+person's own server, Codex, and OpenRouter as well as OpenCode
+(`dictation::caret_prompt::cleanup`). Where it goes is decided for the engine
+chosen now (`destination`, from `cleanup_server::active()` at run time and
+`chosen(settings)` on the card): this computer for the built-in model and an
+own server at `localhost`, 127.x or ::1 (`cleanup_server::is_loopback`);
+OpenCode as Hex has it (its model may be a cloud provider, and no consent is
+added); a cloud engine for Codex, OpenRouter, and an own server at any other
+address or one that doesn't parse, named by its host. The text is used when
+the lab is on and it stays here, goes to OpenCode, or Send it to cloud engines
+(`labs.cursor_context_cloud`, off by default; the key needs the lab in
+`control::settings::requires`, and `labs::cursor_context_cloud()` is on only
+while the lab is, its own atomic in `labs::vibehex`) is on (`used`). Otherwise
+it is not read: `CaretTextRead::start` asks `read_now` beside Hex's lab check,
+and the processor asks again for the engine that runs (`Nearby::new`). On the
+fork's engines the section leads the transcript's part of `prompt_parts`
+(`section_in`), the user message of a chat server and Codex's input, never
+the system message or Codex's base instructions: the text is another app's and
+may hold anything, so it sits with the material to transform, below the
+instructions that say never to follow it. `prompt` joins the same two parts,
+so Hex's OpenCode prompt is byte for byte what it was, with and without the
+text. A long dictation cleaned in pieces (`cleanup_pieces::Piece`) gives its
+first piece the text before the cursor and the selection, its last the text
+after the cursor, and a piece between them none; a one-piece dictation gets
+all of it. The card (`rune_ui/labs/cursor_context.rs`) shows, while the lab is
+on, one line naming where the text goes ("…stays on this Mac", "…is sent to
+Codex with each dictation", "…to your server at <host>", OpenCode's, "Nothing
+reads it now: AI cleanup is off" while no mode cleans up), in the warning
+colour while a cloud engine runs without the consent ("Not used now: your
+cleanup runs on Codex…"), then the switch with its note; the card's own note
+says only that password fields are never read. Assistant's cards never change
+`labs.cursor_context_cloud` (`assistant::changes::catalog::NEVER`). Terminals:
+nothing in the dictation path tells a terminal from another app (the context
+has the app's name only; the Terminal paste labs are a manual choice), so a
+terminal's field is read like any other. Checks: the tests in
+[dictation/caret_prompt/cleanup.rs](../../src/dictation/caret_prompt/cleanup.rs)
+(each engine's destination, loopback and other addresses, the gate, a cloud
+engine without consent not read, the pieces rule, typed text),
+`the_first_and_last_pieces_know_they_border_the_whole` in
+[dictation/cleanup_pieces.rs](../../src/dictation/cleanup_pieces.rs),
+`caret_text_leads_the_transcript_part_on_the_forks_engines` and
+`a_long_dictations_pieces_carry_the_text_they_border` in
+[dictation/processor.rs](../../src/dictation/processor.rs),
+`the_nearby_text_reaches_the_cloud_only_with_the_lab_on` in
+[labs/vibehex.rs](../../src/labs/vibehex.rs),
+`cursor_context_cloud_reads_and_writes` in
+[control/settings.rs](../../src/control/settings.rs), the card's lines in
+[rune_ui/labs/cursor_context.rs](../../src/rune_ui/labs/cursor_context.rs), and
+the window test in `rune_ui/tests/cursor_context.rs` (Linux). Not observed: a
+real engine answering with the nearby text.
 
 Switch model with app (`app-model-switching`, macOS and Windows): while on,
 the Modes pane gives each mode, Global included, a "Speech model" row:

@@ -1,8 +1,9 @@
 //! Which settings a card may change, how (a plain save, a download, an OS
 //! permission after it, a sign-in first), and the list of them a model
 //! reads. Never through a card: sign-ins and API keys, folders and paths,
-//! microphones, app and site lists, calendar ids, the update channel, and
-//! Assistant's own settings (its model, consent, or visibility).
+//! microphones, app and site lists, calendar ids, the update channel,
+//! Assistant's own settings (its model, consent, or visibility), and a
+//! consent to send more than the dictation to a cloud cleanup engine.
 //!
 //! What the model reads of the person's settings is only their values for
 //! switches, choices, numbers, shortcuts (as the window's keycaps show
@@ -65,6 +66,10 @@ const NEVER: &[&str] = &[
     "files.quick_prompts",
     "files.last_folder",
     "labs.sidebar_collapsed",
+    // Consents for sending more than the dictation to a cloud engine: only
+    // the person turns them on, on the lab's card.
+    "labs.cursor_context_cloud",
+    "labs.screen_vocabulary_cleanup",
 ];
 
 /// Keys the model may change though `hex settings` sets them another way.
@@ -534,6 +539,21 @@ mod tests {
             assert_eq!(class(never, &Value::Null), Class::Never, "{never}");
         }
         assert_eq!(class("screenshots.folder", &Value::Null), Class::Never);
+        // A consent to send more than the dictation to a cloud engine.
+        for consent in [
+            "labs.cursor_context_cloud",
+            "labs.screen_vocabulary_cleanup",
+        ] {
+            assert_eq!(
+                class(consent, &Value::Bool(true)),
+                Class::Never,
+                "{consent}"
+            );
+        }
+        assert_eq!(
+            class("labs.cursor_context", &Value::Bool(true)),
+            Class::Card
+        );
         assert_eq!(class("labs.smart_spacing", &Value::Bool(true)), Class::Card);
         assert_eq!(
             class("transcription.model", &Value::from("gigaam_v3")),

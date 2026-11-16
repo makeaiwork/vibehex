@@ -457,7 +457,10 @@ fn api_base(base: &str) -> &str {
     base.strip_suffix("/chat/completions").unwrap_or(base)
 }
 
-fn is_loopback(url: &url::Url) -> bool {
+/// Whether `url` names this computer: `localhost`, or a loopback address
+/// such as 127.0.0.1 or ::1. The loopback-only agent refuses a `localhost`
+/// that resolves anywhere else.
+pub(crate) fn is_loopback(url: &url::Url) -> bool {
     match url.host() {
         Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
         Some(url::Host::Ipv4(address)) => address.is_loopback(),

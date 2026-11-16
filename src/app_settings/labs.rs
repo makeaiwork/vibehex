@@ -275,6 +275,9 @@ pub struct LabsSettings {
     /// VibeHex: while `screen_vocabulary` is on, AI cleanup is given the
     /// window's terms too, which a cloud engine then receives (macOS).
     pub screen_vocabulary_cleanup: bool,
+    /// VibeHex: while `cursor_context` is on, the text around the cursor
+    /// may go to a cloud cleanup engine too (macOS).
+    pub cursor_context_cloud: bool,
     /// Settings › Labs' groups opened or closed by hand, by `labs::Group`
     /// id; a group not here is open while it holds a lab that's on.
     #[serde(skip_serializing_if = "std::collections::BTreeMap::is_empty")]
@@ -468,6 +471,7 @@ impl Default for LabsSettings {
             playback: false,
             lower_every_app: false,
             screen_vocabulary_cleanup: false,
+            cursor_context_cloud: false,
             groups: std::collections::BTreeMap::new(),
             stop_when_call_ends: None,
             meeting_descriptive_filenames: None,
