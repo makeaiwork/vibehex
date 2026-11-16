@@ -111,7 +111,8 @@ Assistant                                        // rune_ui::assistant
 Opened from an answer                            // rune_ui::assistant::jump
 ├── Header      Back to Assistant (chevron, face, words) before the title
 ├── Bar         an item cited more than once: "From the answer: <question>",
-│               "1 of 2", up and down between places, a cross to clear
+│               "1 of 2", up and down between places, a cross to clear;
+│               pinned under the header, the text scrolling beneath it
 └── Place       tinted in the accent, round corners, the answer's [n] by the
                 speaker; inside, the cited phrases at full strength over a
                 thin soft accent underline and the rest of the passage muted

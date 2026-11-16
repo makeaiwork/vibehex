@@ -977,7 +977,6 @@ fn detail(ui: &Ui, p: Paint, meeting: &Meeting, layer: &mut Vec<El>) -> El {
                     .key("transcript-block")
                     .gap(10.0)
                     .child(section_label(p, "transcript-label", transcript_label))
-                    .children(jump::bar(ui, p, Kind::Meeting, &meeting.id))
                     .child(transcript(ui, p, meeting, pane.stop_pending)),
             );
         }
@@ -985,6 +984,11 @@ fn detail(ui: &Ui, p: Paint, meeting: &Meeting, layer: &mut Vec<El>) -> El {
             body = body.child(super::meeting_tabs::requests::chat(ui, p));
         }
     }
+    // The bar between cited places stays over the transcript as it scrolls.
+    let cited_bar = (tab == super::meeting_tabs::MeetingTab::Transcript)
+        .then(|| jump::bar(ui, p, Kind::Meeting, &meeting.id))
+        .flatten()
+        .map(ld::card_pinned);
     let stage = match tab {
         _ if super::meeting_tabs::requests::available(ui, meeting) => {
             super::meeting_tabs::requests::stage(ui, p, body, tab, layer)
@@ -1018,6 +1022,7 @@ fn detail(ui: &Ui, p: Paint, meeting: &Meeting, layer: &mut Vec<El>) -> El {
         .shrink()
         .child(ld::card_header(title, meta, actions))
         .children(confirm)
+        .children(cited_bar)
         .child(stage)
 }
 

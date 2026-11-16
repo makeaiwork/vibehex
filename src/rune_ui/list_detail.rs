@@ -284,6 +284,13 @@ pub(super) fn meta_text(p: Paint, meta: &str) -> El {
         .truncate()
 }
 
+/// What stays put between the card's header and its scrolling content (the
+/// answer's bar of cited places), lined up with the content beside the scroll
+/// bar.
+pub(super) fn card_pinned(content: El) -> El {
+    content.mt(12.0).mr(SCROLL_BAR)
+}
+
 /// The card's scrolling content under its header, clear of the scroll bar.
 pub(super) fn card_scroll(p: Paint, key: &str, content: El) -> El {
     card_scroll_sticky(p, key, content, false)
