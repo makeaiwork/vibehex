@@ -225,9 +225,7 @@ impl Feature {
             }
             Self::SettingsSearch => "Find any setting in General with a search field",
             Self::Appearance => "Use light or dark for the main window instead of the system's",
-            Self::ReleaseNotesLink => {
-                "Show a link to this build's release notes in the sidebar footer"
-            }
+            Self::ReleaseNotesLink => "Show a link to this build's release notes in About",
             Self::HideMenuBarIcon => {
                 "Hide VibeHex's icon from the menu bar. Shortcuts keep working; open VibeHex again from Finder or Spotlight for Settings"
             }

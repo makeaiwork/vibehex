@@ -647,7 +647,7 @@ fn the_meeting_summary_model_is_picked_from_opencode_s_models() {
     assert!(
         texts(&rt)
             .iter()
-            .any(|text| text == "VibeHex picks a fast model")
+            .any(|text| text == "OpenCode's default model")
     );
 
     let rt = runtime("meetings-summary-model-not-running", true, size);

@@ -569,7 +569,7 @@
         "windows",
         "linux"
       ],
-      "summary": "Show a link to this build's release notes in the sidebar footer",
+      "summary": "Show a link to this build's release notes in About",
       "title": "Release notes link"
     },
     {

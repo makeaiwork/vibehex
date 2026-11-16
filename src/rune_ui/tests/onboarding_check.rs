@@ -65,6 +65,7 @@ const OPTIONAL: &[&str] = &[
     "onboarding-model-found-back",
     "onboarding-demo",
     "onboarding-waiting",
+    "onboarding-sketch",
     "onboarding-try",
     "mac-onboarding-try",
     "mac-onboarding-reopen",
@@ -237,9 +238,10 @@ fn onboarding_continue_without_model() {
         ui.platform.permissions.accessibility = Ready;
         super::super::onboarding::poll(ui);
         super::super::onboarding_kit::live::poll(ui, tx);
-        // The granted checks show a beat before the page moves on.
+        // The granted checks show a beat, then their cards float off,
+        // before the page moves on.
         if let Some(s) = ui.first_run.as_mut() {
-            s.now += 1.0;
+            s.now += 2.0;
         }
         super::super::onboarding_kit::live::poll(ui, tx);
     });

@@ -14,7 +14,16 @@ standing decisions are answers the owner has already given, and each sync gets o
   `PATH`; the toolchain lives on the external disk.
 - Checks macOS cannot run: Linux-only code, `rune_ui::tests` and the golden images. GitHub Actions are
   off on the fork, so they run in an arm64 Ubuntu 24.04 container. Golden images take upstream's side
-  in the merge and are regenerated there; every changed image is looked at.
+  in the merge and are regenerated there. The capture capsule's images are macOS's: regenerate them
+  with `HEX_UPDATE_GOLDENS=1 cargo test --locked --bin hex capture_capsule_goldens` on the Mac.
+- A Rune update moves the antialiasing of all text, so nearly every image changes. The skill's
+  `golden-review.py` sorts them: images whose layout changed are all looked at, beside the fork's
+  image from before the merge; the rest differ only in glyph rendering. The comparison lets 0.2% of
+  the pixels differ, so an image can be stale: a regenerated one may show an older change.
+- The container runs as root, and `updater::legacy::tests::a_legacy_linux_install_moves_into_the_installers_layout`
+  runs the installer, which refuses root. It fails there and passes as a normal user (`setpriv`).
+- `rune_ui::tests` have never run on the merged code until the container runs them: expect fork
+  tests that assumed upstream's old layout or wording, and run each failure alone before fixing it.
 - New upstream strings that name Hex: `python3 scripts/vibehex-names.py` rewrites them to VibeHex and
   adds their rows in every language from Hex's own translations (`--check` only lists them).
 - A finished meeting has both `transcript.ndjson` and `transcript.md`; test fixtures need both.
@@ -75,7 +84,8 @@ standing decisions are answers the owner has already given, and each sync gets o
 
 - First run: the fork's model step, then upstream's story. A run counts as finished by upstream's
   rule (the last button, or Continue without a model); the fork's Skip and Set up with Assistant still
-  finish it. Continue without a model goes to the first missing permission, then Ready.
+  finish it. Continue without a model asks for each missing permission on its own page and then
+  closes the first run; it does not show the Ready page.
 - What's new pane: hidden.
 - Meeting pill: upstream's, no Open button.
 - Apple Intelligence cleanup, Voice prompt, Cursor context: hidden from a stable build in this sync;
@@ -94,6 +104,14 @@ standing decisions are answers the owner has already given, and each sync gets o
   the Stop key beside upstream's new cancel rules.
 - About 60 new upstream strings that name Hex or use a middle dot.
 - Upstream's finished-meeting panel assumed Apple Intelligence wrote the notes.
+- Upstream moved the Labs cards' text to `src/labs/card.rs`, and with it the Release notes link card
+  said "in the sidebar footer" again; in VibeHex the link is in About.
+- The capture capsule's permission images said "Hex needs Screen Recording".
+- Two tests walk every scene and outgrew the shared time limit once the fork's scenes joined
+  upstream's new ones; they have their own limit in `.config/nextest.toml`.
+- Fork tests that met upstream's changes: the granted permissions now float off before the page
+  moves on (1.3 s), Skip shows on the new sketch scene, the summary model's "none" reads "OpenCode's
+  default model", and a meeting's retention note has its own line, which moved the cited passage.
 
 **Follow-up after this sync** (separate PRs)
 
@@ -103,4 +121,29 @@ standing decisions are answers the owner has already given, and each sync gets o
    for more accurate cleanup, and the like).
 3. Whether the Stop key ends a dictation that YOLO mode would send.
 
-**Checks**: filled in when the branch is ready.
+**Checks**
+
+- macOS, `scripts/check`: fmt, code shape, clippy, 3,827 of 3,827 tests.
+- Linux (arm64 Ubuntu 24.04 container): clippy clean; 3,313 of 3,314 tests. The one failure is the
+  installer test that refuses root (see Profile); it passes there as a normal user.
+- Golden images: 293 regenerated on Linux and 4 on macOS (the capture capsule's permission bars).
+  90 had a layout change (new scenes included) and were looked at one by one beside the fork's image
+  from before the merge, as were the 4; the other 203 differ only in glyph rendering after the Rune
+  update. Of the capsule images that came from upstream unchanged, 12 were looked at on one sheet.
+- Seen in the images: no "Hex" as the app's name, no middle dot, no What's new row in the sidebar;
+  the fork's model step, Back, Skip and Set up with Assistant in the first run; Keep audio and Export
+  in Meetings settings.
+- `python3 scripts/vibehex-names.py --check`: nothing left to rename. `git diff --check`: clean.
+- Not run: Windows (no machine), the first-run walkthrough that downloads a model
+  (`scripts/check-onboarding.sh`), a real meeting and a real dictation in the merged build. The owner
+  tries the build before this PR is merged.
+- Flaky, upstream's own: `meeting_capsules::tests::a_light_host_draws_the_dark_recording_from_the_first_frame`
+  compares 17 frames and fails when the machine is busy enough for the clock to cross a second
+  before its first frame. It passed in both full runs and failed twice beside heavier tests.
+
+**Left as upstream has it** (seen in the review, not changed)
+
+- A shortcut row has no trash button: Reset appears when the shortcut differs from its default, and
+  Backspace in the recorder turns it off (#1809).
+- The first-run story has its own "Skip →" under the keyboard beside the corner Skip.
+- Assistant's Russian setup card says "Затем:" before an English sentence. It did before this sync.
