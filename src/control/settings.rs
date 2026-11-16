@@ -833,6 +833,31 @@ mod tests {
         assert!(unavailable_under("labs.live_text", Policy::default()).is_none());
     }
 
+    /// VibeHex: Screen vocabulary's terms for AI cleanup read and write as
+    /// their own key, off by default, and need the lab.
+    #[test]
+    fn screen_vocabulary_cleanup_reads_and_writes() {
+        use serde_json::json;
+        let key = "labs.screen_vocabulary_cleanup";
+        let read = |settings: &AppSettings| get(settings, key).unwrap()[0].value.clone();
+        assert_eq!(read(&AppSettings::default()), json!(false));
+        let on = apply(&AppSettings::default(), key, "on", &rules()).unwrap();
+        assert!(on.settings.labs.screen_vocabulary_cleanup);
+        assert_eq!(read(&on.settings), json!(true));
+        let off = apply(&on.settings, key, "off", &rules()).unwrap();
+        assert!(!off.settings.labs.screen_vocabulary_cleanup);
+        assert_eq!(
+            requires(key, &json!(true)),
+            [("labs.screen_vocabulary", json!(true))]
+        );
+        assert!(requires(key, &json!(false)).is_empty());
+        let refused = unavailable_under(key, crate::policy::Policy::default());
+        assert_eq!(
+            refused.map(|error| error.code),
+            (!cfg!(target_os = "macos")).then_some("unsupported")
+        );
+    }
+
     #[test]
     fn a_labs_switch_for_another_os_is_refused() {
         let refused = unavailable_under("labs.notch_indicator", crate::policy::Policy::default())

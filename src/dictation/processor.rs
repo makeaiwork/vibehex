@@ -541,12 +541,20 @@ impl Profiles {
             &profile.vocabulary,
             &crate::dictation::vocabulary::entries(),
         );
+        // VibeHex: with its switch on, Screen vocabulary's terms reach cleanup
+        // too, in the prompt and guarded as terms (`screen_vocabulary::cleanup`).
+        let screen = crate::dictation::screen_vocabulary::cleanup::ForCleanup::new(
+            context,
+            &vocabulary,
+            source,
+        );
+        let context = &*screen.context;
         let started = Instant::now();
         // The Vocabulary in code on both sides of the model: its exact
         // "sounds like" spellings are written as their term before cleanup
         // (heard speech only), and a term cleanup writes stays only where
         // what was heard supports it (`vocabulary_guard`).
-        let guard = crate::dictation::vocabulary_guard::Guard::new(&vocabulary);
+        let guard = crate::dictation::vocabulary_guard::Guard::new(&screen.guarded);
         let corrected = match source {
             Source::Dictation => guard.spell(&corrected),
             Source::TypedText => corrected,
@@ -1295,9 +1303,11 @@ fn prompt_parts(
     let host = context.browser_host().unwrap_or("none");
     (
         format!(
-            "{PROTOCOL_PROMPT}\n\nProfile instructions:\n{}\n\n{}Foreground application: {application}\nBrowser host: {host}",
+            "{PROTOCOL_PROMPT}\n\nProfile instructions:\n{}\n\n{}{}Foreground application: {application}\nBrowser host: {host}",
             profile.prompt,
-            vocabulary_lines(vocabulary)
+            vocabulary_lines(vocabulary),
+            // VibeHex: the screen terms cleanup is given, if any.
+            crate::dictation::screen_vocabulary::cleanup::lines(&context.screen_terms)
         ),
         format!("Raw transcript:\n<transcript>\n{transcript}\n</transcript>"),
     )
@@ -2186,6 +2196,70 @@ mod tests {
                 Source::Dictation
             ),
             format!("{instructions}\n\n{transcript}")
+        );
+    }
+
+    /// VibeHex: the screen terms cleanup is given follow the Vocabulary in
+    /// a section of their own, in both prompts, each term once; with none,
+    /// or with only terms the Vocabulary has, the prompt is as it was.
+    #[test]
+    fn screen_terms_follow_the_vocabulary_in_their_own_section() {
+        use crate::dictation::screen_vocabulary::cleanup::{ForCleanup, SCREEN_TERMS_PROMPT};
+        let vocabulary = [VocabularyEntry {
+            term: "Claude Code".into(),
+            sounds_like: vec!["клод код".into()],
+        }];
+        let profile = Profile::new("default", "Write English terms in English.");
+        let said = "запусти клод код";
+        let plain = context("Zed", None);
+        let (before, transcript) = prompt_parts(&profile, said, &plain, &vocabulary);
+        let today = format!(
+            "{PROTOCOL_PROMPT}\n\nProfile instructions:\nWrite English terms in English.\n\n\
+             Vocabulary: the speaker's names and terms, spelled exactly as they must be written. \
+             Where the transcript has a form on the left of \"→\" and the speaker means the term, \
+             write the term on the right instead:\n- клод код → Claude Code\n{VOCABULARY_LIMIT}\n\n\
+             Foreground application: Zed\nBrowser host: none"
+        );
+        assert_eq!(before, today);
+
+        let mut read = context("Zed", None);
+        read.screen_terms = vec!["Qdrant".into(), "claude code".into(), "OpenCode".into()];
+        let off = ForCleanup::when(false, &read, &vocabulary);
+        assert_eq!(
+            prompt_parts(&profile, said, &off.context, &vocabulary).0,
+            today
+        );
+        let on = ForCleanup::when(true, &read, &vocabulary);
+        let (instructions, sent) = prompt_parts(&profile, said, &on.context, &vocabulary);
+        let section = format!("{SCREEN_TERMS_PROMPT}\n- Qdrant\n- OpenCode\n\n");
+        assert_eq!(
+            instructions,
+            today.replace(
+                "Foreground application:",
+                &format!("{section}Foreground application:")
+            )
+        );
+        assert_eq!(sent, transcript);
+        for term in ["- Qdrant", "- OpenCode"] {
+            assert_eq!(instructions.matches(term).count(), 1, "{term}");
+        }
+        assert!(!instructions.contains("- claude code"));
+        assert_eq!(
+            prompt(&profile, said, &on.context, &vocabulary, Source::Dictation),
+            format!("{instructions}\n\n{transcript}")
+        );
+        assert_eq!(
+            prompt(&profile, said, &off.context, &vocabulary, Source::Dictation),
+            format!("{today}\n\n{transcript}")
+        );
+        let known = ContextSnapshot {
+            screen_terms: vec!["CLAUDE CODE".into()],
+            ..context("Zed", None)
+        };
+        let only_known = ForCleanup::when(true, &known, &vocabulary);
+        assert_eq!(
+            prompt_parts(&profile, said, &only_known.context, &vocabulary).0,
+            today
         );
     }
 

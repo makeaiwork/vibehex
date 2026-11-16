@@ -44,7 +44,8 @@ light or dark instead of following the OS. The dictation HUD and meeting
 recording pill always stay dark; other overlays follow the OS; its Screen vocabulary
 toggle (off by default, macOS) uses names and terms visible in the focused
 window as temporary vocabulary for each dictation, read locally through
-Accessibility and never saved ([vocabulary.md](vocabulary.md)). Its Rewrite
+Accessibility and never saved ([vocabulary.md](vocabulary.md)); in VibeHex its
+`labs.screen_vocabulary_cleanup` switch (off by default) gives them to AI cleanup too. Its Rewrite
 reads nearby text toggle (off by default, macOS) hands the mode's OpenCode
 rewrite the text around the caret as context for names, terms, and where the
 result lands; the text goes to the configured provider, which may be a cloud

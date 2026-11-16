@@ -504,6 +504,7 @@ pub fn place(key: &str, settings: &AppSettings) -> Option<Place> {
             let what = match key {
                 "labs.unload_idle_minutes" => "Minutes",
                 "labs.caps_lock_light" => "Light",
+                "labs.screen_vocabulary_cleanup" => "Also give them to AI cleanup",
                 _ => name,
             };
             return Some(Place {

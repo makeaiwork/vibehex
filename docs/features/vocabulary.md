@@ -127,6 +127,9 @@ Screen vocabulary (Labs › Screen vocabulary, macOS)  // vocabulary.screen
 │   starts, so the text arrives after release with a little more latency
 ├── Only that capture: meetings, the local API, and OpenCode rewriting never
 │   see the terms, and only the term count and read time are logged, at debug
+├── VibeHex: labs.screen_vocabulary_cleanup (off) gives them to AI cleanup
+│   too, after the Vocabulary in the prompt and checked by the vocabulary
+│   guard; the window is then read whatever the model (labs.md)
 ├── One reader runs at a time; an intend with no pending capture reads nothing
 └── Password fields and their subtrees are skipped; Hex's own window is never
     read
