@@ -5,6 +5,8 @@ title: Vocabulary biasing
 for: [dictation, code]
 ask: Make the speech model write your vocabulary terms as you speak?
 then: Add your names and terms in General › Vocabulary
+now: Parakeet speech models ignore your Vocabulary while they transcribe, so names you added can still come out wrong.
+with: Parakeet models write your Vocabulary terms as they transcribe, using only the first 64 terms.
 group: Dictation
 os: every OS
 vibehex: false

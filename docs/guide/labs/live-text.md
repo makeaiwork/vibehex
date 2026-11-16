@@ -4,6 +4,8 @@ key: labs.live_text
 title: Live text
 for: [dictation, code]
 ask: See the words you're saying appear while you speak?
+now: While you speak you cannot see whether VibeHex understood you; the text comes only at the end.
+with: The words heard so far show in a line beside the recording HUD; they may still change before pasting.
 group: Dictation
 os: every OS
 vibehex: false

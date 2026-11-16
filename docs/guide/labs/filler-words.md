@@ -4,6 +4,8 @@ key: labs.filler_words
 title: Remove filler words
 for: [dictation, code]
 ask: Remove ums and ahs from what you dictate?
+now: Hesitation sounds such as um and uh that the speech model writes down stay in your text.
+with: Um, uh, er and ah are removed with the comma beside them, without waiting for AI. Russian fillers stay.
 group: Output
 os: every OS
 vibehex: false

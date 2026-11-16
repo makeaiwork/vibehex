@@ -24,6 +24,7 @@ pub mod about;
 pub mod engines;
 pub mod flow;
 pub mod follow;
+pub mod fresh;
 pub mod language;
 pub mod now;
 pub mod past;
@@ -336,6 +337,7 @@ pub fn own_words() -> Vec<&'static str> {
     words.extend(language::words());
     words.extend(language::USUAL.map(|(_, label)| label));
     words.extend(follow::words());
+    words.extend(fresh::words());
     words.extend(engines::words());
     words.extend(plan::words());
     words.extend(since::words());

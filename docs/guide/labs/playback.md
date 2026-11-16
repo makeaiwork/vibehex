@@ -4,6 +4,8 @@ key: labs.playback
 title: Listen to the recording
 for: [meetings, files]
 ask: Play the recording from its transcript, line by line?
+now: A transcript shows only text, so a wrong or unclear passage cannot be played back from it.
+with: Press Play on a finished meeting or file: the spoken word lights up, and clicking a line plays from there.
 group: Meetings
 os: macOS
 vibehex: true

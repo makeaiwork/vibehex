@@ -4,6 +4,8 @@ key: labs.return_to_app
 title: Return to app
 for: [dictation]
 ask: Paste into the app you started in, even if you switched?
+now: If another app comes to the front while you dictate, the text lands wherever the cursor is when it's ready.
+with: The text goes to the app you started in. If that app can't be brought back, nothing is pasted.
 group: Output
 os: macOS
 vibehex: false

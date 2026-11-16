@@ -836,3 +836,45 @@ fn a_stalled_setup_goes_on_without_a_model() {
         "{plan}"
     );
 }
+
+/// "New for you": one turn with the list and no question asked. Applied,
+/// the setup is kept with the answers it started from, what was ticked
+/// and what was not; a later look leaves out what was unticked.
+#[test]
+fn new_for_you_is_one_list_kept_once_decided() {
+    let (trace, off, on, kept, again) = speaking(Some("en"), || {
+        let mut run = Run::new(false);
+        run.settings = AppSettings::default();
+        run.send("new for you", Event::Fresh { since: None });
+        let turn = run.last();
+        assert!(run.flow.turns[turn].asks.is_empty());
+        assert!(!run.flow.turns[turn].answer.is_empty());
+        let card = &mut run.flow.turns[turn].cards[0];
+        assert!(card.items.len() >= 2, "{:?}", card.items);
+        assert!(card.items.iter().all(|item| !item.now.is_empty()));
+        card.items[0].included = false;
+        let (off, on) = (card.items[0].key.clone(), card.items[1].key.clone());
+        run.decide("apply", applied());
+        let trace = run.trace.clone();
+        let kept = run.flow.kept.last().cloned().unwrap();
+        let mut later = run.later(2);
+        later.send("again", Event::Fresh { since: None });
+        let again: Vec<String> = later.flow.turns[0]
+            .cards
+            .iter()
+            .flat_map(|card| card.items.iter().map(|item| item.key.clone()))
+            .collect();
+        (trace, off, on, kept, again)
+    });
+    assert_eq!(
+        trace,
+        [
+            "new for you: push plan -> Plan",
+            "apply: keep decided -> Done",
+        ]
+    );
+    assert!(kept.answers.iter().any(|answer| answer.id == "use"));
+    assert!(kept.declined.iter().any(|line| line.key == off));
+    assert!(kept.applied.iter().any(|line| line.key == on));
+    assert!(!again.contains(&off), "{again:?}");
+}

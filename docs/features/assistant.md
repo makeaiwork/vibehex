@@ -169,6 +169,10 @@ Opened from a place link                         // rune_ui::assistant::places
 - Setup's follow-up questions (each Labs article's `ask:` and `ask_if:`
   line) have rows in every language (`i18n/vibehex/follow.rs`, a test
   holds every one).
+- "New for you" shows each offered article's `now:` and `with:` lines
+  (how things go without it, what changes with it); they and the list's
+  own phrases have rows in every language (`i18n/vibehex/fresh.rs`, the
+  same test holds every one).
 - Scene `assistant-start-russian`: an English window dictating Russian.
   The setup scenes play the owner's settings (Orukeet, Russian), so
   their questions and chips show in Russian too.

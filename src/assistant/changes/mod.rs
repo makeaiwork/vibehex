@@ -66,6 +66,11 @@ pub struct Card {
     /// an item whose `from` is its value now.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub kept: Vec<Item>,
+    /// "New for you"'s "More to try": the other features that came since,
+    /// off and not picked for the person. One added from there joins
+    /// `items`, checked.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub more: Vec<Item>,
 }
 
 impl Card {
@@ -137,6 +142,13 @@ pub struct Item {
     /// in the row and saved with it.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub companion: Option<companion::Companion>,
+    /// "New for you": how things go without the feature and what changes
+    /// with it on, in the question's language, a sentence each
+    /// (`setup::fresh`). `why` then says what the feature does.
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub now: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub with: String,
 }
 
 impl Item {

@@ -60,6 +60,8 @@ pub struct Usage {
     pub code_share: u32,
     /// The share of [`LONG_WORDS`]+ dictations, in percent.
     pub long_share: u32,
+    /// How many of them there are.
+    pub long: usize,
     pub median_words: usize,
     /// Terms said in Russian speech, not in Vocabulary (`terms`).
     pub terms: Vec<Term>,
@@ -180,6 +182,7 @@ pub fn from_entries(entries: &[HistoryEntry], known: &[String], now_ms: u64) -> 
     usage.apps = ranked(apps, APPS);
     usage.code_share = percent(code, with_app);
     usage.long_share = percent(long, entries.len());
+    usage.long = long;
     lengths.sort_unstable();
     usage.median_words = lengths.get(lengths.len() / 2).copied().unwrap_or(0);
     let mut fixes: Vec<Fix> = fixes

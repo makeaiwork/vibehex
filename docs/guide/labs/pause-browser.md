@@ -5,6 +5,8 @@ title: Also pause the browser
 for: [dictation]
 ask: Pause music and browser videos while you dictate?
 then: Set While dictating to Pause media and allow system audio
+now: With Pause media, players like Music stop, but a browser tab such as YouTube keeps playing over your dictation.
+with: A playing browser tab is paused while you dictate and started again afterwards, but only if VibeHex paused it.
 group: Dictation
 os: macOS
 vibehex: false

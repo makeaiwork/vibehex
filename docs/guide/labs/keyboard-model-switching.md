@@ -5,6 +5,8 @@ title: Switch model with keyboard language
 for: [dictation, code, ru]
 ask: Switch speech language automatically when you change keyboard layout?
 then: Pick a model for each keyboard layout in General
+now: The speech model and language stay as you set them when you change the keyboard layout.
+with: Changing keyboard layout switches to the speech model and language you chose for it, if that model is downloaded.
 group: Models
 os: [macOS, Windows, Linux (X11 only)]
 vibehex: false

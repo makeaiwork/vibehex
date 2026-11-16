@@ -4,6 +4,8 @@ key: labs.skip_pauses
 title: Skip long pauses
 for: [dictation]
 ask: Get text sooner on a slow computer by skipping long pauses?
+now: When a dictation is transcribed as a whole, every second of a pause goes through the speech model too.
+with: Each long pause is cut down before transcribing, so text appears sooner; History still shows the full duration.
 group: Dictation
 os: [Windows, Linux]
 vibehex: false

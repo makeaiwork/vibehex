@@ -4,6 +4,8 @@ key: labs.cleanup_progress
 title: Cleanup progress
 for: [dictation, code, cleanup]
 ask: Show progress while AI cleanup works on a long dictation?
+now: While AI cleans up a long dictation, nothing shows how far it has got.
+with: A bar shows how far cleanup has got, and Paste now pastes the cleaned part plus the rest as transcribed.
 group: Output
 os: macOS
 vibehex: true

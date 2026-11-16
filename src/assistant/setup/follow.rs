@@ -73,7 +73,7 @@ fn weight(tag: &str) -> usize {
 }
 
 /// How well `article` fits `answers`, or `None` when it doesn't.
-fn fits(article: &Article, answers: &[Answer]) -> Option<usize> {
+pub(super) fn fits(article: &Article, answers: &[Answer]) -> Option<usize> {
     let uses: Vec<&str> = picked(answers, "use").collect();
     let language = picked(answers, "language").next().unwrap_or_default();
     let cleans = picked(answers, "cleanup").any(|id| id != "none")
@@ -113,7 +113,9 @@ fn fits(article: &Article, answers: &[Answer]) -> Option<usize> {
 /// and ask a question, and the gate has their switch here (this OS and
 /// build have it, and this computer may have what it needs: a notch, a
 /// mouse's extra buttons).
-fn askable<'a>(gate: &'a Gate) -> impl Iterator<Item = (&'static Article, &'static str)> + 'a {
+pub(super) fn askable<'a>(
+    gate: &'a Gate,
+) -> impl Iterator<Item = (&'static Article, &'static str)> + 'a {
     guide::articles().iter().filter_map(move |article| {
         let key = article.keys.first()?.as_str();
         (article.is_lab()

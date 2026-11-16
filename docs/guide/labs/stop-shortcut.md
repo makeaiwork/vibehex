@@ -4,6 +4,8 @@ key: labs.stop_shortcut
 title: Stop shortcut
 for: [dictation, code]
 ask: Finish a dictation by pressing Return instead of your shortcut?
+now: To finish a dictation you use the dictation shortcut itself, and Return always belongs to the app.
+with: By default, Return finishes and pastes, as if you let go of the shortcut, but only while a dictation is recording.
 group: Shortcuts
 os: macOS
 vibehex: true

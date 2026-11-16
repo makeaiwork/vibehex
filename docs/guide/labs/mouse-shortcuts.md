@@ -7,6 +7,8 @@ ask: Start dictation with a mouse button, such as a side button?
 ask_if: If your mouse has extra buttons, start dictation with one?
 needs: [mouse_buttons]
 then: In General, click Change shortcut and press a mouse button
+now: When you record a shortcut, VibeHex ignores mouse buttons, so dictation starts from the keyboard.
+with: A mouse button, such as a side button, can start dictation; that press no longer reaches the app in front.
 group: Shortcuts
 os: macOS
 vibehex: false

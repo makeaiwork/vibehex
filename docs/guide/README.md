@@ -81,6 +81,8 @@ ask: Add a space automatically when you dictate right after a word?  # setup's y
 then: …                           # optional: what follows a Yes, 12 words or fewer
 needs: [notch]                    # optional hardware: notch, mouse_buttons; known unmet, never suggested
 ask_if: If your screen has a notch, …?  # with needs: the ask while the hardware is unknown
+now: …                            # with a non-empty for: one sentence, 4 to 22 words: how things go today without it, true for anyone who has it off
+with: …                           # with a non-empty for: one sentence, 4 to 22 words: what changes for the person once it is on, and the one detail that matters for trust
 group: Pasting                    # the Labs section it sits in
 os: macOS                         # macOS | Windows | Linux | every OS, or a list
 vibehex: false                    # true when VibeHex added it (a star in Labs)
@@ -107,6 +109,15 @@ two to four phrasings a person might use, at least one in Russian.
 
 <!-- sources: docs/features/labs.md:373-390; src/paste.rs (needs_leading_space) -->
 ```
+
+`now:` and `with:` are the two cells of the "New for you" list. Every Labs article whose `for:` is not
+empty has both, and one with `for: []` has neither (a test checks both). Each is one physical line of plain
+English, 4 to 22 words, ending with a period, addressed to the person as "you", with no middle dot. `now:`
+says how VibeHex behaves with the feature off, true for anyone who has it off: no numbers about the person
+and no claim about what they do. `with:` says what concretely changes, with the one detail that matters for
+trust (what is not sent, what stays). Neither repeats the title, and every fact comes from the article's own
+body or the code it cites. Both are shown through the translation tables, so each needs rows in all nine
+languages in `src/desktop/i18n/vibehex/fresh.rs`.
 
 ## Topic article template
 

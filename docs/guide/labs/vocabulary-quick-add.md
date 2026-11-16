@@ -4,6 +4,8 @@ key: labs.vocabulary_quick_add
 title: Add to vocabulary from a selection
 for: [dictation, code]
 ask: Fix a misheard word by selecting it and pressing a shortcut?
+now: To fix a word VibeHex misheard for good, you open Vocabulary and add it by hand.
+with: Select a misheard word, press the shortcut and type the right spelling; it joins Vocabulary and replaces the selection where possible.
 group: Dictation
 os: macOS
 vibehex: true

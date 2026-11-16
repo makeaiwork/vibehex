@@ -4,6 +4,8 @@ key: labs.failure_notices
 title: Failure notices
 for: [dictation, code]
 ask: Show why a dictation failed, right beside the indicator?
+now: When a dictation fails, the indicator flashes and an error tone plays, but nothing says why.
+with: The reason shows in one line beside the indicator for about six seconds.
 group: Dictation
 os: every OS
 vibehex: false

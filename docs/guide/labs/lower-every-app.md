@@ -5,6 +5,8 @@ title: Lower every app
 for: [dictation]
 ask: Turn down every app while you dictate, even through monitor speakers?
 then: Set While dictating to Mute or Lower audio, allow system audio
+now: Through a monitor's speakers macOS cannot lower the volume, so only Music and Spotify get quieter while you dictate.
+with: With While dictating on Mute or Lower audio, every other app, browsers included, is turned down too.
 group: Dictation
 os: macOS
 vibehex: true

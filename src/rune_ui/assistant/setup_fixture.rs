@@ -597,6 +597,7 @@ fn returning(ui: &mut Ui) -> (Vec<Turn>, State) {
         ],
         code_share: 46,
         long_share: 27,
+        long: 111,
         median_words: 34,
         terms: vec![
             usage::Term {

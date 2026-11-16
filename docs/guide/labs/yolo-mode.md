@@ -2,8 +2,10 @@
 feature: yolo-mode
 key: labs.yolo_mode
 title: YOLO mode
-for: []
+for: [dictation, code]
 ask: Press Return by itself after a long dictation, sending the message?
+now: After a dictation is pasted, sending the message still takes Return from you.
+with: Hold the shortcut 2 seconds or more and the message is sent after pasting; on a Mac, Esc right after skips sending.
 group: Output
 os: every OS
 vibehex: false

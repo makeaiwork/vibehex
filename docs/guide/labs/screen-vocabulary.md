@@ -4,6 +4,8 @@ key: labs.screen_vocabulary
 title: Screen vocabulary
 for: [code]
 ask: Let names visible in the window help spell your dictation?
+now: VibeHex does not look at the window you dictate into, so names on screen can come out misspelled.
+with: Names and terms from the window you dictate into help spell that dictation; nothing is saved and password fields are skipped.
 group: Dictation
 os: macOS
 vibehex: false

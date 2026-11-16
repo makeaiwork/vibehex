@@ -4,6 +4,8 @@ key: labs.unload_idle
 title: Unload model when idle
 for: [dictation]
 ask: Free the speech model's memory while you're not dictating?
+now: A loaded speech model keeps holding memory all day, whether or not you are dictating.
+with: The model is freed after 15 idle minutes by default; the next dictation has to load it again first.
 group: Models
 os: every OS
 vibehex: false
