@@ -14,6 +14,7 @@ pub mod built_in;
 pub mod catalog;
 pub mod companion;
 pub mod counts;
+pub mod extra;
 pub mod names;
 pub mod parse;
 pub mod parts;
@@ -149,6 +150,10 @@ pub struct Item {
     pub now: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub with: String,
+    /// More dictation shortcuts' key, recorded in its row and saved with
+    /// the switch as the first extra shortcut (`extra`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shortcut: Option<crate::app_settings::HotkeyBinding>,
 }
 
 impl Item {
@@ -430,8 +435,9 @@ pub fn current(settings: &AppSettings, key: &str) -> Option<Value> {
 }
 
 /// The values a card's save sends to `check`: what its items need first,
-/// then the items (a part as its whole key) with their companions, then a
-/// plan's companions changed on a row it keeps, in that order.
+/// then the items (a part as its whole key) with their companions and a
+/// key recorded in the row, then a plan's companions changed on a row it
+/// keeps, in that order.
 pub fn values(card: &Card, settings: &AppSettings) -> Result<Map<String, Value>, String> {
     let mut values = Map::new();
     for item in card.items.iter().filter(|item| item.included) {
@@ -464,6 +470,9 @@ pub fn values(card: &Card, settings: &AppSettings) -> Result<Map<String, Value>,
         }
         if let Some(companion) = &item.companion {
             values.insert(companion.key.clone(), companion.to().clone());
+        }
+        if let Some(binding) = &item.shortcut {
+            values.insert(extra::KEY.to_owned(), extra::rows(&working, binding));
         }
     }
     Ok(values)

@@ -117,6 +117,11 @@ pub(super) const SURFACES: &[Surface] = &[
         test: "no_model_page",
         scenes: &["assistant-connect"],
     },
+    Surface {
+        name: "New for you",
+        test: "new_for_you",
+        scenes: &["assistant-new-for-you", "assistant-new-for-you-more"],
+    },
 ];
 
 fn scene(name: &str) -> fn(&mut Ui) {
@@ -238,6 +243,7 @@ surfaces!(
     consent_card,
     consent_card_mid_answer,
     no_model_page,
+    new_for_you,
 );
 
 /// Every Assistant scene as its fixture is, in the window as it opens

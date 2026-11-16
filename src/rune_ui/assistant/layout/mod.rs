@@ -60,7 +60,7 @@ pub(super) const RULES: Rules = Rules {
 const SCALE: f32 = 2.0;
 
 /// A window of `size` showing what `apply` sets up, laid out and settled.
-pub(super) fn window(apply: impl FnOnce(&mut Ui), size: (f32, f32)) -> Runtime<Ui> {
+pub(in crate::rune_ui) fn window(apply: impl FnOnce(&mut Ui), size: (f32, f32)) -> Runtime<Ui> {
     let mut state = Ui::with(AppSettings::default(), Service::Fixture(Vec::new()));
     apply(&mut state);
     let env = Env {

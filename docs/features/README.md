@@ -88,7 +88,10 @@ needed (cleaning up on this computer picks a built-in model there, with
 its memory and download, and Apply downloads it); onboarding's last page offers it ("Set up with Assistant"), and
 after an update a dot on the sidebar row leads once to the start page that
 offers it. "Help me set up my shortcuts" answers with a card of the
-shortcuts in use, each with General's recorder, saved together. "What's new?"
+shortcuts in use, each with General's recorder, saved together. "New for
+you" (from the start page, or Labs' Choose with Assistant, which also shows
+the same picks under Fits you) lists the Labs features that fit, each with
+how things go now and with it, with no model. "What's new?"
 reads VibeHex's own release notes (`docs/releases`) since the version the
 install ran before and offers what fits the person's settings. On Codex,
 with Web on (the default), it may search the web when the guide has no

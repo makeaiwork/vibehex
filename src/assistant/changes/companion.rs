@@ -32,7 +32,7 @@ pub struct Pair {
 }
 
 /// Every switch with a companion.
-pub const PAIRS: [Pair; 4] = [
+pub const PAIRS: [Pair; 5] = [
     Pair {
         switch: "labs.unload_idle",
         value: "labs.unload_idle_minutes",
@@ -47,6 +47,11 @@ pub const PAIRS: [Pair; 4] = [
         switch: "labs.caps_lock_dictation",
         value: "labs.caps_lock_light",
         says: "light {}",
+    },
+    Pair {
+        switch: "labs.yolo_mode",
+        value: "labs.yolo_mode_seconds",
+        says: "longer than {}",
     },
     Pair {
         switch: "experimental.hex_microphone",
@@ -108,9 +113,15 @@ pub fn of(settings: &AppSettings, key: &str, to: &Value) -> Option<Companion> {
 }
 
 /// How a companion's value reads, in the window's language: "15 min",
-/// "At start", "Slow blink", "Muffled".
+/// "At start", "2 s" (as YOLO mode's card says it), "Slow blink",
+/// "Muffled".
 pub fn label(key: &str, value: &Value) -> String {
     let text = value.as_str().unwrap_or_default();
+    if key.ends_with("_seconds")
+        && let Ok(seconds) = text.parse::<u32>()
+    {
+        return tr_fill("{} s", &seconds.to_string());
+    }
     if key.ends_with("_minutes")
         && let Ok(minutes) = text.parse::<u32>()
     {
@@ -242,6 +253,20 @@ mod tests {
         assert_eq!((before.as_str(), after.as_str()), ("after", ""));
         let (before, after) = around(&PAIRS[1]);
         assert_eq!((before.as_str(), after.as_str()), ("remind me", ""));
+        // YOLO mode's "Longer than", its seconds as its Labs card names
+        // them.
+        assert_eq!(label("labs.yolo_mode_seconds", &json!("2")), "2 s");
+        let yolo = PAIRS
+            .iter()
+            .find(|pair| pair.switch == "labs.yolo_mode")
+            .unwrap();
+        let (before, after) = around(yolo);
+        assert_eq!((before.as_str(), after.as_str()), ("longer than", ""));
+        let mut settings = AppSettings::default();
+        settings.labs.yolo_mode_seconds = 3;
+        let companion = of(&settings, "labs.yolo_mode", &json!(true)).unwrap();
+        assert_eq!(companion.from, json!("3"));
+        assert_eq!(companion.options.len(), 5);
     }
 
     /// A follow-up's Yes to Unload model when idle is a row that carries its

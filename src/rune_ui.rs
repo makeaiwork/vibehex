@@ -1282,6 +1282,8 @@ fn poll(ui: &mut Ui, clock: f64, tx: &mut Tx) -> bool {
     #[cfg(hex_capture)]
     let mut changed = ui.captures.poll(ui.pane == Pane::Captures && !ui.labs_open) | changed;
     changed |= assistant::poll(ui, tx);
+    // Labs' Fits you, read when the page opens and the settings change.
+    changed |= labs::fits::poll(ui);
     if ui.pane == Pane::Output && !ui.labs_open {
         changed |= output::poll(ui, clock, tx);
     }

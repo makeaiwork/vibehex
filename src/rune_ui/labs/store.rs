@@ -35,7 +35,7 @@ pub(in crate::rune_ui) fn search_field(ui: &Ui, p: Paint) -> El {
 
 const SEARCH_WIDTH: f32 = 220.0;
 /// Between cards, across and down.
-const GAP: f32 = 8.0;
+pub(super) const GAP: f32 = 8.0;
 
 /// Discover and Turned on, at the title bar's end.
 pub(in crate::rune_ui) fn tabs(ui: &Ui, p: Paint) -> El {
@@ -76,13 +76,20 @@ pub(in crate::rune_ui) fn page(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
     let is_new = |row: &Row| newest > 0 && row.lab.added() == newest;
     let mut content = col().key("content").px(METRICS.gutter).gap(12.0);
     let browsing = store.tab == Tab::Discover && !store.chosen() && query.is_empty();
-    // Labs in New in Labs aren't repeated in the grid below.
+    // Labs in Fits you and New in Labs aren't repeated below them.
     let mut featured_labs = Vec::new();
     if browsing {
-        let mut featured: Vec<&Row> = rows.iter().filter(|row| is_new(row)).collect();
+        if let Some(group) = super::fits::group(ui, p, &rows, layer) {
+            featured_labs = super::fits::labs(ui, &rows);
+            content = content.child(group);
+        }
+        let mut featured: Vec<&Row> = rows
+            .iter()
+            .filter(|row| is_new(row) && !featured_labs.contains(&row.lab))
+            .collect();
         featured.sort_by_key(|row| std::cmp::Reverse((row.lab.added(), row.lab.index())));
         featured.truncate(2);
-        featured_labs = featured.iter().map(|row| row.lab).collect();
+        featured_labs.extend(featured.iter().map(|row| row.lab));
         if !featured.is_empty() {
             content = content
                 .child(heading(p, "new-heading", tr("New in Labs")))
@@ -90,7 +97,7 @@ pub(in crate::rune_ui) fn page(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
                     "featured",
                     featured
                         .into_iter()
-                        .map(|row| card(ui, p, row, true, true, layer))
+                        .map(|row| card(ui, p, row, (true, true), None, layer))
                         .collect(),
                 ));
         }
@@ -138,7 +145,7 @@ pub(in crate::rune_ui) fn page(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
                         &format!("grid-row{index}"),
                         pair_rows
                             .iter()
-                            .map(|row| card(ui, p, row, is_new(row), false, layer))
+                            .map(|row| card(ui, p, row, (is_new(row), false), None, layer))
                             .collect(),
                     ));
                 }
@@ -170,7 +177,7 @@ fn heading(p: Paint, key: &str, title: &str) -> El {
 }
 
 /// Two cards side by side, equally wide; a lone card keeps half the row.
-fn pair(key: &str, cards: Vec<El>) -> El {
+pub(super) fn pair(key: &str, cards: Vec<El>) -> El {
     row()
         .key(key)
         .gap(GAP)
@@ -329,9 +336,17 @@ fn chip(p: Paint, key: &str, label: &str, count: usize, selected: bool, pick: Ch
 /// One lab as a card: tile, name and tags on one line, up to two lines of
 /// description, its switch, and while on any settings of its own. A note
 /// under the description may run to three lines, so a caveat such as where
-/// the text goes is never cut short. `featured` cards sit under New in Labs,
-/// so they carry no New tag.
-fn card(ui: &Ui, p: Paint, entry: &Row, new: bool, featured: bool, layer: &mut Vec<El>) -> El {
+/// the text goes is never cut short. `featured` cards sit under New in Labs
+/// or Fits you, so they carry no New tag; one under Fits you says what it
+/// changes for the person (`for_you`).
+pub(super) fn card(
+    ui: &Ui,
+    p: Paint,
+    entry: &Row,
+    (new, featured): (bool, bool),
+    for_you: Option<&str>,
+    layer: &mut Vec<El>,
+) -> El {
     let c = &p.k.c;
     let lab = entry.lab;
     let mut tags = Vec::new();
@@ -387,13 +402,23 @@ fn card(ui: &Ui, p: Paint, entry: &Row, new: bool, featured: bool, layer: &mut V
                 .max_lines(3),
         );
     }
+    if let Some(line) = for_you {
+        copy = copy.child(
+            text(tr_fill("For you: {}", line))
+                .key("for-you")
+                .font(DESCRIPTION)
+                .color(p.accent())
+                .wrap()
+                .mt(4.0),
+        );
+    }
     if let Some(extras) = extras(ui, p, entry, layer) {
         copy = copy.child(extras.mt(8.0));
     }
-    let key = if featured {
-        format!("lab-featured-{}", lab.id())
-    } else {
-        format!("lab-card-{}", lab.id())
+    let key = match (for_you, featured) {
+        (Some(_), _) => format!("lab-fits-{}", lab.id()),
+        (None, true) => format!("lab-featured-{}", lab.id()),
+        (None, false) => format!("lab-card-{}", lab.id()),
     };
     // The lab an answer's link opened: a soft warm tint and a ring, so it
     // shows among its neighbours (never a side bar).

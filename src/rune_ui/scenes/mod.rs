@@ -838,6 +838,8 @@ pub(super) const SCENES: &[Scene] = &[
     ("assistant-start-russian", assistant::fixture::start_russian),
     ("assistant-start-broke", assistant::suggested::broke),
     ("assistant-start-meetings", assistant::suggested::meetings),
+    ("assistant-new-for-you", assistant::new_for_you),
+    ("assistant-new-for-you-more", assistant::new_for_you_more),
     ("assistant-connect", assistant::fixture::connect),
     ("assistant-setup-unreachable", assistant::connect::scene),
     ("assistant-settings", assistant::fixture::settings),
@@ -1245,6 +1247,7 @@ pub(super) const SCENES: &[Scene] = &[
         ui.pane = Pane::HudLab;
     }),
     ("mac-labs", labs_with_some_on),
+    ("mac-labs-fits", labs::fits::scene),
     // Where hex://labs/vocabulary-biasing lands: its group's chip.
     ("mac-labs-link", |ui| {
         *ui = mac_fixture();

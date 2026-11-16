@@ -178,6 +178,7 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
     ("You say these, and Vocabulary doesn't have them", ["Mówisz je, a nie ma ich w Słowniku", "你常说这些，词汇表里还没有", "よく話すのに語彙にありません", "Du sagst sie, und das Vokabular hat sie nicht", "Los dices y el Vocabulario no los tiene", "Ви їх кажете, а у Словнику їх немає"]),
     ("after {}", ["po {}", "{} 后", "{} 後", "nach {}", "tras {}", "через {}"]),
     ("remind me {}", ["przypomnij {}", "提醒时间 {}", "通知 {}", "erinnern {}", "recordarme {}", "нагадати {}"]),
+    ("longer than {}", ["dłużej niż {}", "超过 {}", "{} より長い", "länger als {}", "más de {}", "довше за {}"]),
     ("light {}", ["lampka {}", "指示灯 {}", "ランプ {}", "Licht {}", "luz {}", "індикатор {}"]),
     ("voice {}", ["głos {}", "声音 {}", "声 {}", "Stimme {}", "voz {}", "голос {}"]),
 ];
@@ -356,6 +357,7 @@ pub(in super::super) const FRENCH: &[(&str, &str)] = &[
     ("You say these, and Vocabulary doesn't have them", "Vous les dites, et le Vocabulaire ne les a pas"),
     ("after {}", "après {}"),
     ("remind me {}", "me rappeler {}"),
+    ("longer than {}", "plus de {}"),
     ("light {}", "voyant {}"),
     ("voice {}", "voix {}"),
 ];
@@ -534,6 +536,7 @@ pub(in super::super) const PORTUGUESE: &[(&str, &str)] = &[
     ("You say these, and Vocabulary doesn't have them", "Você diz estes, e o Vocabulário não os tem"),
     ("after {}", "após {}"),
     ("remind me {}", "lembrar {}"),
+    ("longer than {}", "mais de {}"),
     ("light {}", "luz {}"),
     ("voice {}", "voz {}"),
 ];
@@ -712,6 +715,7 @@ pub(in super::super) const RUSSIAN: &[(&str, &str)] = &[
     ("You say these, and Vocabulary doesn't have them", "Вы их говорите, а в Словаре их нет"),
     ("after {}", "через {}"),
     ("remind me {}", "напомнить {}"),
+    ("longer than {}", "дольше {}"),
     ("light {}", "индикатор {}"),
     ("voice {}", "голос {}"),
 ];

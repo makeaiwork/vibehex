@@ -4055,6 +4055,9 @@ fn goldens() {
     for scene in [
         "assistant-start-broke",
         "assistant-start-meetings",
+        "assistant-new-for-you",
+        "assistant-new-for-you-more",
+        "mac-labs-fits",
         "assistant-whats-new",
         "assistant-updated",
         "assistant-marked",

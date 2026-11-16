@@ -286,7 +286,7 @@ fn hide(ui: &mut Ui, key: String) {
 
 /// A row pressed: what it offers. What broke stays until it works again
 /// or is hidden, a pane's question comes back each visit, and new features
-/// are hidden once setup starts on them.
+/// are hidden once "New for you" opens on them.
 fn press(ui: &mut Ui, suggestion: &Suggestion, tx: &mut Tx) {
     if hides_on_press(suggestion) && ui.assistant.suggestions.hidden.hide(suggestion.key()) {
         save(ui);
@@ -314,7 +314,8 @@ fn press(ui: &mut Ui, suggestion: &Suggestion, tx: &mut Tx) {
         Suggestion::Updated { .. } => {
             super::whats_new::ask(ui);
         }
-        Suggestion::NewLabs { .. } => super::ask::begin(ui),
+        // The Labs features that fit open "New for you", with no model.
+        Suggestion::NewLabs { .. } | Suggestion::WhichLabs => super::fresh::begin(ui),
         Suggestion::MeetingsWeek { .. } => {
             let question = crate::assistant::language::within(&ui.settings, || {
                 tr("What are the action items from this week's meetings, and who owns each one?")
@@ -322,10 +323,7 @@ fn press(ui: &mut Ui, suggestion: &Suggestion, tx: &mut Tx) {
             });
             ask(ui, question);
         }
-        Suggestion::Meeting(_)
-        | Suggestion::WrongWord
-        | Suggestion::WhichLabs
-        | Suggestion::Cleanup { .. } => {
+        Suggestion::Meeting(_) | Suggestion::WrongWord | Suggestion::Cleanup { .. } => {
             let question = crate::assistant::language::within(&ui.settings, || title(suggestion));
             ask(ui, question);
         }
@@ -336,7 +334,7 @@ fn press(ui: &mut Ui, suggestion: &Suggestion, tx: &mut Tx) {
 /// Whether pressing a row hides it. What broke stays until it works
 /// again or is hidden, a pane's question comes back each visit, and
 /// Updated to and a setup left go by their own state (asked about,
-/// decided); new features go once setup starts on them.
+/// decided); new features go once "New for you" opens on them.
 fn hides_on_press(suggestion: &Suggestion) -> bool {
     !suggestion.broke()
         && !suggestion.from_pane()
@@ -351,7 +349,6 @@ fn asks(suggestion: &Suggestion) -> bool {
             | Suggestion::Meeting(_)
             | Suggestion::MeetingsWeek { .. }
             | Suggestion::WrongWord
-            | Suggestion::WhichLabs
             | Suggestion::Cleanup { .. }
     )
 }

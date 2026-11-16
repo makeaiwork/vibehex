@@ -214,6 +214,52 @@ pub fn fresh(
     }
 }
 
+/// What "New for you" finds now: the answers it starts from (`since`'s
+/// setup, else the settings) and the features they pick, with `since`'s
+/// releases and use. `state` knows what earlier setups answered and
+/// declined. The setup machine, the start page's row and the Labs page's
+/// "Fits you" all read it.
+pub fn find(
+    since: Option<&since::Since>,
+    settings: &AppSettings,
+    state: &State,
+) -> (Vec<Answer>, Fresh) {
+    let answers = answers(since, settings, state);
+    let (releases, usage) = match since {
+        Some(since) => (since.releases.as_slice(), since.usage.as_ref()),
+        None => (&[][..], None),
+    };
+    let found = fresh(&answers, settings, state, usage, releases);
+    (answers, found)
+}
+
+/// "Add" on a row of More to try: the feature joins the list, checked,
+/// with what it does now and with it on when its article says so, in its
+/// area's place.
+pub fn add(card: &mut Card, key: &str) {
+    let Some(at) = card.more.iter().position(|item| item.key == key) else {
+        return;
+    };
+    let mut item = card.more.remove(at);
+    item.included = true;
+    let article = guide::articles()
+        .iter()
+        .find(|article| article.is_lab() && article.keys.first().is_some_and(|known| known == key));
+    if let Some(article) =
+        article.filter(|article| !article.now.is_empty() && !article.with.is_empty())
+    {
+        item.now = tr(&article.now).to_owned();
+        item.with = tr(&article.with).to_owned();
+    }
+    let area = plan::area(&item.key);
+    let place = card
+        .items
+        .iter()
+        .position(|other| plan::area(&other.key) > area)
+        .unwrap_or(card.items.len());
+    card.items.insert(place, item);
+}
+
 /// The list to tick: a row per pick, checked unless the gate holds it,
 /// grouped by area, and the rest under "More to try". `None` with nothing
 /// to show.
@@ -447,6 +493,60 @@ mod tests {
             .map(|item| plan::area(&item.key))
             .collect();
         assert!(areas.windows(2).all(|pair| pair[0] <= pair[1]));
+    }
+
+    /// Add moves a feature from More to try into the list, checked, with
+    /// its two sentences where its article has them, in its area's place.
+    #[test]
+    fn add_moves_a_feature_into_the_list_in_its_place() {
+        let settings = AppSettings::default();
+        let state = state();
+        let labs: Vec<String> = guide::articles()
+            .iter()
+            .filter(|article| article.is_lab())
+            .filter_map(|article| article.keys.first().cloned())
+            .collect();
+        let keys: Vec<&str> = labs.iter().map(String::as_str).collect();
+        let found = fresh(&coder(), &settings, &state, None, &[release(&keys)]);
+        let mut card = card(&found, &settings, &state).unwrap();
+        let (rows, more) = (card.items.len(), card.more.len());
+        // One its article says "now" and "with" for, and one without.
+        let said = |item: &&Item| {
+            guide::articles()
+                .iter()
+                .any(|article| article.keys.first() == Some(&item.key) && !article.now.is_empty())
+        };
+        let picked = card.more.iter().find(said).map(|item| item.key.clone());
+        let plain = card
+            .more
+            .iter()
+            .find(|item| !said(item))
+            .map(|item| item.key.clone());
+        for key in picked.iter().chain(&plain) {
+            add(&mut card, key);
+            let item = card.items.iter().find(|item| item.key == *key).unwrap();
+            assert!(item.included && card.more.iter().all(|item| item.key != *key));
+        }
+        let added = picked.iter().chain(&plain).count();
+        assert!(added > 0);
+        assert_eq!(
+            (card.items.len(), card.more.len()),
+            (rows + added, more - added)
+        );
+        if let Some(key) = &picked {
+            let item = card.items.iter().find(|item| item.key == *key).unwrap();
+            assert!(!item.now.is_empty() && !item.with.is_empty());
+        }
+        let areas: Vec<plan::Area> = card
+            .items
+            .iter()
+            .map(|item| plan::area(&item.key))
+            .collect();
+        assert!(areas.windows(2).all(|pair| pair[0] <= pair[1]), "{areas:?}");
+        // A key not under More to try changes nothing.
+        let before = card.clone();
+        add(&mut card, "labs.no_such_feature");
+        assert_eq!(card, before);
     }
 
     /// The opening counts what came and what fits, and says so plainly

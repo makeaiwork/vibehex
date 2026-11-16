@@ -261,7 +261,7 @@ fn rule(p: Paint, key: &str) -> El {
 
 /// A row: its glyph, its name and what it does, a note, and its value;
 /// the name sits level with the middle of a one-line value.
-fn line(p: Paint, key: String, glyph: &'static Icon, words: El, value: El) -> El {
+pub(super) fn line(p: Paint, key: String, glyph: &'static Icon, words: El, value: El) -> El {
     row()
         .key(key)
         .px(14.0)
@@ -279,7 +279,7 @@ fn line(p: Paint, key: String, glyph: &'static Icon, words: El, value: El) -> El
 }
 
 /// A row's words: its name, General's line under it, and a note.
-fn words(p: Paint, name: &str, purpose: Option<&str>, notes: Vec<El>) -> El {
+pub(super) fn words(p: Paint, name: &str, purpose: Option<&str>, notes: Vec<El>) -> El {
     col()
         .key("words")
         .grow(1.0)
@@ -561,7 +561,7 @@ fn footer(p: Paint, at: At, card: &Card, shown: &Shown, (primary, preset): (bool
 
 /// Row `index` records: the way General records (the host pauses the
 /// global shortcuts until it ends); pressed again, it stops.
-fn record(ui: &mut Ui, at: At, index: usize, target: ShortcutTarget) {
+pub(super) fn record(ui: &mut Ui, at: At, index: usize, target: ShortcutTarget) {
     let again = ui.assistant.recording == Some((at, index));
     s::begin_capture(ui, target);
     if again {
@@ -586,6 +586,11 @@ pub(in super::super) fn recorded(
     let Some(card) = act::card(ui, at).cloned() else {
         return s::cancel_capture(ui);
     };
+    // A plan's row records its feature's key ("New for you").
+    #[cfg(target_os = "macos")]
+    if card.kind == crate::assistant::changes::CardKind::Plan {
+        return super::fresh::recorded(ui, (at, index), target, binding);
+    }
     let others = after(ui, &card, Some(index));
     let item = card.items.get(index).cloned().unwrap_or_default();
     // Plain ⌫ turns a shortcut that can be off off, as General's row does:

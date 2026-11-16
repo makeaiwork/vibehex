@@ -38,6 +38,8 @@ keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.d
   which frees VibeHex's keys for another app.
 - New: Assistant's start page suggests what fits now, such as dictations pasted without AI
   cleanup or notes not written, and a warning dot on Assistant says when something broke.
+- New: "New for you" in Assistant and Fits you in Labs list the Labs features that suit you,
+  each with how things go now and with it, and its setting set right in the row.
 - New: `hex transcribe <file>` prints the text of any audio or video file, long ones too.
   Labs has Shell completions for Tab in your terminal.
 - New in Labs for developers: Print-only CLI dictation (macOS), Timestamps in API

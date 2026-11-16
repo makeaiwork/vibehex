@@ -83,7 +83,7 @@ fn start(ui: &Ui, p: Paint, asking: bool) -> El {
     for (index, pair) in examples.chunks(2).enumerate() {
         let mut line = row().key(format!("line{index}")).gap(8.0);
         for (offset, question) in pair.iter().enumerate() {
-            line = line.child(example(p, index * 2 + offset, tr(question)));
+            line = line.child(example(p, index * 2 + offset, question));
         }
         grid = grid.child(line);
     }
@@ -234,8 +234,10 @@ fn knows(p: Paint) -> El {
         )
 }
 
-/// An example question: pressing it asks it.
-fn example(p: Paint, index: usize, question: &'static str) -> El {
+/// An example question: pressing it asks it. Which Labs features are
+/// worth turning on opens "New for you" instead, which asks no model.
+fn example(p: Paint, index: usize, english: &'static str) -> El {
+    let question = tr(english);
     let c = &p.k.c;
     row()
         .key(format!("example{index}"))
@@ -262,6 +264,9 @@ fn example(p: Paint, index: usize, question: &'static str) -> El {
                 .shrink(),
         )
         .on_press(move |ui: &mut Ui| {
+            if english == EXAMPLES[0] {
+                return super::fresh::begin(ui);
+            }
             ask(ui, question.to_owned());
         })
 }

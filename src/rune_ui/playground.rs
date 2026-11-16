@@ -220,6 +220,11 @@ const PATHS: &[(&str, &str)] = &[
         "assistant-start-meetings",
         "Window/Assistant/New conversation from Meetings",
     ),
+    ("assistant-new-for-you", "Window/Assistant/New for you"),
+    (
+        "assistant-new-for-you-more",
+        "Window/Assistant/New for you, More to try open",
+    ),
     ("assistant-connect", "Window/Assistant/Connect a model"),
     (
         "assistant-setup-unreachable",
@@ -603,6 +608,7 @@ const PATHS: &[(&str, &str)] = &[
     ),
     ("mac-hud-lab", "Window/HUD Lab/HUD Lab"),
     ("mac-labs", "Window/General/Labs"),
+    ("mac-labs-fits", "Window/General/Labs fits you"),
     ("mac-labs-link", "Window/General/Labs link"),
     ("mac-labs-on", "Window/General/Labs turned on"),
     ("mac-labs-screenshots", "Window/General/Labs screenshots"),

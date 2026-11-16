@@ -13,16 +13,11 @@ impl Flow {
     /// tick, the look itself is kept, so what came isn't counted again.
     pub(super) fn fresh(&mut self, since: Option<Since>, env: &Env, out: &mut Vec<Effect>) {
         let context = self.context(env);
-        let answers = fresh::answers(since.as_ref(), &context.settings, &context.state);
-        let (releases, usage, last_ms) = match &since {
-            Some(since) => (
-                since.releases.as_slice(),
-                since.usage.as_ref(),
-                since.last.as_ref().map_or(0, |last| last.at_ms),
-            ),
-            None => (&[][..], None, 0),
-        };
-        let found = fresh::fresh(&answers, &context.settings, &context.state, usage, releases);
+        let (answers, found) = fresh::find(since.as_ref(), &context.settings, &context.state);
+        let last_ms = since
+            .as_ref()
+            .and_then(|since| since.last.as_ref())
+            .map_or(0, |last| last.at_ms);
         let card = fresh::card(&found, &context.settings, &context.state);
         let settled = card.as_ref().is_none_or(|card| card.items.is_empty());
         let turn = Turn {

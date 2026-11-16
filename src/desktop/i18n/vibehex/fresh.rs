@@ -1,7 +1,8 @@
 //! "New for you": the two sentences each offered Labs article adds to its
 //! front matter (`now:`, how things go without the feature, and `with:`,
 //! what changes once it is on), and the short phrases around the list
-//! (`setup::fresh`), keyed by the English source string: the six columns
+//! (`setup::fresh`), the picker's rows in the window and Labs' "Fits
+//! you", keyed by the English source string: the six columns
 //! of [`super::super::TRANSLATIONS`] (Polish, Chinese (Simplified),
 //! Japanese, German, Spanish, Ukrainian), then French, Brazilian
 //! Portuguese, and Russian.
@@ -91,6 +92,15 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
     ("{} fit how you use it.", ["Pasujących do tego, jak z niego korzystasz: {}.", "有 {} 项适合你的使用方式。", "{} 件があなたの使い方に合っています。", "{} passen zu deiner Nutzung.", "{} encajan con tu forma de usarlo.", "Підходять до того, як ви ним користуєтеся: {}."]),
     ("{}% of your dictations go into a terminal or a code editor.", ["{}% twoich dyktowań trafia do terminala lub edytora kodu.", "你的听写中有 {}% 是写进终端或代码编辑器的。", "音声入力の {}% はターミナルかコードエディタに入力されています。", "{}% deiner Diktate gehen in ein Terminal oder einen Code-Editor.", "El {}% de tus dictados va a un terminal o a un editor de código.", "{}% ваших диктувань потрапляє в термінал або редактор коду."]),
     ("⌘⇧4 takes a shot, saves it as a PNG and shows a corner card to mark it up or talk over.", ["⌘⇧4 robi zrzut, zapisuje go jako PNG i pokazuje kartę w rogu, na której możesz rysować lub mówić.", "⌘⇧4 截一张图，存成 PNG，并在角落显示一张卡片，可以标注或语音讲解。", "⌘⇧4 で撮影すると PNG として保存され、隅にカードが出て、書き込みや声での説明ができます。", "⌘⇧4 macht ein Bild, speichert es als PNG und zeigt eine Karte in der Ecke, auf der du zeichnen oder sprechen kannst.", "⌘⇧4 hace la captura, la guarda como PNG y muestra una tarjeta en la esquina para marcarla o comentarla con la voz.", "⌘⇧4 робить знімок, зберігає його як PNG і показує картку в кутку, щоб малювати на ньому або коментувати голосом."]),
+    ("Now", ["Teraz", "现在", "いま", "Jetzt", "Ahora", "Зараз"]),
+    ("With it", ["Z nią", "开启后", "オンにすると", "Damit", "Con ella", "З нею"]),
+    ("More to try: 1 new feature", ["Więcej do wypróbowania: 1 nowa funkcja", "更多可尝试：1 项新功能", "ほかに試せるもの：新機能 1 件", "Mehr zum Ausprobieren: 1 neue Funktion", "Más para probar: 1 función nueva", "Ще спробувати: 1 нова функція"]),
+    ("More to try: {} new features", ["Więcej do wypróbowania: nowe funkcje ({})", "更多可尝试：{} 项新功能", "ほかに試せるもの：新機能 {} 件", "Mehr zum Ausprobieren: {} neue Funktionen", "Más para probar: {} funciones nuevas", "Ще спробувати: нові функції ({})"]),
+    ("Click the field and press the keys", ["Kliknij pole i naciśnij klawisze", "点击这个字段，然后按下按键", "欄をクリックしてキーを押してください", "Klicke auf das Feld und drücke die Tasten", "Haz clic en el campo y pulsa las teclas", "Клацніть поле й натисніть клавіші"]),
+    ("Fits you", ["Pasuje do ciebie", "适合你", "あなたに合うもの", "Passt zu dir", "Para ti", "Вам підходить"]),
+    ("Choose with Assistant", ["Wybierz z Asystentem", "让助手帮你选", "アシスタントと選ぶ", "Mit dem Assistenten auswählen", "Elegir con el asistente", "Обрати з асистентом"]),
+    ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", ["Wybrane na podstawie twoich ustawień i tego, jak używasz VibeHex. Każda karta mówi, co się dla ciebie zmieni. Nic nie zostanie włączone, dopóki tego nie zechcesz.", "根据你的设置和你使用 VibeHex 的方式挑选。每张卡片都写明会为你带来什么变化。在你确认之前，什么都不会开启。", "あなたの設定と VibeHex の使い方から選びました。各カードに、あなたにとって何が変わるかを書いています。あなたが決めるまで、何もオンになりません。", "Ausgewählt nach deinen Einstellungen und deiner Nutzung von VibeHex. Jede Karte sagt, was sich für dich ändert. Nichts wird eingeschaltet, bevor du es willst.", "Elegidas según tus ajustes y cómo usas VibeHex. Cada tarjeta dice qué cambia para ti. Nada se activa hasta que tú lo digas.", "Дібрано за вашими налаштуваннями і тим, як ви користуєтеся VibeHex. Кожна картка каже, що зміниться для вас. Нічого не ввімкнеться, доки ви не скажете."]),
+    ("For you: {}", ["Dla ciebie: {}", "对你来说：{}", "あなたには：{}", "Für dich: {}", "Para ti: {}", "Для вас: {}"]),
 ];
 
 /// French.
@@ -179,6 +189,15 @@ pub(super) const FRENCH: &[(&str, &str)] = &[
     ("{} fit how you use it.", "{} correspondent à votre façon de l'utiliser."),
     ("{}% of your dictations go into a terminal or a code editor.", "{}% de vos dictées vont dans un terminal ou un éditeur de code."),
     ("⌘⇧4 takes a shot, saves it as a PNG and shows a corner card to mark it up or talk over.", "⌘⇧4 prend la capture, l'enregistre en PNG et affiche une carte dans un coin pour l'annoter ou la commenter à voix haute."),
+    ("Now", "Maintenant"),
+    ("With it", "Avec elle"),
+    ("More to try: 1 new feature", "Autres à essayer : 1 nouvelle fonction"),
+    ("More to try: {} new features", "Autres à essayer : {} nouvelles fonctions"),
+    ("Click the field and press the keys", "Cliquez sur le champ et appuyez sur les touches"),
+    ("Fits you", "Pour vous"),
+    ("Choose with Assistant", "Choisir avec l'Assistant"),
+    ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", "Choisies d'après vos réglages et votre usage de VibeHex. Chaque carte dit ce qui change pour vous. Rien n'est activé tant que vous ne le décidez pas."),
+    ("For you: {}", "Pour vous : {}"),
 ];
 
 /// Brazilian Portuguese.
@@ -267,6 +286,15 @@ pub(super) const PORTUGUESE: &[(&str, &str)] = &[
     ("{} fit how you use it.", "{} combinam com o seu jeito de usar."),
     ("{}% of your dictations go into a terminal or a code editor.", "{}% dos seus ditados vão para um terminal ou um editor de código."),
     ("⌘⇧4 takes a shot, saves it as a PNG and shows a corner card to mark it up or talk over.", "⌘⇧4 tira a captura, salva como PNG e mostra um cartão no canto para marcar ou comentar falando."),
+    ("Now", "Agora"),
+    ("With it", "Com ele"),
+    ("More to try: 1 new feature", "Mais para testar: 1 recurso novo"),
+    ("More to try: {} new features", "Mais para testar: {} recursos novos"),
+    ("Click the field and press the keys", "Clique no campo e pressione as teclas"),
+    ("Fits you", "Combina com você"),
+    ("Choose with Assistant", "Escolher com o Assistente"),
+    ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", "Escolhidos a partir dos seus ajustes e de como você usa o VibeHex. Cada cartão diz o que muda para você. Nada é ligado até você decidir."),
+    ("For you: {}", "Para você: {}"),
 ];
 
 /// Russian.
@@ -355,4 +383,13 @@ pub(super) const RUSSIAN: &[(&str, &str)] = &[
     ("{} fit how you use it.", "Подходят к тому, как вы им пользуетесь: {}."),
     ("{}% of your dictations go into a terminal or a code editor.", "{}% ваших диктовок идёт в терминал или редактор кода."),
     ("⌘⇧4 takes a shot, saves it as a PNG and shows a corner card to mark it up or talk over.", "⌘⇧4 делает снимок, сохраняет его как PNG и показывает в углу карточку, на которой можно рисовать или комментировать голосом."),
+    ("Now", "Сейчас"),
+    ("With it", "С ней"),
+    ("More to try: 1 new feature", "Ещё попробовать: 1 новая функция"),
+    ("More to try: {} new features", "Ещё попробовать: новые функции ({})"),
+    ("Click the field and press the keys", "Щёлкните по полю и нажмите клавиши"),
+    ("Fits you", "Вам подходит"),
+    ("Choose with Assistant", "Выбрать с ассистентом"),
+    ("Picked from your settings and how you use VibeHex. Each card says what changes for you. Nothing is turned on until you say so.", "Подобраны по вашим настройкам и тому, как вы используете VibeHex. На каждой карточке сказано, что изменится для вас. Ничего не включится, пока вы не решите."),
+    ("For you: {}", "Для вас: {}"),
 ];

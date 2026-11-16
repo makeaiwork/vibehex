@@ -7,6 +7,7 @@
 //! while off.
 
 mod browser_access;
+pub(super) mod fits;
 mod group;
 #[cfg(all(target_os = "macos", hex_capture))]
 pub(super) mod screenshots;
@@ -250,6 +251,9 @@ pub(super) struct Store {
     pub(super) flash: Option<(&'static str, std::time::Instant)>,
     /// VibeHex's chip: only the labs VibeHex added show.
     pub(super) vibehex: bool,
+    /// What Fits you shows, read when the page opens and when the
+    /// settings change (`fits`).
+    pub(super) fits: fits::Fits,
 }
 
 /// How long a linked lab's card keeps its focus border.
