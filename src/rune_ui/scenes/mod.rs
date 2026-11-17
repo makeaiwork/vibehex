@@ -77,7 +77,7 @@ pub(super) const SCENES: &[Scene] = &[
     }),
     ("history", |ui| {
         *ui = portal_fixture();
-        ui.history = history::HistoryPane::fixture();
+        ui.history = history::HistoryPane::fixture_read(); // VibeHex: one that read
         ui.pane = Pane::History;
     }),
     ("about", |ui| {

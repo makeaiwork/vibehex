@@ -516,8 +516,9 @@ the read), and up to 1,000 after it join that capture's context
 (`ContextSnapshot::caret_text`); empty parts are omitted. The read uses
 `AXFocusedUIElement` through the 0.25 s messaging timeout and never reads Hex
 or an `AXSecureTextField`, so a password field returns nothing. Output's
-typed-text path, the Voice prompt request, meetings, the local API, History,
-logs, and events never see it, and the text is never saved. Off, no
+typed-text path, the Voice prompt request, meetings, the local API, logs,
+and events never see it. VibeHex keeps it, secrets cut out, with that
+dictation's History entry under What VibeHex read (README.md › History). Off, no
 Accessibility read or thread starts, and the rewrite prompt is byte for byte
 what it was. A cancelled capture discards a late read. VibeHex: every cleanup
 engine gets it, a cloud one included, in the transcript's part of the prompt

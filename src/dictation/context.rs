@@ -38,7 +38,8 @@ pub struct ContextSnapshot {
     pub screen_terms: Vec<String>,
     /// Labs › Rewrite reads nearby text: the focused text element's text
     /// around this dictation's insertion point. Set only on the snapshot a
-    /// capture finishes with, and never saved or logged.
+    /// capture finishes with, and never logged; VibeHex keeps it with the
+    /// dictation's History entry (`history::read`).
     pub caret_text: Option<CaretText>,
 }
 

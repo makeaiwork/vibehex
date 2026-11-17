@@ -182,6 +182,9 @@ struct HistoryRow<'a> {
     /// still beside the store.
     #[serde(skip_serializing_if = "Option::is_none")]
     recording: Option<String>,
+    /// VibeHex: what the dictation read (`history::read`), with `--raw`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    read: Option<&'a crate::history::read::HistoryRead>,
 }
 
 #[derive(Serialize)]
@@ -251,6 +254,7 @@ fn history_output<'a>(
             recording: recordings
                 .and_then(|recordings| recordings::saved(recordings, entry))
                 .map(|path| path.to_string_lossy().into_owned()),
+            read: entry.read.as_ref().filter(|_| args.raw),
         })
         .collect();
     Ok(HistoryOutput {

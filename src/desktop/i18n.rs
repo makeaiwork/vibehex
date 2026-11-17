@@ -1622,6 +1622,8 @@ mod tests {
         include_str!("../rune_ui/general/search.rs"),
         include_str!("../rune_ui/history.rs"),
         include_str!("../rune_ui/history/selection.rs"),
+        // VibeHex: History's "What VibeHex read".
+        include_str!("../rune_ui/history/read.rs"),
         include_str!("../rune_ui/files.rs"),
         include_str!("../rune_ui/files/detail.rs"),
         include_str!("../rune_ui/files/settings.rs"),

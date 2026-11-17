@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 pub mod annotations;
 pub mod captures;
 pub mod playback;
+pub mod read; // VibeHex: what a dictation read, kept with its entry.
 pub mod recordings;
 pub mod stats;
 pub mod versions;
@@ -146,6 +147,9 @@ pub struct HistoryEntry {
     /// Earlier transcripts, newest first ([`versions`]).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub versions: Vec<HistoryVersion>,
+    /// VibeHex: what the dictation read, if anything ([`read`]).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub read: Option<read::HistoryRead>,
 }
 
 fn is_zero(value: &u64) -> bool {
@@ -166,6 +170,7 @@ impl HistoryEntry {
                 .iter()
                 .map(HistoryVersion::text_bytes)
                 .sum::<usize>()
+            + self.read.as_ref().map_or(0, read::HistoryRead::text_bytes) // VibeHex
     }
 
     /// Whether any searched field contains `needle` (already lowercased).
@@ -214,6 +219,8 @@ pub struct HistoryDraft {
     pub recording: Option<Recording>,
     /// The speech model that transcribed it ([`dictation_model`]).
     pub model: Option<String>,
+    /// VibeHex: what the dictation read, if anything ([`read`]).
+    pub read: Option<read::HistoryRead>,
 }
 
 /// The name of the speech model dictation runs: the one the engine holds,
@@ -431,6 +438,7 @@ impl HistoryStore {
             language: None,
             text_ms: None,
             versions: Vec::new(),
+            read: draft.read.and_then(read::HistoryRead::kept), // VibeHex
         });
         self.prune(now_ms);
         self.persist()?;
@@ -908,6 +916,7 @@ mod tests {
             total_ms: 1_100,
             recording: None,
             model: None,
+            read: None,
         }
     }
 

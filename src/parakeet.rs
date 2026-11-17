@@ -171,6 +171,8 @@ struct CompletedTranscript {
     timings: JobTimings,
     processing: Option<ProcessingObservation>,
     recording: Option<crate::history::Recording>,
+    /// VibeHex: what the dictation read, for its History entry.
+    read: Option<crate::history::read::HistoryRead>,
 }
 
 enum OutputJob {
@@ -675,6 +677,7 @@ fn run_processor_worker(
                 control: job.control,
                 target: job.target,
                 result: Box::new(Ok(CompletedTranscript {
+                    read: crate::history::read::HistoryRead::of(&job.context, &processed.read),
                     text: processed.text,
                     nothing: processed.nothing,
                     raw: job.text,
@@ -899,6 +902,7 @@ fn run_inference_worker(
                 }
             }
             result => {
+                let read = crate::history::read::HistoryRead::of(&job.context, &Default::default());
                 let application = job.context.application;
                 let recording = job.recording;
                 let result = result.map(|text| CompletedTranscript {
@@ -910,6 +914,7 @@ fn run_inference_worker(
                     timings,
                     processing: None,
                     recording,
+                    read,
                 });
                 if output
                     .send(OutputJob::Completed {
@@ -1236,6 +1241,7 @@ fn record_history(
         total_ms: completed.timings.total_started.elapsed().as_millis() as u64,
         recording: completed.recording.take(),
         model: crate::history::dictation_model(),
+        read: completed.read.take(),
     };
     if let Err(error) = history.record(draft) {
         tracing::warn!(%error, "could not record dictation history");
@@ -1639,6 +1645,7 @@ mod tests {
                     },
                     processing: None,
                     recording: None,
+                    read: None,
                 })),
             },
             &mut |_, _| Err(eyre!("clipboard changed while Hex was preserving it")),
@@ -1697,6 +1704,7 @@ mod tests {
                         },
                         processing: None,
                         recording: None,
+                        read: None,
                     })),
                 },
                 &mut |pasted_text, mode| {
@@ -1787,6 +1795,7 @@ mod tests {
                 },
                 processing: None,
                 recording: None,
+                read: None,
             };
             record_history(&history, TranscriptionTarget::Paste, sent, &mut completed);
         }
@@ -1796,6 +1805,61 @@ mod tests {
             .map(|entry| entry.kind)
             .collect();
         assert!(kinds.contains(&HistoryKind::Dictation) && kinds.contains(&HistoryKind::Send));
+        let _ = std::fs::remove_dir_all(&directory);
+    }
+
+    /// VibeHex: a dictation's History entry keeps what it read, from its
+    /// context and its processing; one that read nothing keeps nothing, and
+    /// the local API's dictations (the service) keep no entry at all.
+    #[test]
+    fn a_dictations_history_entry_keeps_what_it_read() {
+        use crate::dictation::caret_text::CaretText;
+        use crate::dictation::processor::{Profile, Profiles};
+        use crate::history::read::{HistoryRead, NearbySent};
+        let directory =
+            std::env::temp_dir().join(format!("hex-parakeet-read-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir_all(&directory).unwrap();
+        let history = History::new(crate::history::HistoryStore::open(
+            directory.join("history.json"),
+            crate::history::HistoryRetention::Week,
+            crate::history::now_ms(),
+        ));
+        let mut job = processing_job(TranscriptionTarget::Paste);
+        job.context.screen_terms = vec!["Qdrant".into()];
+        job.context.caret_text = Some(CaretText {
+            before: "We ship on ".into(),
+            selected: String::new(),
+            after: String::new(),
+        });
+        // A mode that doesn't clean up: read, and given to nothing.
+        let processed = process_job_text(&job, || Profiles::new(Profile::new("Global", "")), || {});
+        for (target, context) in [
+            (TranscriptionTarget::Service, &job.context),
+            (TranscriptionTarget::Paste, &ContextSnapshot::default()),
+            (TranscriptionTarget::Paste, &job.context),
+        ] {
+            let mut completed = CompletedTranscript {
+                text: processed.text.clone(),
+                nothing: false,
+                raw: job.text.clone(),
+                application: None,
+                return_to: None,
+                timings: job.timings,
+                processing: None,
+                recording: None,
+                read: HistoryRead::of(context, &processed.read),
+            };
+            record_history(&history, target, false, &mut completed);
+        }
+        let entries = history.recent(5);
+        assert_eq!(entries.len(), 2, "the service keeps no entry");
+        let read = entries[0].read.as_ref().unwrap();
+        assert_eq!(read.screen_terms, ["Qdrant"]);
+        assert!(read.cleanup_terms.is_empty());
+        assert_eq!(read.nearby.as_ref().unwrap().before, "We ship on ");
+        assert_eq!(read.nearby_sent, NearbySent::Nothing);
+        assert_eq!(entries[1].read, None, "nothing read, nothing kept");
         let _ = std::fs::remove_dir_all(&directory);
     }
 

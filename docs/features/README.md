@@ -44,7 +44,8 @@ light or dark instead of following the OS. The dictation HUD and meeting
 recording pill always stay dark; other overlays follow the OS; its Screen vocabulary
 toggle (off by default, macOS) uses names and terms visible in the focused
 window as temporary vocabulary for each dictation, read locally through
-Accessibility and never saved ([vocabulary.md](vocabulary.md)); in VibeHex its
+Accessibility ([vocabulary.md](vocabulary.md)); in VibeHex the names are kept
+with that dictation's History entry (below) and its
 `labs.screen_vocabulary_cleanup` switch (off by default) gives them to AI cleanup too. Its Rewrite
 reads nearby text toggle (off by default, macOS) hands AI cleanup the text
 around the caret as context for names, terms, and where the result lands, on
@@ -1044,11 +1045,52 @@ Completed output                         // output
     │   -> the card's "Transcribe again" menu runs it through any installed model
     │   -> the new text with Copy and Replace; Clear all and retention delete the audio (labs.md, #1032)
     │   -> Replace keeps the old text as one of 5 earlier versions: Copy, Use this version (#1177)
-    └── Labs > Copy dictation audio (off) -> copies a kept WAV as a file   // labs.copy-dictation-audio
-        -> the card's Copy audio beside Play, and the menu bar or tray's Copy last dictation audio
-        -> needs Keep recordings; it stores no audio itself (labs.md)
+    ├── Labs > Copy dictation audio (off) -> copies a kept WAV as a file   // labs.copy-dictation-audio
+    │   -> the card's Copy audio beside Play, and the menu bar or tray's Copy last dictation audio
+    │   -> needs Keep recordings; it stores no audio itself (labs.md)
+    └── VibeHex: What VibeHex read (macOS dictations, folded until pressed)   // history::read, rune_ui/history/read.rs
+        -> a dictation that read anything (Labs > Screen vocabulary, Rewrite reads nearby text) keeps it in its entry
+        -> Names from the window (count, tags; the ones AI cleanup was given marked) + one legend line
+        -> Text near the cursor: Before the cursor / Selected / After the cursor blocks (6 lines, Show all)
+        -> what cleanup got: all / the built-in model's part / nothing; warning line when it was asked again
+        -> both labs off, or a dictation that read nothing -> the entry and the pane are exactly as before
 Every entry since #1177 -> "Speech model" fact: the model that made its text (+ language when chosen)
 ```
+
+VibeHex: what a dictation read is kept with its History entry (the owner's
+decision of 2026-11-16, so the temporary vocabulary and the nearby text can be
+looked at and analysed later). `HistoryEntry::read` (`history::read::HistoryRead`,
+serde default, omitted when absent, so older files and entries without it are
+byte for byte as before) holds `screen_terms` (what Screen vocabulary read, in
+order), `cleanup_terms` (the ones AI cleanup's prompt listed), `nearby` (before,
+selected, after: the context's text after the secrets pass), `nearby_sent`
+(`nothing`, `all`, or `part`: a built-in model's end of the text before the
+cursor and the selection, unless that was all of it) and `asked_again` (an
+answer repeated the nearby text and was asked again without it). The macOS
+processor worker writes it from the job's context and `Processed::read`
+(`Nearby::given`, which knows the terms cleanup listed and what of the text a
+piece was asked with); the raw path keeps what was read with nothing given;
+Linux and Windows drafts have none (the labs are macOS's). It rides on the
+draft, so it is written only when the entry is (History Off, the local API's
+dictations: neither), is bounded like the entry's other fields, counts toward
+the 16 MB text cap, and leaves with the entry (Delete, retention, the caps,
+Clear all). It is never logged and never reaches the live log, events, the
+local API, or Assistant (whose History readers pick their own fields);
+`hex history --raw --json` prints it as `read`; Copy copies the text only.
+Search does not look in it. Checks: `history::read::tests` (the record from a
+context and what cleanup was given, nothing for nothing, bounds, the round
+trip and an entry without it byte for byte, retention, Delete, Clear all and
+History Off, the text cap), `what_cleanup_was_given_is_told_to_history` in
+[dictation/caret_prompt/cleanup.rs](../../src/dictation/caret_prompt/cleanup.rs),
+`a_dictations_history_entry_keeps_what_it_read` in
+[parakeet.rs](../../src/parakeet.rs),
+`history_json_prints_what_a_dictation_read_only_with_raw` in
+`control/transcript_cli_tests.rs`, and the window tests in
+[rune_ui/history/read.rs](../../src/rune_ui/history/read.rs) (no section
+without the record, folded until pressed, names, blocks, Show all, each
+"what cleanup got" line, the warning line, accessible names). The `history`
+scene shows the rewritten entry with the section folded. Not observed: a real
+dictation's record on a Mac.
 
 Checks in [paste.rs](../../src/paste.rs), [parakeet.rs](../../src/parakeet.rs), and
 [history.rs](../../src/history.rs) cover output and retention boundaries.
@@ -1503,8 +1545,9 @@ under its own `timeout` (1 s by default, 30 s when the config uses host APIs,
 60 s cap). OpenCode rewriting sends documented context to the configured
 provider; speech transcription stays local. With Labs › Rewrite reads nearby
 text on (macOS), that context also includes the focused text element's text
-around the caret, read through Accessibility and never saved; password fields
-are skipped, and off leaves the prompt unchanged. In VibeHex the fork's
+around the caret, read through Accessibility; password fields
+are skipped, and off leaves the prompt unchanged. VibeHex keeps it with that
+dictation's History entry, secrets cut out (Use The Result › History). In VibeHex the fork's
 cleanup engines get it too, cloud ones included, with known key and token
 shapes cut out ([labs.md](labs.md)).
 

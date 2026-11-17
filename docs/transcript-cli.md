@@ -157,6 +157,7 @@ integer milliseconds. Absolute timestamps use Unix time. Nullable fields are
 present as `null`, except `raw_text`, which is omitted without `--raw`,
 `score` and `snippet`, which are omitted without `--search`, `recording`, which
 is omitted unless Labs › Keep recordings still holds the entry's audio file,
+`read`, which is omitted without `--raw` or when the dictation read nothing,
 `range`, which
 is omitted without `--from` or `--to`, `chapters`, which is omitted when a
 meeting has none, and `chapter`, which is omitted without `--chapter`.
@@ -180,6 +181,13 @@ type History = {
     score?: number // present only with --search; higher is more relevant
     snippet?: string // present only with --search; matches wrapped in **
     recording?: string // absolute path to the kept WAV; only while Labs › Keep recordings has it
+    read?: { // VibeHex, only with --raw: what the dictation read (Screen vocabulary, Rewrite reads nearby text)
+      screen_terms?: string[] // names read from the window, in order
+      cleanup_terms?: string[] // the ones AI cleanup was given
+      nearby?: { before?: string, selected?: string, after?: string } // text near the cursor, secrets cut out
+      nearby_sent?: "all" | "part" // what cleanup was given of it; omitted when nothing
+      asked_again?: true // cleanup repeated the text and was asked again without it
+    }
   }[]
 }
 

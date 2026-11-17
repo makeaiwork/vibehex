@@ -1467,6 +1467,7 @@ fn history_delete_confirmation_stops_when_the_pane_moves_on() {
                 total_ms: 200,
                 recording: None,
                 model: None,
+                read: None,
             })
             .unwrap()
             .unwrap()
@@ -2084,6 +2085,7 @@ fn history_search_without_matches_says_so() {
             total_ms: 200,
             recording: None,
             model: None,
+            read: None,
         })
         .unwrap();
     let mut rt = runtime("history-empty", true, PANE_SIZE);
@@ -2173,6 +2175,7 @@ fn transcribe_again_shows_only_with_its_lab_and_replace_updates_the_entry() {
         total_ms: 200,
         recording,
         model: Some("Parakeet v3".into()),
+        read: None,
     };
     let plain = history.record(draft(None)).unwrap().unwrap();
     let id = history
@@ -2281,6 +2284,7 @@ fn copy_audio_shows_only_with_its_lab_and_keep_recordings() {
             total_ms: 200,
             recording: Some(Recording::from_samples(vec![0.2; 1_600])),
             model: Some("Parakeet v3".into()),
+            read: None,
         })
         .unwrap()
         .unwrap();

@@ -116,8 +116,9 @@ impl Feature {
             Self::VocabularyBiasing => {
                 "Help the Parakeet model hear your Vocabulary words. Rewriting and search use them anyway"
             }
+            // VibeHex: kept with the dictation in History (`history::read`).
             Self::ScreenVocabulary => {
-                "Names in the window you're dictating into help VibeHex spell them. Never saved"
+                "Names in the window you're dictating into help VibeHex spell them. History keeps them with the dictation"
             }
             Self::TerminalPaste => "Paste with Ctrl+Shift+V so terminals accept it",
             Self::KeyboardModelSwitching => {
