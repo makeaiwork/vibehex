@@ -17,7 +17,11 @@
 //!   goes;
 //! - anywhere, drops the few function words upstream's rule lets through as
 //!   an acronym or a mid-sentence capital (`The`, `AND`), and the words of
-//!   the dictation's own app name (`Code`, `Sublime Text`).
+//!   the dictation's own app name (`Code`, `Sublime Text`);
+//! - before all of that, takes the names of the text read around the field
+//!   being dictated into (`accessibility::near`), nearest first and not most
+//!   frequent first: the message being answered matters more than a word a
+//!   command's output repeats forty times further up.
 //!
 //! The dictionary is macOS's own `/usr/share/dict/words` (its lowercase
 //! entries only, so a name it lists capitalized is not ordinary) and the
@@ -30,7 +34,7 @@ use std::ops::Range;
 #[cfg(target_os = "macos")]
 use std::sync::OnceLock;
 
-use super::{MAX_TERMS, extract, uncapped};
+use super::{MAX_TERMS, extract, in_order, uncapped};
 
 /// The dictionary: its entries that start lowercase are ordinary words.
 #[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
@@ -51,6 +55,9 @@ pub(crate) struct WindowText {
     pub text: String,
     /// Byte ranges of `text`, in order and apart, that are labels.
     pub labels: Vec<Range<usize>>,
+    /// How much of `text`, from its start, was read around the focused
+    /// element, nearest first; the rest is the window from its top.
+    pub near: usize,
 }
 
 impl std::fmt::Debug for WindowText {
@@ -64,6 +71,24 @@ impl std::fmt::Debug for WindowText {
 }
 
 impl WindowText {
+    /// The content read around the focused element, nearest first.
+    pub(crate) fn nearest(&self) -> String {
+        let near = self.near.min(self.text.len());
+        if !self.text.is_char_boundary(near) {
+            return String::new();
+        }
+        let labels = (self.labels.iter())
+            .filter(|range| range.end <= near)
+            .cloned()
+            .collect();
+        let part = Self {
+            text: self.text[..near].into(),
+            labels,
+            near: 0,
+        };
+        part.split().0
+    }
+
     /// The content (every text value, in order) and the labels, each piece
     /// still on its own line as the reader wrote it.
     pub(crate) fn split(&self) -> (String, String) {
@@ -182,13 +207,34 @@ fn words() -> &'static Words {
 pub(crate) fn terms(window: &WindowText, known: &[String]) -> Vec<String> {
     let (content, labels) = window.split();
     let application = crate::dictation::context::frontmost_other_application();
-    rank(&content, &labels, known, application.as_deref(), words())
+    rank_near(
+        &window.nearest(),
+        &content,
+        &labels,
+        known,
+        application.as_deref(),
+        words(),
+    )
 }
 
 /// The window's terms: the content's as [`extract`] ranks them, then the
 /// labels' that are not ordinary words, never a function word, a word of
 /// `application`'s name, or one in `known`, at most [`MAX_TERMS`].
+#[cfg(test)]
 pub(crate) fn rank(
+    content: &str,
+    labels: &str,
+    known: &[String],
+    application: Option<&str>,
+    words: &Words,
+) -> Vec<String> {
+    rank_near("", content, labels, known, application, words)
+}
+
+/// [`rank`] with, ahead of everything, the names of `near` (the content
+/// read around the field being dictated into) in the order they were read.
+pub(crate) fn rank_near(
+    near: &str,
     content: &str,
     labels: &str,
     known: &[String],
@@ -206,9 +252,18 @@ pub(crate) fn rank(
             .filter(|word| !word.is_empty())
             .map(str::to_owned),
     );
+    let mut terms = in_order(near, &known);
+    terms.truncate(MAX_TERMS);
+    let mut seen: HashSet<String> = terms.iter().map(|term| term.to_lowercase()).collect();
     // The content's own list is whole unless it is already full.
-    let mut terms = extract(content, &known);
-    let seen: HashSet<String> = terms.iter().map(|term| term.to_lowercase()).collect();
+    for term in extract(content, &known) {
+        if terms.len() >= MAX_TERMS {
+            break;
+        }
+        if seen.insert(term.to_lowercase()) {
+            terms.push(term);
+        }
+    }
     for term in uncapped(labels, &known) {
         if terms.len() >= MAX_TERMS {
             break;
@@ -241,6 +296,15 @@ fn ordinary(term: &str, dictionary: &WordList) -> bool {
         .any(|pair| pair[0].is_lowercase() && pair[1].is_uppercase())
     {
         return false;
+    }
+    // The dictionary is English: a capitalized word in another alphabet
+    // can't be told from an ordinary one, and in a label it usually is one
+    // (the first word of a message's description).
+    if !term
+        .chars()
+        .any(|character| character.is_ascii_alphabetic())
+    {
+        return true;
     }
     term.to_lowercase()
         .split(['.', '-', '_'])
@@ -369,6 +433,19 @@ mod tests {
         );
     }
 
+    /// A message's description starts with its first word, which is no
+    /// name; the English dictionary can't say so for another alphabet.
+    #[test]
+    fn a_capitalized_label_word_in_another_alphabet_is_not_a_name() {
+        let labels = "You said: Смотри, я диктовал\nMessage from Слушай\nOpen Qdrant\n";
+        assert_eq!(rank("", labels, &[], None, &words()), ["Qdrant"]);
+        assert_eq!(
+            rank("Мы спросили Яндекс про это.", "", &[], None, &words()),
+            ["Яндекс"],
+            "in the content it still is one"
+        );
+    }
+
     #[test]
     fn a_dictionary_word_counts_in_the_content_but_not_in_a_label() {
         let labels = "Open Slack Channel\nMove Cursor Here\n";
@@ -445,6 +522,7 @@ mod tests {
         let window = WindowText {
             text: text.into(),
             labels: vec![12..21, 31..40],
+            near: 0,
         };
         let (content, labels) = window.split();
         assert_eq!(content, "hello there\nmore text\n");
@@ -453,9 +531,34 @@ mod tests {
         let odd = WindowText {
             text: "abc\n".into(),
             labels: vec![2..99, 0..1],
+            near: 0,
         };
         assert_eq!(odd.split(), ("ab".into(), "c\n".into()));
         assert_eq!(format!("{window:?}"), "WindowText { bytes: 40, labels: 2 }");
+    }
+
+    /// Around the field, the newest message's names come before a word the
+    /// rest of the window repeats, and its code and titles stay labels.
+    #[test]
+    fn names_near_the_field_come_first_in_the_order_read() {
+        let text =
+            "We moved it to Qdrant and Postgres.\nCfObject\nThen OK and OK and OK, said Rune.\n";
+        let window = WindowText {
+            text: text.into(),
+            labels: std::iter::once(36..45).collect(),
+            near: 45,
+        };
+        assert_eq!(window.nearest(), "We moved it to Qdrant and Postgres.\n");
+        let (content, labels) = window.split();
+        assert_eq!(
+            rank_near(&window.nearest(), &content, &labels, &[], None, &words()),
+            ["Qdrant", "Postgres", "OK", "Rune", "CfObject"]
+        );
+        assert_eq!(
+            rank(&content, &labels, &[], None, &words()),
+            ["OK", "Qdrant", "Postgres", "Rune", "CfObject"],
+            "without a field, the most frequent first"
+        );
     }
 
     #[test]

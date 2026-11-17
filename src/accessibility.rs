@@ -6,6 +6,11 @@ use std::time::{Duration, Instant};
 use crate::dictation::caret_text::{Keep, bounded_units};
 use crate::dictation::screen_vocabulary::labels::WindowText; // VibeHex
 
+// VibeHex: what is nearest the focused element is read first, and a web
+// field's placeholder is not text.
+mod near;
+mod placeholder;
+
 type CfTypeRef = *const c_void;
 type CfStringRef = *const c_void;
 type AxUiElementRef = *const c_void;
@@ -22,6 +27,8 @@ unsafe extern "C" {
         value: *mut CfTypeRef,
     ) -> i32;
     fn AXUIElementSetMessagingTimeout(element: AxUiElementRef, timeout_in_seconds: f32) -> i32;
+    // VibeHex: `placeholder` asks which attributes an element names.
+    fn AXUIElementCopyAttributeNames(element: AxUiElementRef, names: *mut CfTypeRef) -> i32;
     fn AXUIElementSetAttributeValue(
         element: AxUiElementRef,
         attribute: CfStringRef,
@@ -129,16 +136,24 @@ pub fn focused_window_text(pid: i32) -> Option<WindowText> {
     let application = foreign_application(pid)?;
     let window = copy_element(&application, c"AXFocusedWindow")?;
     let started = Instant::now();
-    let mut text = String::new();
-    let mut labels = Vec::new(); // VibeHex
+    // VibeHex: what is nearest the focused element first (`near`); the walk
+    // below spends the rest of the budget on the rest of the window.
+    let near = near::read(&application, &window, started);
+    let near_bytes = near.text.len();
+    let mut text = near.text;
+    let mut labels = near.labels; // VibeHex
     let mut queue = VecDeque::from([(window, 0_usize)]);
-    let mut visited = 0_usize;
+    let mut visited = near.visited;
     while let Some((element, depth)) = queue.pop_front() {
         if visited >= MAX_TEXT_NODES
             || started.elapsed() >= TEXT_DEADLINE
             || text.len() >= MAX_TEXT_BYTES
         {
             break;
+        }
+        // VibeHex: already read.
+        if (near.top.as_ref()).is_some_and(|top| unsafe { CFEqual(top.0, element.0) } != 0) {
+            continue;
         }
         visited += 1;
         if is_secure_text_field(&element) {
@@ -173,7 +188,12 @@ pub fn focused_window_text(pid: i32) -> Option<WindowText> {
             queue.push_back((child, depth + 1));
         }
     }
-    (!text.trim().is_empty()).then_some(WindowText { text, labels }) // VibeHex
+    // VibeHex
+    (!text.trim().is_empty()).then_some(WindowText {
+        text,
+        labels,
+        near: near_bytes,
+    })
 }
 
 /// Whether an element holds a password. macOS marks most secure fields with
@@ -287,6 +307,10 @@ pub fn text_around_caret(pid: i32) -> Option<crate::dictation::caret_text::Caret
     let application = foreign_application(pid)?;
     let focused = copy_element(&application, c"AXFocusedUIElement")?;
     if is_secure_text_field(&focused) {
+        return None;
+    }
+    // VibeHex: an empty web field's hint is not text near the cursor.
+    if placeholder::only(&focused) {
         return None;
     }
     let selection = copy_range(&focused, c"AXSelectedTextRange")?;
@@ -480,6 +504,11 @@ pub fn char_before_caret(pid: i32) -> Option<char> {
     let focused = copy_element(&application, c"AXFocusedUIElement")?;
     let selection = copy_range(&focused, c"AXSelectedTextRange")?;
     if selection.length != 0 || selection.location <= 0 {
+        return None;
+    }
+    // VibeHex: an empty web field's hint is not a character typed before
+    // the cursor.
+    if placeholder::only(&focused) {
         return None;
     }
     // One UTF-16 unit, or two when it is half of a surrogate pair.

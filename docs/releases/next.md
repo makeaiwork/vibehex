@@ -28,6 +28,8 @@ keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.d
   around your cursor to spell names right; keys and tokens in it are cut out first.
 - New: History keeps what VibeHex read for each dictation, on this Mac, and says when an app
   gave nothing to read. Screen vocabulary skips the app's own button and tab labels.
+- New: Screen vocabulary reads from the field you dictate into outward: in a chat or an AI
+  coding panel, the newest messages above it come first.
 - New: Ten meeting features left Labs. Meetings › Settings now has Keep audio, and Export
   with Descriptive meeting file names and Separate notes file.
 - New: Stop when the call ends (macOS) is a setting under Detected calls: the recording ends
