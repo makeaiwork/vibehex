@@ -5,8 +5,18 @@
 use super::Feature;
 
 impl Feature {
-    /// The card's title.
+    /// The card's title. VibeHex: a Hex lab the fork reworked carries the
+    /// fork's name ([`Feature::vibehex_renamed`]); Hex's own website keeps
+    /// Hex's ([`Feature::hex_title`]).
     pub const fn title(self) -> &'static str {
+        match self.vibehex_renamed() {
+            Some(title) => title,
+            None => self.hex_title(),
+        }
+    }
+
+    /// The card's title as Hex names it.
+    pub const fn hex_title(self) -> &'static str {
         match self {
             Self::Meetings => "Meetings (beta)",
             Self::VoiceFilter => "Voice Filter",
@@ -97,8 +107,19 @@ impl Feature {
         }
     }
 
-    /// The card's one line, under its title.
+    /// The card's one line, under its title. VibeHex: a Hex lab the fork
+    /// reworked may say it in the fork's words
+    /// ([`Feature::vibehex_reworded`]); Hex's website keeps Hex's
+    /// ([`Feature::hex_summary`]).
     pub const fn summary(self) -> &'static str {
+        match self.vibehex_reworded() {
+            Some(summary) => summary,
+            None => self.hex_summary(),
+        }
+    }
+
+    /// Hex's one line for the card, as upstream has it.
+    pub const fn hex_summary(self) -> &'static str {
         match self {
             Self::Meetings => "Record calls and keep transcripts",
             Self::VoiceFilter => "Hex Microphone virtual input and real-time voice filters",

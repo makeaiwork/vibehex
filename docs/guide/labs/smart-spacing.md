@@ -30,6 +30,7 @@ pasting. Nothing else.
 
 **Good to know.** It does nothing when text is selected, when the cursor is
 at the very start, or in apps that don't tell VibeHex where the cursor is.
+An empty web field's grey hint is not taken for a word before the cursor.
 It doesn't change the first letter's case. It doesn't apply with Copy
 dictation only, since nothing is pasted.
 
@@ -39,4 +40,4 @@ dictation only, since nothing is pasted.
 dictated text"; «Надиктованный текст слипается с предыдущим словом»; «Нет
 пробела после вставки».
 
-<!-- sources: docs/features/labs.md:63, docs/features/labs.md:373-390; src/rune_ui/labs.rs:365 -->
+<!-- sources: docs/features/labs.md:63, docs/features/labs.md:373-390; src/rune_ui/labs.rs:365; src/accessibility.rs (char_before_caret); src/accessibility/placeholder.rs -->

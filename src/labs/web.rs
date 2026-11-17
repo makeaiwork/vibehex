@@ -29,7 +29,8 @@ impl Feature {
             Self::StandaloneSpecialKeys => {
                 "Use a special key alone as a shortcut: Insert, Home, End, Page Up, or Page Down on Windows, and Menu, Pause, or Scroll Lock on Linux"
             }
-            _ => self.summary(),
+            // VibeHex: Hex's website describes a lab as Hex does.
+            _ => self.hex_summary(),
         }
     }
 }
@@ -53,7 +54,8 @@ fn catalog_json() -> String {
             let added = feature.added();
             serde_json::json!({
                 "id": feature.name(),
-                "title": feature.title(),
+                // VibeHex: Hex's website names a lab as Hex does.
+                "title": feature.hex_title(),
                 "summary": feature.web_summary(),
                 "group": feature.group().id(),
                 "groupTitle": feature.group().title(),

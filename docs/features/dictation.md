@@ -506,7 +506,7 @@ by unit tests only.
 
 ### Rewrite With Nearby Text (Labs, macOS)
 
-While Labs › Rewrite reads nearby text is on (`labs.cursor_context`, off by
+While Labs › Enhanced cursor context is on (`labs.cursor_context`, off by
 default), each dictation reads the focused text element's text around the
 caret once, on a background thread, as its capture becomes real, and the
 mode's OpenCode rewrite carries it ahead of the raw transcript as context for

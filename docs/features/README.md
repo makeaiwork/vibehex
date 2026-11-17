@@ -41,13 +41,13 @@ search field at the top of General that filters its rows; its Release notes
 link toggle (off by default) puts a link to this build's release notes in
 About; its Appearance toggle (off by default) forces the main window
 light or dark instead of following the OS. The dictation HUD and meeting
-recording pill always stay dark; other overlays follow the OS; its Screen vocabulary
+recording pill always stay dark; other overlays follow the OS; its Enhanced screen vocabulary
 toggle (off by default, macOS) uses names and terms visible in the focused
 window as temporary vocabulary for each dictation, read locally through
 Accessibility ([vocabulary.md](vocabulary.md)); in VibeHex the names are kept
 with that dictation's History entry (below) and its
-`labs.screen_vocabulary_cleanup` switch (off by default) gives them to AI cleanup too. Its Rewrite
-reads nearby text toggle (off by default, macOS) hands AI cleanup the text
+`labs.screen_vocabulary_cleanup` switch (off by default) gives them to AI cleanup too. Its Enhanced
+cursor context toggle (off by default, macOS) hands AI cleanup the text
 around the caret as context for names, terms, and where the result lands, on
 every engine: it stays on this Mac with the built-in model or an own server at
 a loopback address, goes to OpenCode's model as in Hex, and is sent to Codex,
@@ -1049,7 +1049,7 @@ Completed output                         // output
     │   -> the card's Copy audio beside Play, and the menu bar or tray's Copy last dictation audio
     │   -> needs Keep recordings; it stores no audio itself (labs.md)
     └── VibeHex: What VibeHex read (macOS dictations, folded until pressed)   // history::read, rune_ui/history/read.rs
-        -> a dictation that read anything (Labs > Screen vocabulary, Rewrite reads nearby text) keeps it in its entry
+        -> a dictation that read anything (Labs > Enhanced screen vocabulary, Enhanced cursor context) keeps it in its entry
         -> Names from the window (count, tags; the ones AI cleanup was given marked) + one legend line
         -> Text near the cursor: Before the cursor / Selected / After the cursor blocks (6 lines, Show all)
         -> what cleanup got: all / the built-in model's part / nothing; warning line when it was asked again
@@ -1063,7 +1063,7 @@ VibeHex: what a dictation read is kept with its History entry (the owner's
 decision of 2026-11-16, so the temporary vocabulary and the nearby text can be
 looked at and analysed later). `HistoryEntry::read` (`history::read::HistoryRead`,
 serde default, omitted when absent, so older files and entries without it are
-byte for byte as before) holds `screen_terms` (what Screen vocabulary read, in
+byte for byte as before) holds `screen_terms` (what Enhanced screen vocabulary read, in
 order), `cleanup_terms` (the ones AI cleanup's prompt listed), `nearby` (before,
 selected, after: the context's text after the secrets pass), `nearby_sent`
 (`nothing`, `all`, or `part`: a built-in model's end of the text before the
@@ -1551,8 +1551,7 @@ Built-in text transformations run natively. Custom transformations come from
 `~/.config/hex/hex.config.ts` and run in Hex's embedded script engine, each
 under its own `timeout` (1 s by default, 30 s when the config uses host APIs,
 60 s cap). OpenCode rewriting sends documented context to the configured
-provider; speech transcription stays local. With Labs › Rewrite reads nearby
-text on (macOS), that context also includes the focused text element's text
+provider; speech transcription stays local. With Labs › Enhanced cursor context on (macOS), that context also includes the focused text element's text
 around the caret, read through Accessibility; password fields
 are skipped, and off leaves the prompt unchanged. VibeHex keeps it with that
 dictation's History entry, secrets cut out (Use The Result › History). In VibeHex the fork's

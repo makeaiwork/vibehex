@@ -12,7 +12,7 @@ use super::super::Ui;
 use super::super::controls::{DESCRIPTION, METRICS, Paint, PushSize, segmented_tx};
 use super::super::list_detail::{FOLDED, UNFOLDED};
 use super::super::lists::{Tone, tone_tag};
-use super::{Row, Tab, extras, flip, group, row_key, shown};
+use super::{Row, Star, Tab, extras, flip, group, row_key, shown};
 use crate::desktop::i18n::{tr, tr_fill};
 use crate::labs::Group;
 
@@ -106,7 +106,7 @@ pub(in crate::rune_ui) fn page(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
         .iter()
         .filter(|row| store.tab == Tab::Discover || row.on)
         .filter(|row| store.group.is_none_or(|group| row.group == group))
-        .filter(|row| !store.vibehex || row.lab.vibehex())
+        .filter(|row| !store.vibehex || row.lab.star().is_some())
         .filter(|row| matches(row, &query))
         .filter(|row| !featured_labs.contains(&row.lab))
         .collect();
@@ -232,7 +232,7 @@ fn group_header(p: Paint, group: Group, count: usize, open: bool, filtering: boo
         .child(header.px(4.0).py(2.0))
 }
 
-/// All, then a chip per group with its count, then VibeHex's own labs.
+/// All, then a chip per group with its count, then VibeHex's starred labs.
 fn chips(rows: &[Row], store: &super::Store, p: Paint) -> El {
     let selected = (!store.vibehex).then_some(store.group).flatten();
     let mut chips = row()
@@ -263,7 +263,7 @@ fn chips(rows: &[Row], store: &super::Store, p: Paint) -> El {
             Chip::Group(group),
         ));
     }
-    let ours = rows.iter().filter(|row| row.lab.vibehex()).count();
+    let ours = rows.iter().filter(|row| row.lab.star().is_some()).count();
     if ours > 0 {
         chips = chips.child(chip(
             p,
@@ -277,7 +277,7 @@ fn chips(rows: &[Row], store: &super::Store, p: Paint) -> El {
     chips
 }
 
-/// What a chip keeps: everything, one group, or VibeHex's own labs.
+/// What a chip keeps: everything, one group, or VibeHex's starred labs.
 #[derive(Clone, Copy)]
 enum Chip {
     All,
@@ -357,8 +357,8 @@ pub(super) fn card(
     if lab.audience() == crate::labs::Audience::Dev {
         tags.push(tone_tag(p, "dev-tag", tr("Dev"), Tone::Neutral));
     }
-    if lab.vibehex() {
-        tags.push(vibehex_star(p));
+    if let Some(star) = lab.star() {
+        tags.push(vibehex_star(p, star));
     }
     let title = row()
         .key("title-row")
@@ -463,13 +463,17 @@ fn flashing(ui: &Ui, id: &str) -> bool {
         .is_some_and(|(linked, at)| linked == id && at.elapsed() < super::FLASH)
 }
 
-/// The star beside a lab VibeHex added; hovering it says so.
-fn vibehex_star(p: Paint) -> El {
+/// The star beside a lab VibeHex added or reworked; hovering it says which.
+fn vibehex_star(p: Paint, star: Star) -> El {
+    let says = match star {
+        Star::Added => tr("Added in VibeHex"),
+        Star::Reworked => tr("Reworked in VibeHex"),
+    };
     col()
         .key("vibehex")
         .role("image")
-        .label(tr("Added in VibeHex"))
-        .help(tr("Added in VibeHex"))
+        .label(says)
+        .help(says)
         .child(rune::icon(&rune_kit::glyphs::STAR_FILLED, 10.0).color(p.k.c.warning.icon))
 }
 
@@ -619,6 +623,53 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// VibeHex: a lab VibeHex added and one of Hex's it reworked carry the
+    /// same star, whose words say which, and the VibeHex chip keeps both.
+    #[test]
+    fn the_star_says_added_or_reworked() {
+        let mut ui = Ui::with(AppSettings::default(), Service::Fixture(Vec::new()));
+        SCENES
+            .iter()
+            .find(|(name, _)| *name == "mac-labs")
+            .unwrap()
+            .1(&mut ui);
+        for group in crate::labs::Group::ALL {
+            ui.settings.labs.groups.insert(group.id().to_string(), true);
+        }
+        let text = TextSystem::new(rune_theme_opencode::FONTS, rune_theme_opencode::FAMILIES);
+        let mut rt = offscreen::runtime(ui, view, (980.0, 6000.0), Env::new(false, 2.0), text);
+        settle(&mut rt);
+        let star = |rt: &Runtime<Ui>, id: &str| {
+            let cards = ["card", "featured", "fits"].map(|kind| format!("/lab-{kind}-{id}/"));
+            rt.elements()
+                .into_iter()
+                .find(|e| {
+                    !e.exiting
+                        && e.path.ends_with("/vibehex")
+                        && cards.iter().any(|card| e.path.contains(card.as_str()))
+                })
+                .and_then(|e| e.label)
+        };
+        assert_eq!(star(&rt, "files").as_deref(), Some("Added in VibeHex"));
+        for reworked in ["screen-vocabulary", "cursor-context"] {
+            assert_eq!(
+                star(&rt, reworked).as_deref(),
+                Some("Reworked in VibeHex"),
+                "{reworked}"
+            );
+        }
+        assert_eq!(star(&rt, "live-text"), None, "a Hex lab has no star");
+        let (x, y) = rt.find("chip-vibehex").expect("the VibeHex chip");
+        rt.pointer_down(x, y);
+        rt.pointer_up(x, y);
+        settle(&mut rt);
+        assert!(rt.state.lab_store.vibehex);
+        for kept in ["files", "screen-vocabulary", "cursor-context"] {
+            assert!(star(&rt, kept).is_some(), "the VibeHex chip lacks {kept}");
+        }
+        assert!(rt.find("lab-card-live-text").is_none());
     }
 
     fn settle(rt: &mut Runtime<Ui>) {

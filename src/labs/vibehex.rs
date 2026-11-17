@@ -1,8 +1,8 @@
-//! VibeHex's own Labs: which features VibeHex added (their cards carry a
-//! star), which of Hex's labs a stable VibeHex leaves out, the English copy
-//! of VibeHex's cards, where feedback goes, and the runtime switches of
-//! VibeHex's labs. Kept apart from Hex's registry files so an upstream sync
-//! only touches one arm per match there.
+//! VibeHex's own Labs: which features VibeHex added and which of Hex's it
+//! reworked (their cards carry a star), which of Hex's labs a stable
+//! VibeHex leaves out, the English copy of VibeHex's cards, where feedback
+//! goes, and the runtime switches of VibeHex's labs. Kept apart from Hex's
+//! registry files so an upstream sync only touches one arm per match there.
 //!
 //! VibeHex's switches are not bits in Hex's state word ([`super::STATE`]):
 //! each has its own atomic here, so a lab Hex adds can never land on one.
@@ -56,6 +56,45 @@ impl Feature {
                 | Self::VocabularyPasteList
                 | Self::VocabularyQuickAdd
         )
+    }
+
+    /// Whether VibeHex reworked this feature: Hex has the lab, and VibeHex
+    /// changed how it works. Settings › Labs gives these rows the same star,
+    /// said "Reworked in VibeHex" (the owner's request of 2026-11-17).
+    ///
+    /// - Screen vocabulary (Hex's name): reads from the field being
+    ///   dictated into outward, skips interface labels, and can give the
+    ///   names to AI cleanup (`dictation::screen_vocabulary::{labels,
+    ///   cleanup}`).
+    /// - Rewrite reads nearby text (Hex's name): works on every cleanup
+    ///   engine, not only OpenCode, and cuts keys and tokens out
+    ///   (`dictation::caret_prompt`).
+    pub const fn vibehex_reworked(self) -> bool {
+        matches!(self, Self::ScreenVocabulary | Self::CursorContext)
+    }
+
+    /// The fork's card title for a Hex lab it reworked, in place of Hex's
+    /// ([`Feature::hex_title`]), so the name says it is the improved one
+    /// (the owner's request of 2026-11-17). Its `hex labs` name, settings
+    /// keys and Hex's website stay Hex's.
+    pub(super) const fn vibehex_renamed(self) -> Option<&'static str> {
+        match self {
+            Self::ScreenVocabulary => Some("Enhanced screen vocabulary"),
+            Self::CursorContext => Some("Enhanced cursor context"),
+            _ => None,
+        }
+    }
+
+    /// The fork's one line for the card of a Hex lab it reworked, where
+    /// Hex's no longer says what happens: Hex's rewrite was OpenCode's, and
+    /// here every cleanup engine reads the nearby text.
+    pub(super) const fn vibehex_reworded(self) -> Option<&'static str> {
+        match self {
+            Self::CursorContext => Some(
+                "AI cleanup uses the text around the cursor to spell names and terms right and fit where it pastes.",
+            ),
+            _ => None,
+        }
     }
 
     /// Hex labs VibeHex leaves out of a stable build, as Hex does its
@@ -337,6 +376,48 @@ mod tests {
         assert_eq!(
             Feature::for_settings_key("labs.screen_vocabulary_cleanup"),
             Some(Feature::ScreenVocabulary)
+        );
+    }
+
+    /// A lab is VibeHex's own or one of Hex's it reworked, never both, and
+    /// a reworked one stays in a stable build.
+    #[test]
+    fn no_lab_is_both_added_and_reworked() {
+        for feature in Feature::ALL {
+            assert!(
+                !(feature.vibehex() && feature.vibehex_reworked()),
+                "{feature:?}"
+            );
+            if feature.vibehex_reworked() {
+                assert!(!feature.vibehex_hides(), "{feature:?}");
+            }
+        }
+        let reworked: Vec<&str> = Feature::ALL
+            .into_iter()
+            .filter(|feature| feature.vibehex_reworked())
+            .map(Feature::name)
+            .collect();
+        assert_eq!(reworked, ["screen-vocabulary", "cursor-context"]);
+    }
+
+    /// Only a reworked lab takes the fork's name, and it says so; Hex's
+    /// name stays for Hex's website.
+    #[test]
+    fn a_reworked_lab_has_the_forks_name() {
+        for feature in Feature::ALL {
+            match feature.vibehex_renamed() {
+                Some(title) => {
+                    assert!(feature.vibehex_reworked(), "{feature:?}");
+                    assert!(title.starts_with("Enhanced "), "{title}");
+                    assert_eq!(feature.title(), title);
+                }
+                None => assert_eq!(feature.title(), feature.hex_title()),
+            }
+        }
+        assert_eq!(Feature::ScreenVocabulary.hex_title(), "Screen vocabulary");
+        assert_eq!(
+            Feature::CursorContext.hex_title(),
+            "Rewrite reads nearby text"
         );
     }
 

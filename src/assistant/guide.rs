@@ -336,6 +336,33 @@ mod tests {
         }
     }
 
+    /// `vibehex:` says whose a lab is, as its star in Settings › Labs does:
+    /// `true` for one VibeHex added, `reworked` for one of Hex's VibeHex
+    /// reworked, `false` for the rest of Hex's. Any other value is a typo.
+    #[test]
+    fn every_labs_article_says_whose_the_lab_is() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("docs/guide/labs");
+        for feature in crate::labs::Feature::ALL {
+            let text = std::fs::read_to_string(root.join(format!("{}.md", feature.name())))
+                .unwrap()
+                .replace("\r\n", "\n");
+            let front = text
+                .strip_prefix("---\n")
+                .and_then(|rest| rest.split_once("\n---\n"))
+                .map_or("", |(front, _)| front);
+            let written = front.lines().find_map(|line| {
+                let value = line.strip_prefix("vibehex:")?;
+                Some(value.split('#').next().unwrap_or_default().trim())
+            });
+            let whose = match (feature.vibehex(), feature.vibehex_reworked()) {
+                (true, _) => "true",
+                (false, true) => "reworked",
+                (false, false) => "false",
+            };
+            assert_eq!(written, Some(whose), "{}", feature.name());
+        }
+    }
+
     #[test]
     fn comments_are_removed_wherever_they_are() {
         assert_eq!(without_comments("a<!-- x -->b<!-- y"), "ab");

@@ -20,11 +20,15 @@ language and it answers in that one. Places it names keep the window's words.
 
 ## Its start screen
 
-A new conversation suggests what fits now: dictations pasted without AI
-cleanup, meeting notes that weren't written, a setup left halfway, new
-features that suit you, or a question about the pane you came from. **×**
-hides one. When something stopped working, a warning dot marks Assistant in
-the sidebar until you open it.
+A new conversation suggests up to four things, most pressing first: what
+stopped working (your last three or more dictations pasted without AI
+cleanup, with the engine's reason, or a meeting's notes not written), a setup
+left halfway, what's new after an update, a question about the pane you came
+from, then new features that suit you. Example questions fill the rest.
+**×** hides a row until its reason changes (a new run of failures, a newer
+meeting, the next update); a row about something broken stays until it works
+again or you hide it. When something stopped working, a warning dot marks
+Assistant in the sidebar until you open it.
 
 ## Changes it suggests
 
@@ -36,74 +40,68 @@ same save ("Also turns on…"), and a shorter retention says what it removes.
 A new speech model downloads first and switches when ready.
 
 No card comes for a value you already have, a feature this computer lacks,
-or an ordinary word as a term: **What Assistant knew** lists what was left
-out.
+or an ordinary word as a term (**What Assistant knew** lists them).
 
-**Undo** puts back everything a card changed, while the conversation stays
-open; after that the card offers **Show in…**.
+**Undo** puts back everything a card changed while the conversation stays
+open; then the card offers **Show in…**.
 
-For the AI cleanup instructions, the card shows the lines that change;
-**Edit first** lets you adjust the new text before **Save instructions**.
+For cleanup instructions the card shows the lines that change; **Edit
+first** adjusts them before **Save instructions**.
 
 Names your dictation gets wrong come as one **Add 3 terms** card: each term
 with what it sounds like, a checkbox, and **Edit** to fix either.
 
 Ask why dictation wrote one word as another ("it writes AI cleanup when I
 say AI") and, with Your current settings on, Assistant looks for the cause
-in your cleanup instructions and Vocabulary, never on the web.
+in your cleanup instructions and Vocabulary, not on the web.
 
 ## Set VibeHex up for you
 
-**Set VibeHex up for me**, on Assistant's start screen, or asking "help me
-set VibeHex up", first says what is set now: the speech model and language,
-where dictation is cleaned up, who writes meeting notes, the Labs features on,
-and how many Vocabulary terms you have. Then four questions, already answered
-from your settings: what you use VibeHex for, your language (with or
-without English tech terms, or your own by name), where dictation is
-cleaned up, and, for
-calls or files, where notes and files are worked on. On a remote model, an
-optional field asks about your work and where you dictate most. Yes-or-no
-questions about fitting Labs features follow; **Skip to the plan** skips them.
+**Set VibeHex up for me** on the start screen, or "help me set VibeHex up",
+first says what is set now: speech model and language, cleanup, notes
+writer, Labs features on, Vocabulary size. Then four questions, already
+answered from your settings: what you use VibeHex for, your language (with
+or without English tech terms, or your own), where dictation is cleaned up,
+and, for calls or files, where notes and files are worked on. On a remote
+model, an optional field asks about your work. Yes-or-no questions about
+fitting Labs features follow; **Skip to the plan** skips them.
 
-Then comes one list of changes, grouped by area, each with a checkbox, what it
-changes from and to, and what it takes: a download and its size, a ChatGPT
-sign-in, or a macOS permission. A setting you chose yourself is never ticked
-for you ("You chose …"), an engine not set up yet says where to finish, and a
-model that already hears your language stays. A switch's own value is in
-its row: "Off → On after [60 min ▾]". Cleanup on this Mac lists the
-built-in models and their memory; Apply downloads one. What fits already
-folds under **Already set**, a long value under **Show all**. Untick what you
-don't need, press **Apply 3 changes and 81 terms**. A failed change says
-why, the rest apply; **Undo** undoes them all.
+Then one list of changes by area, each with a checkbox, from and to, and
+what it takes: a download and its size, a ChatGPT sign-in, a macOS
+permission. A setting you chose yourself is never ticked for you ("You
+chose …"), an engine not set up yet says where to finish, and a model that
+already hears your language stays. A switch's own value is in its row:
+"Off → On after [60 min ▾]". What fits already folds under **Already set**.
+Untick what you don't need, press **Apply 3 changes and 81 terms**. A
+failed change says why, the rest apply; **Undo** undoes them all.
 
-Setting up again, after a setup or once you have used VibeHex a while (50
-dictations, or any meeting), skips the first questions: it says what came
-since your last setup, what is new in VibeHex, and, if Assistant may read
-your recordings, what your use shows (how much you dictate and where, how
-many are long, the words cleanup keeps fixing, terms Vocabulary lacks, as
-one **Add N terms** card). Your earlier answers stay folded under **Has
-anything changed in how you use VibeHex?**: **Continue** goes on to the
-plan, **Change answers** opens them. Something you declined before isn't
-offered again until that setting changes.
+Setting up again (after a setup, 50 dictations, or any meeting) skips the
+first questions: it says what came since your last setup and, if Assistant
+may read your recordings, what your use shows (how much you dictate and
+where, the words cleanup keeps fixing, terms Vocabulary lacks, as one **Add
+N terms** card). Earlier answers fold under **Has anything changed in how
+you use VibeHex?**: **Continue** or **Change answers**. Something you
+declined isn't offered again until that setting changes.
 
-**Or set it up like Denis**, under it, or asking "set me up like Denis" («сделай
-настройки как у Дениса»), offers the settings of the person who makes VibeHex
-as one such list: his Labs features, speech model, cleanup and notes engines,
-cleanup instructions, and Vocabulary terms you don't have yet. Keeping meetings
-for a month starts unticked. Then his shortcuts beside yours: record your own
-key in any row, then **Use these** or **Keep mine**.
-
-It is offered only when Russian is the recognition language in **General ›
-Language**; otherwise use **Set VibeHex up for me**.
+**Or set it up like Denis** («сделай настройки как у Дениса»), offered
+only when Russian is the recognition language in **General › Language**, gives
+the settings of the person who makes VibeHex as one such list: his Labs
+features, speech model, cleanup and notes engines, instructions, and
+Vocabulary terms you lack. Keeping meetings for a month starts unticked.
+Then his shortcuts beside yours: record your own in any row, then **Use
+these** or **Keep mine**.
 
 ## What's new for you
 
 **N new features fit how you use VibeHex** on the start screen, **Which Labs
 features are worth turning on for me?**, or **Choose with Assistant** in Labs
-opens one list of the Labs features that suit you, with no model: what each
-does, **Now** and **With it**, and in its row the setting it needs (YOLO
-mode's seconds, a shortcut key). **More to try** has the rest, each with
-**Add**. Labs shows the same picks under **Fits you**.
+opens one list, with no model, of up to five Labs features that suit you and
+are off: what each does, **Now** and **With it**, and in its row the setting
+it needs (YOLO mode's seconds, a shortcut key). If Assistant may read your
+recordings, **Now** can be a count from your own use. Once the list is
+applied or put off, what you left unticked isn't offered again. **More to
+try** has the other features that came since your last setup, each with
+**Add**. Labs shows the same picks under **Fits you** (see Getting started).
 
 ## Ask about your recordings
 
@@ -116,8 +114,8 @@ never ask.
 Once allowed, it searches on this computer for the meetings, Files texts, and
 History dictations that match the question's time ("yesterday", "last week",
 "the last five meetings") and words, and reads their notes and the best
-passages. Its steps fold into one line, such as "Read 4 meetings and 1 file
-in 9 s", which opens on a click. If the recordings don't say, the answer says so.
+passages. Its steps fold into one line ("Read 4 meetings and 1 file in 9 s")
+that opens on a click. If the recordings don't say, the answer says so.
 
 ## Go to the place cited
 
@@ -133,9 +131,9 @@ The question, the conversation so far, and guide text go to the model in
 found, a few thousand characters for a built-in model and more for larger
 ones; recordings themselves are never sent. A model on this computer keeps
 everything here; Codex sends to OpenAI, OpenRouter to its provider.
-On Codex, when the guide has no answer (setting up LM Studio, say), it may
-search the web through OpenAI, never with anything from your recordings or
-settings, and names the pages under **From the web**; **Assistant ›
+On Codex, when the guide has no answer, it may search the web through
+OpenAI, never with anything from your recordings or settings, and names the
+pages under **From the web**; **Assistant ›
 Settings › What it reads › The web**, or **Web** in the field for one
 conversation, turns that off.
 
@@ -156,4 +154,4 @@ me"; "Can Assistant search the web?"; «Может ли ассистент ис�
 ассистенту читать мои записи?»; «Помоги мне настроить VibeHex под меня»;
 «Добавь Kubernetes в словарь».
 
-<!-- sources: docs/features/assistant.md; src/assistant/web.rs; src/rune_ui/assistant/web.rs; src/assistant/intent/mod.rs; src/assistant/intent/setup.rs; src/assistant/setup/mod.rs; src/assistant/setup/follow.rs; src/assistant/setup/plan.rs; src/assistant/setup/preset.rs; src/assistant/changes/vocab.rs; src/assistant/changes/companion.rs; src/rune_ui/assistant/card.rs; src/rune_ui/assistant/plan.rs; src/rune_ui/assistant/vocab.rs; src/assistant/recordings/mod.rs; src/rune_ui/assistant/recall.rs; src/rune_ui/assistant/jump.rs; src/rune_ui/assistant/settings.rs; src/rune_ui/assistant/suggestions/mod.rs; src/assistant/setup/fresh.rs; src/rune_ui/assistant/fresh/mod.rs; src/rune_ui/labs/fits.rs -->
+<!-- sources: docs/features/assistant.md; src/assistant/web.rs; src/rune_ui/assistant/web.rs; src/assistant/intent/mod.rs; src/assistant/intent/setup.rs; src/assistant/setup/mod.rs; src/assistant/setup/follow.rs; src/assistant/setup/plan.rs; src/assistant/setup/preset.rs; src/assistant/changes/vocab.rs; src/assistant/changes/companion.rs; src/rune_ui/assistant/card.rs; src/rune_ui/assistant/plan.rs; src/rune_ui/assistant/vocab.rs; src/assistant/recordings/mod.rs; src/rune_ui/assistant/recall.rs; src/rune_ui/assistant/jump.rs; src/rune_ui/assistant/settings.rs; src/assistant/suggest.rs; src/rune_ui/assistant/suggestions/mod.rs; src/assistant/setup/fresh.rs; src/rune_ui/assistant/fresh/mod.rs; src/rune_ui/labs/fits.rs -->

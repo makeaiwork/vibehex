@@ -22,8 +22,8 @@ choose in **Output › AI cleanup › Runs on**:
   (`brew install codex` on a Mac), then press **Sign in with ChatGPT**. Pick
   the Model and Reasoning (Low, Medium, High); **Wait for Codex** sets how
   long a dictation waits. Plan usage shows how much of the limit is spent;
-  when it runs out, dictations paste without AI cleanup. Codex gets only the dictation
-  and your instructions.
+  when it runs out, dictations paste without AI cleanup. Codex gets the dictation,
+  your instructions and Vocabulary, and what the Mac Labs features below add.
 - **OpenRouter**: hundreds of models with one API key.
 - **Your own**: LM Studio (`http://127.0.0.1:1234/v1`) or Ollama
   (`http://127.0.0.1:11434/v1`), or any OpenAI-compatible address. Fill in
@@ -32,6 +32,11 @@ choose in **Output › AI cleanup › Runs on**:
   Gemma 4 E2B is fastest, Gemma 4 E4B writes best, Qwen3 4B is in between.
   Several GB each.
 - **OpenCode**: as without the Labs switch.
+
+On a Mac, two Labs features give cleanup more to go on, on any engine: **Enhanced
+cursor context** (the text around your cursor, keys and tokens cut out)
+and Enhanced screen vocabulary's **Also give them to AI cleanup** (names in the
+window). A cloud engine receives that too; cleanup on this Mac keeps it here.
 
 API keys are kept in the macOS keychain or Windows Credential Manager, not in
 settings. Each server row has **Test**.
@@ -53,4 +58,4 @@ pieces of about three minutes, so there is no length limit.
 LM Studio?"; «Как подключить модель для чистки текста»; «Можно без
 интернета?».
 
-<!-- sources: docs/features/labs.md:913-1000; src/dictation/cleanup_server/codex.rs; src/dictation/cleanup_server/local_models.rs -->
+<!-- sources: docs/features/labs.md:913-1000; src/dictation/processor.rs (prompt_parts); src/dictation/caret_prompt/cleanup.rs; src/dictation/screen_vocabulary/cleanup.rs; src/dictation/cleanup_server/codex.rs; src/dictation/cleanup_server/local_models.rs -->

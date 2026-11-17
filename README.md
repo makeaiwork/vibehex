@@ -23,8 +23,8 @@ VibeHex is built for people who dictate to code and to AI assistants. Hold a
 key, speak, and it pastes. It is a fork of [Hex](https://github.com/anomalyco/hex)
 by Anomaly and keeps up with Hex's changes. It has what Hex has on the Mac,
 apart from a few of Hex's Labs features it leaves out: Clean up with Apple
-Intelligence, Voice prompt and Rewrite reads nearby text come once they also
-run on VibeHex's own cleanup engines. VibeHex is its own app, built and signed
+Intelligence and Voice prompt come once they also run on VibeHex's own
+cleanup engines. VibeHex is its own app, built and signed
 separately, so it is not an official Hex release.
 
 ## What VibeHex adds to Hex
@@ -48,6 +48,11 @@ separately, so it is not an official Hex release.
   with the playing line lit.
 - **Quiet while you dictate, even on a monitor.** Music and other apps get
   quieter even when macOS can't set your display's volume.
+- **Two of Hex's Labs, reworked.** Enhanced screen vocabulary (Hex's Screen
+  vocabulary) reads names from the field you dictate into and can give them
+  to AI cleanup; Enhanced cursor context (Hex's Rewrite reads nearby text)
+  works with every cleanup engine and cuts keys and tokens out.
+  In Labs, a star marks what VibeHex added or reworked.
 
 ## Assistant
 
@@ -125,8 +130,8 @@ spelling, then Add.
 **The sidebar folds.** Turn on Labs › Collapsible sidebar, and a button by
 the logo folds the sidebar into a column of icons.
 
-Most of what VibeHex adds lives in Labs, marked with a star, and stays off
-until you turn it on. Russian vibe coding turns on most of it in one go.
+Most of what VibeHex adds lives in Labs, marked with a star (as are the two
+Hex labs it reworked), and stays off until you turn it on. Russian vibe coding turns on most of it in one go.
 
 ## Screenshots
 
@@ -188,7 +193,7 @@ until you turn it on. Russian vibe coding turns on most of it in one go.
   <img width="100%" alt="Labs with VibeHex's starred features" src="docs/images/readme/labs-light.png">
 </picture>
 </a>
-<br><b>Labs.</b> What VibeHex adds is marked with a star, and new features are listed first.
+<br><b>Labs.</b> What VibeHex adds or reworked is marked with a star, and new features are listed first.
 </td>
 </tr>
 </table>
