@@ -341,6 +341,13 @@ impl Hidden {
         Self::add(&mut self.keys, key)
     }
 
+    /// The keys hidden that start with `prefix`, without it.
+    pub fn under<'a>(&'a self, prefix: &'a str) -> impl Iterator<Item = &'a str> + 'a {
+        self.keys
+            .iter()
+            .filter_map(move |key| key.strip_prefix(prefix))
+    }
+
     pub fn saw(&self, key: &str) -> bool {
         self.seen.iter().any(|kept| kept == key)
     }

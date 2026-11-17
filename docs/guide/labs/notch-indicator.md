@@ -5,6 +5,8 @@ title: Notch indicator
 for: [dictation]
 ask: Show the recording indicator in your screen's notch?
 ask_if: If your screen has a notch, show the recording indicator in it?
+now: The dictation indicator sits below the menu bar, even on a MacBook with a notch.
+with: The indicator grows out of the notch like a Dynamic Island and shows level bars while you speak.
 needs: [notch]
 group: Dictation
 os: macOS

@@ -4,6 +4,8 @@ key: labs.recent_dictations
 title: Copy recent dictations
 for: [dictation, code]
 ask: Copy any of your last five dictations from the menu bar?
+now: Only the very last dictation can be reached from the menu bar, through Paste Last Dictation.
+with: The menu bar lists your last five dictations, and clicking one copies its text; nothing is pasted.
 group: History
 os: macOS
 vibehex: false

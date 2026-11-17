@@ -5,6 +5,8 @@ title: Second dictation shortcut
 for: [dictation]
 ask: Add a second dictation key, such as one on an external keyboard?
 then: Record its key in General › Second dictation shortcut
+now: Dictation starts from your one main shortcut.
+with: A second key you record, such as one on an external keyboard, dictates exactly like the main one.
 group: Shortcuts
 os: every OS
 vibehex: false

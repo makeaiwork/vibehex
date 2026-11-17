@@ -40,21 +40,17 @@ or an ordinary word as a term: **What Assistant knew** lists what was left
 out.
 
 **Undo** puts back everything a card changed, while the conversation stays
-open; after that the card offers **Show in…**. A card follows your
-settings: changed by hand since, it says so.
+open; after that the card offers **Show in…**.
 
-For the AI cleanup instructions, the card shows the lines that change.
-**Edit first** opens the new text in the card itself, to adjust before
-**Save instructions**; **Cancel edit** goes back to the lines.
+For the AI cleanup instructions, the card shows the lines that change;
+**Edit first** lets you adjust the new text before **Save instructions**.
 
 Names your dictation gets wrong come as one **Add 3 terms** card: each term
-with what it sounds like, a checkbox, and **Edit** to fix either. Terms
-already in your Vocabulary are left out.
+with what it sounds like, a checkbox, and **Edit** to fix either.
 
 Ask why dictation wrote one word as another ("it writes AI cleanup when I
-say AI") and, with Your current settings on, Assistant reads your cleanup
-instructions (every mode's) and the Vocabulary entries your words name, and
-looks for the cause there. Such a question never searches the web.
+say AI") and, with Your current settings on, Assistant looks for the cause
+in your cleanup instructions and Vocabulary, never on the web.
 
 ## Set VibeHex up for you
 
@@ -63,8 +59,8 @@ set VibeHex up", first says what is set now: the speech model and language,
 where dictation is cleaned up, who writes meeting notes, the Labs features on,
 and how many Vocabulary terms you have. Then four questions, already answered
 from your settings: what you use VibeHex for, your language (with or
-without English tech terms, or your own by name), where dictation is cleaned up (this Mac, Codex,
-OpenCode, OpenRouter, your own server, or nowhere), and, for
+without English tech terms, or your own by name), where dictation is
+cleaned up, and, for
 calls or files, where notes and files are worked on. On a remote model, an
 optional field asks about your work and where you dictate most. Yes-or-no
 questions about fitting Labs features follow; **Skip to the plan** skips them.
@@ -99,6 +95,15 @@ key in any row, then **Use these** or **Keep mine**.
 
 It is offered only when Russian is the recognition language in **General ›
 Language**; otherwise use **Set VibeHex up for me**.
+
+## What's new for you
+
+**N new features fit how you use VibeHex** on the start screen, **Which Labs
+features are worth turning on for me?**, or **Choose with Assistant** in Labs
+opens one list of the Labs features that suit you, with no model: what each
+does, **Now** and **With it**, and in its row the setting it needs (YOLO
+mode's seconds, a shortcut key). **More to try** has the rest, each with
+**Add**. Labs shows the same picks under **Fits you**.
 
 ## Ask about your recordings
 
@@ -151,4 +156,4 @@ me"; "Can Assistant search the web?"; «Может ли ассистент ис�
 ассистенту читать мои записи?»; «Помоги мне настроить VibeHex под меня»;
 «Добавь Kubernetes в словарь».
 
-<!-- sources: docs/features/assistant.md; src/assistant/web.rs; src/rune_ui/assistant/web.rs; src/assistant/intent/mod.rs; src/assistant/intent/setup.rs; src/assistant/setup/mod.rs; src/assistant/setup/follow.rs; src/assistant/setup/plan.rs; src/assistant/setup/preset.rs; src/assistant/changes/vocab.rs; src/assistant/changes/companion.rs; src/rune_ui/assistant/card.rs; src/rune_ui/assistant/plan.rs; src/rune_ui/assistant/vocab.rs; src/assistant/recordings/mod.rs; src/rune_ui/assistant/recall.rs; src/rune_ui/assistant/jump.rs; src/rune_ui/assistant/settings.rs; src/rune_ui/assistant/suggestions/mod.rs -->
+<!-- sources: docs/features/assistant.md; src/assistant/web.rs; src/rune_ui/assistant/web.rs; src/assistant/intent/mod.rs; src/assistant/intent/setup.rs; src/assistant/setup/mod.rs; src/assistant/setup/follow.rs; src/assistant/setup/plan.rs; src/assistant/setup/preset.rs; src/assistant/changes/vocab.rs; src/assistant/changes/companion.rs; src/rune_ui/assistant/card.rs; src/rune_ui/assistant/plan.rs; src/rune_ui/assistant/vocab.rs; src/assistant/recordings/mod.rs; src/rune_ui/assistant/recall.rs; src/rune_ui/assistant/jump.rs; src/rune_ui/assistant/settings.rs; src/rune_ui/assistant/suggestions/mod.rs; src/assistant/setup/fresh.rs; src/rune_ui/assistant/fresh/mod.rs; src/rune_ui/labs/fits.rs -->

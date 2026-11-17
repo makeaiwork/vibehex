@@ -12,7 +12,6 @@ use std::time::{Duration, Instant};
 use super::super::super::Ui;
 use super::super::super::meetings::Status;
 use crate::assistant::setup::flow::{self, Step};
-use crate::assistant::setup::{self, follow, since};
 use crate::assistant::store::Store;
 use crate::assistant::suggest::{From, Left, Met, Signals};
 use crate::meeting::query::Library;
@@ -287,52 +286,17 @@ pub(super) struct NewLabs {
     labs: Vec<(String, String)>,
 }
 
-/// The Labs features releases brought after the last setup (or, without
-/// one, after the first version this install ran) that setup's follow-ups
-/// would offer now: they fit the answers, are off, and can be used here.
-/// Without either date nothing counts as new.
+/// The features "New for you" would pick now that releases brought after
+/// the last setup (without one, after the first version this install ran;
+/// without either, none): exactly its new picks, by key and card title.
+/// It reads what came since, never the person's use: a scan of History
+/// and the meetings is the picker's own, on a press.
 fn fitting(ui: &Ui) -> Vec<(String, String)> {
-    let last = since::last(ui.assistant.store.setups()).cloned();
-    let after = match &last {
-        Some(last) => last.at_ms,
-        None => crate::assistant::releases::history::read()
-            .first()
-            .map_or(0, |first| first.first_ms),
-    };
-    if after == 0 {
-        return Vec::new();
-    }
-    let keys: Vec<String> = since::releases_after(after)
+    let since = super::super::fresh::since(ui);
+    super::super::fresh::found(ui, since.as_ref())
+        .picks
         .into_iter()
-        .flat_map(|release| release.keys)
-        .filter(|key| key.starts_with("labs."))
-        .collect();
-    if keys.is_empty() {
-        return Vec::new();
-    }
-    let mut context = super::super::changes::context(ui);
-    let kept = ui.assistant.store.setups();
-    context.state.answered = crate::assistant::setup::past::answered_before(
-        kept,
-        &context.settings,
-        since::changed_since,
-    );
-    context.state.declined = crate::assistant::setup::past::declined(kept);
-    let answers = match last {
-        Some(last) => last.answers,
-        None => {
-            let spoken = setup::Spoken::of(&context.settings, &context.state);
-            let mut asks = setup::questions_for(context.state.os, spoken);
-            setup::preselect(&mut asks, &context.settings, &context.state);
-            for ask in &mut asks {
-                ask.done = true;
-            }
-            setup::answers(&asks)
-        }
-    };
-    follow::candidates(&answers, &context.settings, &context.state)
-        .into_iter()
-        .filter(|ask| keys.contains(&ask.id))
-        .map(|ask| (ask.id, ask.hint))
+        .filter(|pick| pick.new)
+        .map(|pick| (pick.key, pick.title.to_owned()))
         .collect()
 }

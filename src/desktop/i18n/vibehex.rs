@@ -10,6 +10,7 @@ pub(super) mod changes;
 pub(super) mod codex;
 pub(super) mod files;
 pub(super) mod follow;
+pub(super) mod fresh;
 pub(super) mod languages;
 pub(super) mod linked;
 mod naming;
@@ -35,6 +36,7 @@ pub(super) fn rows() -> impl Iterator<Item = &'static (&'static str, [&'static s
         .chain(setup::TRANSLATIONS)
         .chain(languages::TRANSLATIONS)
         .chain(follow::TRANSLATIONS)
+        .chain(fresh::TRANSLATIONS)
         .chain(linked::TRANSLATIONS)
         .chain(web::TRANSLATIONS)
         .chain(agent::TRANSLATIONS)
@@ -52,6 +54,7 @@ pub(super) fn french() -> impl Iterator<Item = &'static (&'static str, &'static 
         .chain(setup::FRENCH)
         .chain(languages::FRENCH)
         .chain(follow::FRENCH)
+        .chain(fresh::FRENCH)
         .chain(linked::FRENCH)
         .chain(web::FRENCH)
         .chain(agent::FRENCH)
@@ -67,6 +70,7 @@ pub(super) fn portuguese() -> impl Iterator<Item = &'static (&'static str, &'sta
         .chain(setup::PORTUGUESE)
         .chain(languages::PORTUGUESE)
         .chain(follow::PORTUGUESE)
+        .chain(fresh::PORTUGUESE)
         .chain(linked::PORTUGUESE)
         .chain(web::PORTUGUESE)
         .chain(agent::PORTUGUESE)
@@ -82,6 +86,7 @@ pub(super) fn russian() -> impl Iterator<Item = &'static (&'static str, &'static
         .chain(setup::RUSSIAN)
         .chain(languages::RUSSIAN)
         .chain(follow::RUSSIAN)
+        .chain(fresh::RUSSIAN)
         .chain(linked::RUSSIAN)
         .chain(web::RUSSIAN)
         .chain(agent::RUSSIAN)

@@ -4,6 +4,8 @@ key: labs.keep_on_clipboard
 title: Keep dictation on clipboard
 for: [dictation]
 ask: Leave each dictation on the clipboard after it's pasted?
+now: After pasting a dictation, VibeHex puts back whatever you had copied before, so the dictation is gone from the clipboard.
+with: The dictation stays on the clipboard after pasting, and what you copied before is not restored. Clipboard managers may record it.
 group: Output
 os: every OS
 vibehex: false

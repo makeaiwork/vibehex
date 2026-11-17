@@ -464,6 +464,9 @@ impl<'a> Gate<'a> {
         if !picked && self.declined_key(id) {
             return Verdict::Drop(Why::Declined);
         }
+        if !picked && self.state.dismissed.iter().any(|key| key == id) {
+            return Verdict::Drop(Why::Declined);
+        }
         Verdict::Show
     }
 

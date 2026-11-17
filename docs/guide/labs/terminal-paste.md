@@ -4,6 +4,8 @@ key: paste_with_shift
 title: Terminal paste
 for: [code]
 ask: Make dictations paste into terminals that ignore Ctrl+V?
+now: Terminals and some other apps ignore the Ctrl+V that VibeHex sends, so a dictation does not appear.
+with: VibeHex pastes with Ctrl+Shift+V instead, in every app; some apps use it for paste without formatting.
 group: Output
 os: Windows
 vibehex: false

@@ -54,7 +54,18 @@ impl Flow {
     /// made.
     pub(super) fn keep(&mut self, plan: Option<(&Card, u64)>, env: &Env, out: &mut Vec<Effect>) {
         let asked = self.asked();
-        let answers = crate::assistant::setup::answers(&asked);
+        let mut answers = crate::assistant::setup::answers(&asked);
+        // "New for you" asks nothing: its turn holds the answers it
+        // started from.
+        if asked.is_empty() {
+            answers = self
+                .setup_turns()
+                .iter()
+                .rev()
+                .find(|turn| !turn.answers.is_empty())
+                .map(|turn| turn.answers.clone())
+                .unwrap_or_default();
+        }
         let started_ms = self
             .setup_turns()
             .first()

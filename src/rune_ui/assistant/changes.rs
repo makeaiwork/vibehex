@@ -38,13 +38,14 @@ pub(in super::super) struct At {
 /// Codex and OpenCode, and a scene's stand-ins.
 pub(super) fn context(ui: &Ui) -> Context {
     let settings = ui.drafted();
-    let state = facts::gather(facts::Seen {
+    let mut state = facts::gather(facts::Seen {
         settings: &settings,
         setups: ui.assistant.store.setups(),
         codex_signed_in: super::super::output::codex_signed_in(ui),
         opencode_running: ui.assistant.reach.opencode,
         scene: scene(ui),
     });
+    state.dismissed = super::suggestions::dismissed(ui);
     Context { settings, state }
 }
 

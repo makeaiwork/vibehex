@@ -5,6 +5,8 @@ title: Transform typed text
 for: [dictation, cleanup]
 ask: Clean up text you typed, just like a dictation?
 then: Record its shortcut in Output › Typed text
+now: AI cleanup applies to what you dictate, not to text you typed by hand.
+with: A shortcut you record runs the app's cleanup steps on your typed text and pastes the result over the whole field.
 group: Output
 os: Linux
 vibehex: false

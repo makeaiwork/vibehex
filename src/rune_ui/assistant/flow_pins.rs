@@ -326,8 +326,8 @@ const FIRST: [&[&str]; 10] = [
     &[
         "now since facts asks(use=dictation_any+dictation_code+files*! language=en*! cleanup=none*! notes=apple!)",
         "asks(labs.cleanup_progress=! labs.live_text=! labs.recent_dictations=! labs.spoken_symbols=!) more(8)",
-        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.screen_vocabulary=!) more(4)",
-        "asks(labs.screenshots=! paste_with_shift=! labs.playback=! labs.history_multi_select=!)",
+        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.yolo_mode=!) more(4)",
+        "asks(labs.screen_vocabulary=! labs.screenshots=! paste_with_shift=! labs.playback=!)",
         "answer answers(use language cleanup notes) plan(1/1 open)",
         "kept: answers(use language cleanup labs.caps_lock_dictation labs.failure_notices labs.filler_words) asked(3) applied(1) declined(2) decided",
         "kept: answers(use language cleanup notes) asked(0) applied(0) declined(0)",
@@ -336,8 +336,8 @@ const FIRST: [&[&str]; 10] = [
     &[
         "now since facts asks(use=dictation_any+dictation_code+files*! language=en*! cleanup=none*! notes=apple!)",
         "asks(labs.cleanup_progress=! labs.live_text=! labs.recent_dictations=! labs.spoken_symbols=!) more(8)",
-        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.screen_vocabulary=!) more(4)",
-        "asks(labs.screenshots=! paste_with_shift=! labs.playback=! labs.history_multi_select=!)",
+        "asks(labs.stop_shortcut=! labs.vocabulary_biasing=! labs.vocabulary_quick_add=! labs.yolo_mode=!) more(4)",
+        "asks(labs.screen_vocabulary=! labs.screenshots=! paste_with_shift=! labs.playback=!)",
         "answer answers(use language cleanup notes) plan(1/1 declined)",
         "kept: answers(use language cleanup labs.caps_lock_dictation labs.failure_notices labs.filler_words) asked(3) applied(1) declined(2) decided",
         // Put off, and kept as decided: a scene's clock stands still, and this plan

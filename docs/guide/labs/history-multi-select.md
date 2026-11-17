@@ -4,6 +4,8 @@ key: labs.history_multi_select
 title: Select multiple dictations
 for: [dictation]
 ask: Select several dictations in History to copy or delete together?
+now: History selects one dictation at a time, so copying or deleting several means doing it one by one.
+with: Select several with Shift-click, Cmd-click or dragging; Copy joins them oldest first and Delete asks once.
 group: History
 os: every OS
 vibehex: false

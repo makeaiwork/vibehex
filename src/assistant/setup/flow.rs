@@ -17,6 +17,7 @@
 //! asks the model and shapes its reply with [`replied`]; the eval scenarios
 //! send the same events.
 
+mod fresh;
 mod preset;
 mod record;
 
@@ -93,6 +94,9 @@ pub enum Event {
     LookAgain { turn: usize },
     /// "Set me up like Denis", typed as `question` or pressed.
     Preset { question: String },
+    /// "New for you": the features that fit and are off, with no
+    /// questions (`fresh`); `since` when there was a setup or some use.
+    Fresh { since: Option<Since> },
 }
 
 /// What a transition asks to be done.
@@ -362,6 +366,7 @@ impl Flow {
             Event::Again { turn } => self.again(turn, env, &mut out),
             Event::LookAgain { turn } => self.look_again(turn, env, &mut out),
             Event::Preset { question } => self.preset(question, env, &mut out),
+            Event::Fresh { since } => self.fresh(since, env, &mut out),
         }
         (self, out)
     }

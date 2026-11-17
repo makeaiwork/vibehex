@@ -4,6 +4,8 @@ key: labs.keep_recordings
 title: Keep recordings
 for: [dictation]
 ask: Keep dictation audio so you can transcribe it again later?
+now: VibeHex keeps no audio of a dictation, so a misheard one cannot be transcribed again.
+with: Each new dictation's audio stays on your computer, and Transcribe again with another model gives a second text.
 group: History
 os: every OS
 vibehex: false

@@ -337,6 +337,24 @@ mod tests {
         assert!(held(&plan_of(&[OFF], &[OFF])).1.none());
     }
 
+    /// "New for you"'s More to try waits beside the list: its features
+    /// count nowhere, neither in the header, the button, nor the applied
+    /// line, until one is added to the list.
+    #[test]
+    fn more_to_try_is_never_counted() {
+        let mut plan = plan_of(&[ON, OFF], &[]);
+        plan.more = (0..19)
+            .map(|_| Item {
+                key: "labs.return_to_app".into(),
+                to: json!(true),
+                ..Item::default()
+            })
+            .collect();
+        assert_eq!(held(&plan), (counts(2, 0), counts(1, 0)));
+        assert_eq!(applied(&plan), (counts(1, 0), counts(1, 0)));
+        assert_eq!(super::super::state::applied_count(&plan), (1, 1));
+    }
+
     /// Every count line is a row of every language's table, with its
     /// numbers kept: a language may reorder them, never drop one.
     #[test]

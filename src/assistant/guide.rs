@@ -38,6 +38,12 @@ pub struct Article {
     /// Setup's question while it isn't known whether the need is met
     /// (`ask_if:`, "If your mouse has extra buttons, …"); else `ask`.
     pub ask_if: String,
+    /// How things go without it, in English (`now:`): one sentence said
+    /// to the person, "You press Return after every dictation yourself."
+    pub now: String,
+    /// What changes with it on, in English (`with:`): "The message is
+    /// sent as soon as you let go of the shortcut."
+    pub with: String,
 }
 
 impl Article {
@@ -115,6 +121,8 @@ fn parse(id: &'static str, text: &str) -> Article {
             .filter_map(|need| Need::parse(need))
             .collect(),
         ask_if: field("ask_if").unwrap_or_default(),
+        now: field("now").unwrap_or_default(),
+        with: field("with").unwrap_or_default(),
         asked_as: asked_as(&body),
         body,
     }
@@ -296,6 +304,33 @@ mod tests {
             assert!(
                 kind.is_some_and(|(_, kind, ..)| kind == "bool"),
                 "{}: {key} is no switch",
+                article.id
+            );
+        }
+    }
+
+    /// A feature setup may offer says what changes for the person: how
+    /// things go now and how they go with it on, a sentence each, short
+    /// enough for a cell of the "New for you" list.
+    #[test]
+    fn every_offered_labs_article_says_what_changes() {
+        for article in articles().iter().filter(|article| article.is_lab()) {
+            for (name, words) in [("now", &article.now), ("with", &article.with)] {
+                if article.uses.is_empty() {
+                    assert!(words.is_empty(), "{}: {name} without for", article.id);
+                    continue;
+                }
+                let count = words.split_whitespace().count();
+                assert!(
+                    (4..=22).contains(&count) && words.ends_with('.'),
+                    "{}: {name} {words:?}",
+                    article.id
+                );
+                assert!(!words.contains('\u{b7}'), "{}: {name}", article.id);
+            }
+            assert!(
+                article.uses.is_empty() || article.now != article.with,
+                "{}",
                 article.id
             );
         }

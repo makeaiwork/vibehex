@@ -35,7 +35,7 @@ pub(in crate::rune_ui) fn search_field(ui: &Ui, p: Paint) -> El {
 
 const SEARCH_WIDTH: f32 = 220.0;
 /// Between cards, across and down.
-const GAP: f32 = 8.0;
+pub(super) const GAP: f32 = 8.0;
 
 /// Discover and Turned on, at the title bar's end.
 pub(in crate::rune_ui) fn tabs(ui: &Ui, p: Paint) -> El {
@@ -76,13 +76,20 @@ pub(in crate::rune_ui) fn page(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
     let is_new = |row: &Row| newest > 0 && row.lab.added() == newest;
     let mut content = col().key("content").px(METRICS.gutter).gap(12.0);
     let browsing = store.tab == Tab::Discover && !store.chosen() && query.is_empty();
-    // Labs in New in Labs aren't repeated in the grid below.
+    // Labs in Fits you and New in Labs aren't repeated below them.
     let mut featured_labs = Vec::new();
     if browsing {
-        let mut featured: Vec<&Row> = rows.iter().filter(|row| is_new(row)).collect();
+        if let Some(group) = super::fits::group(ui, p, &rows, layer) {
+            featured_labs = super::fits::labs(ui, &rows);
+            content = content.child(group);
+        }
+        let mut featured: Vec<&Row> = rows
+            .iter()
+            .filter(|row| is_new(row) && !featured_labs.contains(&row.lab))
+            .collect();
         featured.sort_by_key(|row| std::cmp::Reverse((row.lab.added(), row.lab.index())));
         featured.truncate(2);
-        featured_labs = featured.iter().map(|row| row.lab).collect();
+        featured_labs.extend(featured.iter().map(|row| row.lab));
         if !featured.is_empty() {
             content = content
                 .child(heading(p, "new-heading", tr("New in Labs")))
@@ -90,7 +97,7 @@ pub(in crate::rune_ui) fn page(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
                     "featured",
                     featured
                         .into_iter()
-                        .map(|row| card(ui, p, row, true, true, layer))
+                        .map(|row| card(ui, p, row, (true, true), None, layer))
                         .collect(),
                 ));
         }
@@ -138,7 +145,7 @@ pub(in crate::rune_ui) fn page(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
                         &format!("grid-row{index}"),
                         pair_rows
                             .iter()
-                            .map(|row| card(ui, p, row, is_new(row), false, layer))
+                            .map(|row| card(ui, p, row, (is_new(row), false), None, layer))
                             .collect(),
                     ));
                 }
@@ -170,7 +177,7 @@ fn heading(p: Paint, key: &str, title: &str) -> El {
 }
 
 /// Two cards side by side, equally wide; a lone card keeps half the row.
-fn pair(key: &str, cards: Vec<El>) -> El {
+pub(super) fn pair(key: &str, cards: Vec<El>) -> El {
     row()
         .key(key)
         .gap(GAP)
@@ -329,9 +336,18 @@ fn chip(p: Paint, key: &str, label: &str, count: usize, selected: bool, pick: Ch
 /// One lab as a card: tile, name and tags on one line, up to two lines of
 /// description, its switch, and while on any settings of its own. A note
 /// under the description may run to three lines, so a caveat such as where
-/// the text goes is never cut short. `featured` cards sit under New in Labs,
-/// so they carry no New tag.
-fn card(ui: &Ui, p: Paint, entry: &Row, new: bool, featured: bool, layer: &mut Vec<El>) -> El {
+/// the text goes is never cut short. `featured` cards sit under New in Labs
+/// or Fits you, so they carry no New tag; one under Fits you says what it
+/// changes for the person (`for_you`), as one line that opens, and has a
+/// quiet × that takes it out of the group.
+pub(super) fn card(
+    ui: &Ui,
+    p: Paint,
+    entry: &Row,
+    (new, featured): (bool, bool),
+    for_you: Option<super::fits::ForYou>,
+    layer: &mut Vec<El>,
+) -> El {
     let c = &p.k.c;
     let lab = entry.lab;
     let mut tags = Vec::new();
@@ -362,7 +378,12 @@ fn card(ui: &Ui, p: Paint, entry: &Row, new: bool, featured: bool, layer: &mut V
         ))
         .children(tags)
         .child(el().key("spacer").grow(1.0).min_w(8.0))
-        .child(lab_switch(p, entry).key(row_key(lab)));
+        .child(lab_switch(p, entry).key(row_key(lab)))
+        .children(
+            for_you
+                .as_ref()
+                .map(|fit| super::fits::dismiss_button(p, fit)),
+        );
     // The description runs under the switch too.
     let mut copy = col()
         .key("copy")
@@ -390,10 +411,10 @@ fn card(ui: &Ui, p: Paint, entry: &Row, new: bool, featured: bool, layer: &mut V
     if let Some(extras) = extras(ui, p, entry, layer) {
         copy = copy.child(extras.mt(8.0));
     }
-    let key = if featured {
-        format!("lab-featured-{}", lab.id())
-    } else {
-        format!("lab-card-{}", lab.id())
+    let key = match (for_you.is_some(), featured) {
+        (true, _) => format!("lab-fits-{}", lab.id()),
+        (false, true) => format!("lab-featured-{}", lab.id()),
+        (false, false) => format!("lab-card-{}", lab.id()),
     };
     // The lab an answer's link opened: a soft warm tint and a ring, so it
     // shows among its neighbours (never a side bar).
@@ -406,16 +427,24 @@ fn card(ui: &Ui, p: Paint, entry: &Row, new: bool, featured: bool, layer: &mut V
     } else {
         ((c.bg_base, p.hair), c.border_weak)
     };
-    row()
-        .key(key)
+    let top = row()
+        .gap(10.0)
+        .items_start()
+        .child(crate::rune_ui::icons::tile(p, entry.icon, TILE))
+        .child(copy);
+    // Under Fits you the card is its usual row, then Assistant's line.
+    let card = match for_you {
+        Some(fit) => col()
+            .gap(6.0)
+            .child(top.key("top"))
+            .child(super::fits::line(p, lab, &fit)),
+        None => top,
+    };
+    card.key(key)
         .role("group")
         .label(entry.title)
         .padding(CARD_PADDING)
-        .gap(10.0)
-        .items_start()
         .radius(p.k.radius.lg)
-        .child(crate::rune_ui::icons::tile(p, entry.icon, TILE))
-        .child(copy)
         .fill(fill.0)
         .border(
             fill.1,
@@ -445,7 +474,7 @@ fn vibehex_star(p: Paint) -> El {
 }
 
 const CARD_PADDING: f32 = 12.0;
-const TILE: f32 = 32.0;
+pub(super) const TILE: f32 = 32.0;
 
 /// A lab's switch: it flips the lab; a locked lab's is disabled.
 fn lab_switch(p: Paint, entry: &Row) -> El {

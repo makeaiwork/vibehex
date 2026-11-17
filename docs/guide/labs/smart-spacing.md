@@ -4,6 +4,8 @@ key: labs.smart_spacing
 title: Smart spacing
 for: [dictation]
 ask: Add a space automatically when you dictate right after a word?
+now: A dictation that starts right after a word you typed can stick to it with no space.
+with: VibeHex looks at the character before the cursor and adds one space only when the text needs it.
 group: Output
 os: macOS
 vibehex: false

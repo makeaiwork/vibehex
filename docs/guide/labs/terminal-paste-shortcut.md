@@ -5,6 +5,8 @@ title: Terminal paste shortcut
 for: [code]
 ask: Want a separate shortcut that always pastes into the terminal?
 then: Record its key in General › Terminal paste shortcut
+now: Every dictation is pasted the same way, whether it goes into a terminal or another app.
+with: A second key you record always pastes with Ctrl+Shift+V for terminals, and your main shortcut keeps its usual paste.
 group: Shortcuts
 os: [Windows, Linux]
 vibehex: false

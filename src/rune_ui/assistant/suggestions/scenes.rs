@@ -10,7 +10,7 @@ const HOUR: u64 = 60 * MINUTE;
 const DAY: u64 = 24 * HOUR;
 
 /// The scene's rows picked from `signals`, as the window picks them.
-pub(super) fn show(ui: &mut Ui, signals: Signals) {
+pub(in super::super) fn show(ui: &mut Ui, signals: Signals) {
     ui.assistant.suggestions.scene = Some(signals);
     super::refresh(ui);
 }

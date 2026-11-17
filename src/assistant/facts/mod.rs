@@ -95,6 +95,9 @@ pub struct State {
     /// The follow-ups answered in an earlier setup and not asked again
     /// (`setup::past::answered_before`), as answered then.
     pub answered: Vec<Ask>,
+    /// The Labs switches the person dismissed on Labs' Fits you ("Not for
+    /// me"): setup and "New for you" don't offer them on their own again.
+    pub dismissed: Vec<String>,
     /// The screens and pointing devices, for Labs features that need them;
     /// each part `None` while unknown.
     pub hardware: Hardware,

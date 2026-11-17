@@ -4,6 +4,8 @@ key: labs.spoken_symbols
 title: Spoken symbols
 for: [dictation, code]
 ask: Say comma, hashtag, or underscore and get the symbol?
+now: Spoken symbol words such as hashtag or underscore are written out as plain words.
+with: Hashtag release becomes #release and my underscore variable becomes my_variable; comma, colon and slash work too. English and Spanish only.
 group: Output
 os: every OS
 vibehex: false

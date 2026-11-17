@@ -2,9 +2,11 @@
 feature: double-tap-modifiers
 key: labs.double_tap_modifiers
 title: Double-tap on a lone modifier
-for: []
+for: [dictation]
 ask: Start hands-free dictation by tapping Option or Globe twice?
 then: Choose Double-tap in General › Shortcut mode
+now: In Double-tap mode a shortcut must include a key, such as Option+Space; a modifier alone will not do.
+with: Tap Option or Globe twice and hands-free dictation starts; press again to finish. Your Mac's own Globe shortcut may fire too.
 group: Shortcuts
 os: macOS
 vibehex: false

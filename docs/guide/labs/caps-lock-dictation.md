@@ -4,6 +4,8 @@ key: labs.caps_lock_dictation
 title: Caps Lock dictation
 for: [dictation, code]
 ask: Use Caps Lock as a one-press dictation key?
+now: Caps Lock keeps its usual job and cannot start a dictation.
+with: Press Caps Lock once to start and again to paste; Escape cancels, and typing never turns to capitals.
 group: Shortcuts
 os: macOS
 vibehex: false

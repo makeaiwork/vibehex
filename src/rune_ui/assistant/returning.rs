@@ -20,6 +20,12 @@ use crate::desktop::i18n::tr;
 /// the releases since, and the use, only while Assistant may read
 /// recordings.
 pub(super) fn since(ui: &Ui) -> Option<Since> {
+    since_reading(ui, true)
+}
+
+/// The same; the use read only with `usage`, which reads History and the
+/// meetings off the disk.
+pub(super) fn since_reading(ui: &Ui, usage: bool) -> Option<Since> {
     let setups = ui.assistant.store.setups();
     let dictations = ui.history.kept(since::USED_DICTATIONS);
     if !since::returning(setups, dictations, ui.meetings.meetings.len()) {
@@ -42,7 +48,7 @@ pub(super) fn since(ui: &Ui) -> Option<Since> {
     };
     let fixture = ui.assistant.fixture || ui.is_fixture();
     let usage = recordings::Allowed::from_settings(&ui.settings.assistant)
-        .filter(|_| !fixture)
+        .filter(|_| usage && !fixture)
         .and_then(|allowed| {
             let sources = recordings::Sources::here()?;
             let known: Vec<String> = ui

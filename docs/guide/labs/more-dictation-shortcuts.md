@@ -2,9 +2,11 @@
 feature: more-dictation-shortcuts
 key: labs.more_dictation_shortcuts
 title: More dictation shortcuts
-for: []
+for: [dictation]
 ask: Add up to four more dictation shortcuts, each with its own mode?
 then: Add them in General › Shortcut
+now: You start dictation with one main shortcut, in one mode at a time.
+with: Up to four more shortcuts dictate like the main one, each with its own mode, for example Hold or Tap.
 group: Shortcuts
 os: macOS
 vibehex: false

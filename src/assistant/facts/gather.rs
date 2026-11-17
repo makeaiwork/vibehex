@@ -92,6 +92,7 @@ pub fn gather(seen: Seen) -> State {
             servers: Fact::Unknown,
             declined,
             answered,
+            dismissed: Vec::new(),
             hardware: scene.hardware,
             // A scene follows the window, whatever this computer's is.
             system_language: String::new(),
@@ -106,6 +107,7 @@ pub fn gather(seen: Seen) -> State {
             servers: Fact::Known(engines::installed_servers()),
             declined,
             answered,
+            dismissed: Vec::new(),
             hardware: hardware::detect(),
             system_language: crate::desktop::i18n::preferred_language(),
             machine: Machine::here(),

@@ -30,11 +30,12 @@ mod invite_tests;
 // Pinned on a Mac: the follow-ups and the preset's rows are this OS's.
 #[cfg(all(test, target_os = "macos"))]
 mod flow_pins;
+pub(super) mod fresh;
 pub(super) mod jump;
 pub(super) mod keys;
 mod knew;
 #[cfg(test)]
-mod layout;
+pub(super) mod layout;
 pub(super) mod long_fixture;
 pub(super) mod nav;
 mod picker;
@@ -57,6 +58,7 @@ mod vocab_edit;
 mod web;
 pub(super) mod whats_new;
 
+pub(super) use fresh::scenes::{new_for_you, new_for_you_more};
 pub(super) use keys::recorded;
 pub(super) use suggestions::scenes as suggested;
 pub(super) use value::ValueAt;
@@ -128,6 +130,8 @@ pub(in super::super) struct AssistantPane {
     pub(super) recording: Option<(changes::At, usize)>,
     /// Setup plans whose "Already set" is unfolded.
     pub(super) kept_open: Vec<changes::At>,
+    /// "New for you" plans whose "More to try" is unfolded.
+    pub(super) more_open: Vec<changes::At>,
     /// Plans whose Vocabulary terms are folded the other way than they
     /// start (`terms::open`).
     pub(super) terms_flipped: Vec<changes::At>,

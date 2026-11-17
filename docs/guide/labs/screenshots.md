@@ -5,6 +5,8 @@ title: Screenshots
 for: [code]
 ask: Take screenshots you can mark up and talk over?
 then: Free ⌘⇧4 in Keyboard Shortcuts › Screenshots, allow Screen Recording
+now: VibeHex takes no pictures of your screen, and ⌘⇧4 belongs to macOS.
+with: ⌘⇧4 takes a shot, saves it as a PNG and shows a corner card to mark it up or talk over.
 group: Annotate
 os: macOS
 vibehex: false

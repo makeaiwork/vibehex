@@ -4,6 +4,8 @@ key: labs.calendar_menu
 title: Upcoming meetings in menu bar
 for: [meetings]
 ask: Show your next calendar meetings in the menu bar menu?
+now: VibeHex's menu bar menu does not list your upcoming meetings.
+with: Up to five next meetings show in the menu, and picking one with a call link opens the call.
 group: Meetings
 os: macOS
 vibehex: false

@@ -169,6 +169,10 @@ Opened from a place link                         // rune_ui::assistant::places
 - Setup's follow-up questions (each Labs article's `ask:` and `ask_if:`
   line) have rows in every language (`i18n/vibehex/follow.rs`, a test
   holds every one).
+- "New for you" shows each offered article's `now:` and `with:` lines
+  (how things go without it, what changes with it); they and the list's
+  own phrases have rows in every language (`i18n/vibehex/fresh.rs`, the
+  same test holds every one).
 - Scene `assistant-start-russian`: an English window dictating Russian.
   The setup scenes play the owner's settings (Orukeet, Russian), so
   their questions and chips show in Russian too.
@@ -1052,14 +1056,17 @@ With no model connected, only the rows that need none show.
   - From Meetings: "What did we decide in “<the meeting open>”?" and, with
     two or more this week, "Pull the action items from this week's N
     meetings"; from History, the wrong-word question; from Labs, which
-    features fit (or the new-features row); from Output, how to steer
-    cleanup, or how to get it while it is off. Each asks its question.
+    features fit (or the new-features row), which opens "New for you" and
+    so needs no model; from Output, how to steer cleanup, or how to get it
+    while it is off. The others ask their question.
   - "N new features fit how you use VibeHex": Labs features a release
     brought after the last setup (without one, after the first version
     this install ran; without either, none) that setup's follow-ups would
     offer now (they fit the answers, are off, and work here), named in the
-    window's words, the first three and "and N more". A press starts guided
-    setup.
+    window's words, the first three and "and N more": exactly the picks
+    "New for you" would show that came since (read without the person's
+    use, so a counted "Now" can't reorder them), cached until the settings
+    or the setups change. A press opens "New for you" (below).
 - What broke is drawn as a warning: a soft warning tint and border, the
   warning colour on the tile's glyph, never a bar on its edge. New
   features take the accent on their tile; the rest are neutral.
@@ -1096,6 +1103,66 @@ With no model connected, only the rows that need none show.
   hiding, pressing what broke, the examples, the mark, a setup left),
   `rune_ui::history::tests`; scenes `assistant-start-broke`,
   `assistant-start-meetings`.
+
+## New for you
+
+One list of the Labs features that fit the person and are off, written by
+the app with no question and no model (`assistant::setup::fresh`, the
+window's side in `rune_ui::assistant::fresh`, owner mockups
+`LabsPick.dc.html` and `LabsForYou.dc.html`). It runs with no model
+connected and while a model answers in another conversation.
+
+- Three ways in, one picker (`fresh::begin`): the start page's "N new
+  features fit how you use VibeHex" row; "Which Labs features are worth
+  turning on for me?", as the row from Labs and as the example question
+  (neither asks a model now, so `suggestions::asks` leaves it out); and
+  Labs' **Choose with Assistant**, which opens Assistant first. Each starts
+  a conversation named "What's new for me?" (the empty one open, unless a
+  question waits there for leave to read recordings) and sends
+  `Event::Fresh` with what a returning setup reads (`returning::since`:
+  the last setup, the releases since, and the use only with the
+  recordings consent) through `ask::send`, the one effect loop.
+- The turn: the opening ("Since your setup on … VibeHex gained N Labs
+  features. 4 fit how you use it. …") and one plan card, at most five
+  rows by area. A row keeps the plan's tick, name, path, what the feature
+  does, and from → to; under its line, **Now** and **With it** side by
+  side, two equal cells each on its own rounded backing (the first
+  neutral with a faint label, the second on a soft accent tint with an
+  accent label), stacked when too narrow for both (`fresh::rows::pair`).
+  "Now" is a number the app counted only with the recordings consent.
+- A setting the feature needs is set in its row, never "then go to
+  General" (owner rule): YOLO mode's "longer than [2 s ▾]" is a companion
+  like Unload model when idle's (`changes::companion::PAIRS`, the rule
+  `labs.yolo_mode_seconds` needs `labs.yolo_mode`; the choices read as
+  its Labs card's, "1 s" to "10 s"); its "Only in" app list is never in a
+  card. More dictation shortcuts (macOS) shows one line as the shortcuts
+  card draws a row: the keyboard glyph, "Extra shortcut 1", "Click the
+  field and press the keys", and General's recorder, "Not set" until
+  pressed (`fresh::shortcut`). It records through the shortcuts card's
+  path (`keys::record`, the host pausing VibeHex's shortcuts; the chord
+  back through `keys::recorded`), checked with General's rules against
+  the settings as the plan would save them; ⌫ alone clears it, and a key
+  ticks the row. It shows only while no extra shortcut has a key, and
+  the row's "Then:" line goes. The key is the item's `shortcut`; Apply
+  saves it with the switch as the first row of `extra_dictation_hotkeys`
+  in General's default mode (`changes::extra`); with none, only the
+  switch. Undo puts both back. These in-row settings hold in any plan.
+- **More to try: N new features ›**, below the rows and folded like
+  "Already set": unfolded, a compact row per other feature that came
+  since (name, path, what it does) with **Add**, which moves it into the
+  list, checked, with its article's `now:`/`with:` and in its area
+  (`fresh::add`). A decided plan adds nothing. The counts ("N changes, M
+  selected", "Apply N changes", the applied line) count only the list.
+- What is recorded: applied or put off, it is a setup like any other
+  (`flow::record`), with the answers it started from and the rows applied
+  and declined; what was left unticked isn't offered again. More to try
+  records nothing.
+- Checks: `assistant::setup::fresh` tests (picks, the list, Add),
+  `changes::extra` and `changes::counts` tests, `flow::tests::new_for_you_is_one_list_kept_once_decided`,
+  `rune_ui::assistant::fresh::tests` (the three ways in with no model and
+  while one answers elsewhere, Add, Apply with the companion and the
+  recorded key, Undo), `labs::fits` tests; scenes `assistant-new-for-you`,
+  `assistant-new-for-you-more`, `mac-labs-fits`.
 
 ## What's new
 
@@ -1667,6 +1734,7 @@ gone.
 | Consent card | `assistant-consent` | `consent_card` |
 | Consent card mid-answer | `assistant-agent-consent` | `consent_card_mid_answer` |
 | No model page | `assistant-connect` | `no_model_page` |
+| New for you | `assistant-new-for-you`, `assistant-new-for-you-more` | `new_for_you` |
 
 The other scenes, each through `every_scene_is_laid_out_whole`:
 

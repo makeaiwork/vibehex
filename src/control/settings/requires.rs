@@ -122,6 +122,8 @@ const RULES: &[Rule] = &[
         "labs.caps_lock_dictation",
     ),
     rule("labs.unload_idle_minutes", When::Any, "labs.unload_idle"),
+    // How long a dictation runs before YOLO mode presses Return.
+    rule("labs.yolo_mode_seconds", When::Any, "labs.yolo_mode"),
     // How long before a meeting its reminder shows: nothing without one.
     rule(
         "meetings.calendar.lead_minutes",

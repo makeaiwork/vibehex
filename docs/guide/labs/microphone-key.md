@@ -5,6 +5,8 @@ title: Microphone key alone
 for: [dictation]
 ask: Dictate with the microphone key on your Mac laptop?
 then: Record the mic key in General › Shortcut
+now: VibeHex refuses the microphone key on a Mac laptop as an unsupported key, so it cannot start dictation.
+with: The microphone key can be your dictation key; while a shortcut uses it, VibeHex takes it from other apps.
 group: Shortcuts
 os: macOS
 vibehex: false

@@ -1661,9 +1661,13 @@ mod tests {
         include_str!("../rune_ui/assistant/recall.rs"),
         include_str!("../rune_ui/assistant/settings.rs"),
         include_str!("../rune_ui/assistant/vocab.rs"),
+        include_str!("../rune_ui/assistant/fresh/mod.rs"),
+        include_str!("../rune_ui/assistant/fresh/rows.rs"),
+        include_str!("../rune_ui/assistant/fresh/shortcut.rs"),
         include_str!("../rune_ui/hud_lab.rs"),
         include_str!("../rune_ui/labs.rs"),
         include_str!("../rune_ui/labs/browser_access.rs"),
+        include_str!("../rune_ui/labs/fits.rs"),
         include_str!("../rune_ui/labs/group.rs"),
         include_str!("../rune_ui/labs/screenshots.rs"),
         include_str!("../rune_ui/labs/store.rs"),
@@ -1823,13 +1827,21 @@ mod tests {
     }
 
     /// Setup's follow-up questions are the Labs articles' `ask:` lines,
-    /// shown in Assistant's language like its other words.
+    /// and "New for you" shows their `now:` and `with:` lines: all shown
+    /// in Assistant's language like its other words.
     #[test]
     fn every_follow_up_question_has_every_language() {
         let table: std::collections::HashMap<_, _> = all_translations().copied().collect();
         let questions = crate::assistant::guide::articles()
             .iter()
-            .flat_map(|article| [article.ask.as_str(), article.ask_if.as_str()]);
+            .flat_map(|article| {
+                [
+                    article.ask.as_str(),
+                    article.ask_if.as_str(),
+                    article.now.as_str(),
+                    article.with.as_str(),
+                ]
+            });
         for question in questions.filter(|question| !question.is_empty()) {
             let translations = table
                 .get(question)

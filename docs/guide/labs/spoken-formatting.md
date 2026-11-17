@@ -4,6 +4,8 @@ key: labs.spoken_formatting
 title: Spoken formatting
 for: [dictation]
 ask: Format by voice, saying new line or new paragraph?
+now: Saying new line or new paragraph while you dictate puts those words into your text.
+with: Say new line, new paragraph, open quote or close quote and get that break or quote mark. English and Spanish only.
 group: Output
 os: every OS
 vibehex: false

@@ -4,6 +4,8 @@ key: labs.live_chapters
 title: Live chapters
 for: [meetings, cleanup]
 ask: Split meeting transcripts into named chapters while you record?
+now: A meeting transcript is one long text with no named chapters.
+with: Named chapters appear during the call, if a model writes your meeting notes, so you can jump to one topic.
 group: Meetings
 os: [macOS, Windows, Linux]
 vibehex: false
