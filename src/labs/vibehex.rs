@@ -85,6 +85,18 @@ impl Feature {
         }
     }
 
+    /// The fork's one line for the card of a Hex lab it reworked, where
+    /// Hex's no longer says what happens: Hex's rewrite was OpenCode's, and
+    /// here every cleanup engine reads the nearby text.
+    pub(super) const fn vibehex_reworded(self) -> Option<&'static str> {
+        match self {
+            Self::CursorContext => Some(
+                "AI cleanup uses the text around the cursor to spell names and terms right and fit where it pastes.",
+            ),
+            _ => None,
+        }
+    }
+
     /// Hex labs VibeHex leaves out of a stable build, as Hex does its
     /// developer tools: they repeat something VibeHex already has (About),
     /// the owner chose not to ship them, or they run only on OpenCode while

@@ -107,8 +107,19 @@ impl Feature {
         }
     }
 
-    /// The card's one line, under its title.
+    /// The card's one line, under its title. VibeHex: a Hex lab the fork
+    /// reworked may say it in the fork's words
+    /// ([`Feature::vibehex_reworded`]); Hex's website keeps Hex's
+    /// ([`Feature::hex_summary`]).
     pub const fn summary(self) -> &'static str {
+        match self.vibehex_reworded() {
+            Some(summary) => summary,
+            None => self.hex_summary(),
+        }
+    }
+
+    /// Hex's one line for the card, as upstream has it.
+    pub const fn hex_summary(self) -> &'static str {
         match self {
             Self::Meetings => "Record calls and keep transcripts",
             Self::VoiceFilter => "Hex Microphone virtual input and real-time voice filters",

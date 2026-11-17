@@ -29,7 +29,8 @@ impl Feature {
             Self::StandaloneSpecialKeys => {
                 "Use a special key alone as a shortcut: Insert, Home, End, Page Up, or Page Down on Windows, and Menu, Pause, or Scroll Lock on Linux"
             }
-            _ => self.summary(),
+            // VibeHex: Hex's website describes a lab as Hex does.
+            _ => self.hex_summary(),
         }
     }
 }
