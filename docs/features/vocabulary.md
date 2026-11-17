@@ -130,8 +130,12 @@ Screen vocabulary (Labs › Screen vocabulary, macOS)  // vocabulary.screen
 ├── A capture with terms for a model that reads them uses its whole-clip run
 │   rather than a live stream's text: a stream fixes its vocabulary when it
 │   starts, so the text arrives after release with a little more latency
-├── Only that capture: meetings, the local API, and OpenCode rewriting never
-│   see the terms, and only the term count and read time are logged, at debug
+├── VibeHex: a term found only in a button's, tab's or panel's label is kept
+│   only when it is no ordinary word, and the words of the app's own name go
+│   (dictionary: /usr/share/dict/words)  // screen_vocabulary/labels.rs
+├── Only that capture: meetings, the local API, and AI cleanup (unless the
+│   VibeHex switch below is on) never see the terms, and only the term count
+│   and read time are logged, at debug
 ├── VibeHex: labs.screen_vocabulary_cleanup (off) gives them to AI cleanup
 │   too, after the Vocabulary in the prompt and checked by the vocabulary
 │   guard; the window is then read whatever the model; a term shaped like a

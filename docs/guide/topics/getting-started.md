@@ -106,8 +106,14 @@ VibeHex" when you point at it. The newest labs show first under "New in
 Labs". Each card has its own switch. At the bottom, Run setup again and Send
 feedback.
 
+While Assistant is on, **Fits you** at the top of Discover shows up to four
+labs that suit you and are off, each with a line from Assistant on what
+changes for you (press it to read it all). **×** (Not for me) puts a lab back
+in its place, and it isn't suggested again; pressing the heading folds the
+group; **Choose with Assistant** opens them as one list to tick in Assistant.
+
 **Asked as.** "How do I start using VibeHex?"; "Why does it ask for
 Accessibility?"; «Зачем VibeHex просит универсальный доступ?»; «Как пройти
 настройку заново?».
 
-<!-- sources: upstream docs/features/README.md:229-303 (story, one permission page each, practice, launch-at-login ask); docs/features/README.md:157-243; AGENTS.md:687-724; src/rune_ui/platform_settings.rs:28-131; src/rune_ui/onboarding_kit/permissions.rs:190-330; src/rune_ui/onboarding_kit/first_run.rs:505-540; src/rune_ui/onboarding_kit/landing.rs:150-210; src/rune_ui/sidebar.rs:71-147, 270-300, 440-490; src/rune_ui/labs.rs:31-48, 360-366, 610-616, 801-805; src/rune_ui/labs/store.rs:1-60, 150-250, 410-475; src/rune_ui/labs/group.rs:10-20; src/rune_ui/general.rs:1000-1115; src/desktop/i18n.rs:26-42; src/rune_ui/files.rs:139; src/rune_ui/meetings.rs:158; src/labs.rs:460-495 -->
+<!-- sources: upstream docs/features/README.md:229-303 (story, one permission page each, practice, launch-at-login ask); docs/features/README.md:157-243; AGENTS.md:687-724; src/rune_ui/platform_settings.rs:28-131; src/rune_ui/onboarding_kit/permissions.rs:190-330; src/rune_ui/onboarding_kit/first_run.rs:505-540; src/rune_ui/onboarding_kit/landing.rs:150-210; src/rune_ui/sidebar.rs:71-147, 270-300, 440-490; src/rune_ui/labs.rs:31-48, 360-366, 610-616, 801-805; src/rune_ui/labs/store.rs:1-60, 150-250, 410-475; src/rune_ui/labs/group.rs:10-20; src/rune_ui/labs/fits.rs; src/rune_ui/general.rs:1000-1115; src/desktop/i18n.rs:26-42; src/rune_ui/files.rs:139; src/rune_ui/meetings.rs:158; src/labs.rs:460-495 -->

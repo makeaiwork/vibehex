@@ -49,7 +49,10 @@ to a server at sign-in; everything else stays in `%APPDATA%\hex`.
   plan, and OpenRouter to its model provider. "Your own" stays on your
   computer for LM Studio or Ollama at their usual local addresses, and goes
   wherever another address points.
-  "Built in" (Mac) never leaves.
+  "Built in" (Mac) never leaves. On a Mac, Labs › Rewrite reads nearby text
+  adds the text around your cursor (known keys and tokens cut out), and
+  Screen vocabulary's Also give them to AI cleanup the names in the window.
+  History keeps what was read with the entry, on this computer.
 - **Meeting notes:** Apple Intelligence keeps the transcript on the Mac, and a
   Built in writer keeps it on the computer; any other writer in Meetings ›
   Settings › Notes › Written by (OpenCode, Codex, Other) receives it. So does
@@ -92,4 +95,4 @@ Codex keeps its own sign-in. Output › AI cleanup › API key has Remove.
 «Мои записи отправляются в интернет?»; «Как удалить историю диктовок?»; «Где
 хранится API-ключ?».
 
-<!-- sources: upstream docs/features/README.md:935-936 (10 MB cap, newest 5 MB, launch and hourly); docs/features/README.md:660-690; src/history.rs:26-96,390; src/history/recordings.rs:1-27; src/rune_ui/history.rs:316-331,702-800; src/app_paths.rs:29-100; src/dictation/cleanup_server/keys.rs:1-12; src/dictation/cleanup_server/codex.rs:1-12; src/rune_ui/output/ai_cleanup.rs:108-200,456-510; src/rune_ui/labs.rs:776-780; src/rune_ui/meeting_notes.rs:113-123,126-210; src/rune_ui/platform_settings.rs:260-380,500-520,574-611; src/app_settings/meetings.rs:142-172; src/control/settings.rs:688-697; src/rune_ui/output.rs:300-330; src/updater.rs:1-60; src/rune_ui/assistant/settings.rs:20-165; docs/features/meetings.md:128-135; crates/capture/src/speech_model.rs:1-10 -->
+<!-- sources: src/dictation/caret_prompt/cleanup.rs; src/dictation/caret_prompt/secrets.rs; src/dictation/screen_vocabulary/cleanup.rs; src/history/read.rs; upstream docs/features/README.md:935-936 (10 MB cap, newest 5 MB, launch and hourly); docs/features/README.md:660-690; src/history.rs:26-96,390; src/history/recordings.rs:1-27; src/rune_ui/history.rs:316-331,702-800; src/app_paths.rs:29-100; src/dictation/cleanup_server/keys.rs:1-12; src/dictation/cleanup_server/codex.rs:1-12; src/rune_ui/output/ai_cleanup.rs:108-200,456-510; src/rune_ui/labs.rs:776-780; src/rune_ui/meeting_notes.rs:113-123,126-210; src/rune_ui/platform_settings.rs:260-380,500-520,574-611; src/app_settings/meetings.rs:142-172; src/control/settings.rs:688-697; src/rune_ui/output.rs:300-330; src/updater.rs:1-60; src/rune_ui/assistant/settings.rs:20-165; docs/features/meetings.md:128-135; crates/capture/src/speech_model.rs:1-10 -->

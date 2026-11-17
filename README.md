@@ -23,8 +23,8 @@ VibeHex is built for people who dictate to code and to AI assistants. Hold a
 key, speak, and it pastes. It is a fork of [Hex](https://github.com/anomalyco/hex)
 by Anomaly and keeps up with Hex's changes. It has what Hex has on the Mac,
 apart from a few of Hex's Labs features it leaves out: Clean up with Apple
-Intelligence, Voice prompt and Rewrite reads nearby text come once they also
-run on VibeHex's own cleanup engines. VibeHex is its own app, built and signed
+Intelligence and Voice prompt come once they also run on VibeHex's own
+cleanup engines. VibeHex is its own app, built and signed
 separately, so it is not an official Hex release.
 
 ## What VibeHex adds to Hex
