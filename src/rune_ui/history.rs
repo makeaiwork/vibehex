@@ -120,6 +120,39 @@ impl HistoryPane {
         }
     }
 
+    /// The newest `most` entries History keeps, newest first, read from
+    /// the store whatever the pane shows: its own list is stale off the
+    /// pane and narrowed by a search.
+    fn newest(&self, most: usize) -> Vec<HistoryEntry> {
+        match &self.store {
+            Some(store) => store.recent(most),
+            None => self.entries.iter().take(most).cloned().collect(),
+        }
+    }
+
+    /// What Assistant's start page reads of the newest `most` entries
+    /// (`assistant::suggest`): each dictation that went through AI cleanup,
+    /// newest first, when, and the engine's reason when it fell back.
+    /// Never a word of what was said.
+    pub(super) fn cleanups(&self, most: usize) -> Vec<crate::assistant::suggest::Cleaned> {
+        self.newest(most)
+            .iter()
+            .filter(|entry| entry.kind == HistoryKind::Dictation)
+            .filter_map(|entry| {
+                let processing = entry.processing.as_ref()?;
+                Some(crate::assistant::suggest::Cleaned {
+                    at_ms: entry.timestamp_ms,
+                    fallback: processing.fallback.clone(),
+                })
+            })
+            .collect()
+    }
+
+    /// The store's revision, when there is a store.
+    pub(super) fn revision_now(&self) -> Option<u64> {
+        self.store.as_ref().map(History::revision)
+    }
+
     /// The host's store; `None` when it could not open one.
     pub(super) fn shared(store: Option<History>) -> Self {
         Self {
@@ -1448,4 +1481,61 @@ fn versions_section(ui: &Ui, p: Paint, entry: &HistoryEntry) -> El {
         );
     }
     section
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::history::{History, HistoryDraft, HistoryKind, HistoryProcessing, HistoryRetention};
+
+    /// Assistant's cleanups come from the store, whatever the pane's own
+    /// list holds, newest first; only dictations cleaned up count.
+    #[test]
+    fn cleanups_come_from_the_store_and_only_dictations_cleaned_up_count() {
+        let folder =
+            std::env::temp_dir().join(format!("hex-history-cleanups-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&folder);
+        std::fs::create_dir_all(&folder).unwrap();
+        let history = History::new(crate::history::HistoryStore::open(
+            folder.join("history.json"),
+            HistoryRetention::Week,
+            crate::history::now_ms(),
+        ));
+        let record = |kind: HistoryKind, fallback: Option<Option<&str>>| {
+            history
+                .record(HistoryDraft {
+                    kind,
+                    raw_text: "raw".into(),
+                    final_text: "text".into(),
+                    application: None,
+                    processing: fallback.map(|fallback| HistoryProcessing {
+                        profile: "Global".into(),
+                        latency_ms: 10,
+                        fallback: fallback.map(str::to_owned),
+                    }),
+                    audio_ms: 900,
+                    inference_ms: 80,
+                    total_ms: 200,
+                    recording: None,
+                    model: None,
+                })
+                .unwrap();
+        };
+        record(HistoryKind::Dictation, None);
+        record(HistoryKind::Dictation, Some(None));
+        record(HistoryKind::Send, Some(Some("timeout")));
+        record(HistoryKind::Dictation, Some(Some("sign in to Codex again")));
+        let mut pane = super::HistoryPane::shared(Some(history));
+        pane.entries.clear();
+        assert_eq!(pane.newest(30).len(), 4, "the store, not the pane's list");
+        let cleaned = pane.cleanups(30);
+        assert_eq!(cleaned.len(), 2, "two dictations went through cleanup");
+        assert_eq!(
+            cleaned[0].fallback.as_deref(),
+            Some("sign in to Codex again"),
+            "newest first"
+        );
+        assert_eq!(cleaned[1].fallback, None);
+        assert_eq!(pane.cleanups(1).len(), 1);
+        let _ = std::fs::remove_dir_all(&folder);
+    }
 }

@@ -322,4 +322,5 @@ pub(super) fn new_conversation(ui: &mut Ui) {
     pane.engine = None;
     pane.effort = None;
     pane.web = None;
+    super::suggestions::again(ui);
 }

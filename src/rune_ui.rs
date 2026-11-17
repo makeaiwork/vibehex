@@ -1114,6 +1114,10 @@ impl Ui {
         if self.pane == Pane::HudLab {
             self.ask(platform::PlatformRequest::EndHudDemo);
         }
+        if pane == Pane::Assistant {
+            // Where the person came from, for the start page's suggestions.
+            assistant::suggestions::arriving(self, labs);
+        }
         self.pane = pane;
         match pane {
             Pane::History => self.history.reload(),

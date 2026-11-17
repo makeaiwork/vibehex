@@ -16,18 +16,23 @@ Sidebar                                          // rune_ui::sidebar, rune_ui::a
                 eyes); open, the face and word brighten, no fill. On the rail
                 the last button, 36 by 32, with its own tooltip. After an
                 update, an accent dot at the row's end (on the rail, at the
-                face's top right) until Assistant is first opened
+                face's top right) until Assistant is first opened; when
+                something stopped working, the dot is the warning colour
+                ("Something stopped working") and wins over an update's
 Assistant                                        // rune_ui::assistant
 ├── Header      Chat | Settings; in Chat, the conversation picker and +.
 │               A narrow window cuts the picker's name, never the title
 ├── Chat
-│   ├── New     "Ask anything about VibeHex", after an update "Updated to
-│   │           <version>" (a neutral row: a sparkles tile, "Ask me what's
-│   │           new…", a chevron), "Set VibeHex up for me" (an
+│   ├── New     "Ask anything about VibeHex", up to four suggestions that
+│   │           fit what is going on (Start page suggestions: a 30 pt tile,
+│   │           a title, one muted line, a chevron, a quiet × "Hide this
+│   │           suggestion"; what broke in a soft warning tint, "Updated to
+│   │           <version>" among them), "Set VibeHex up for me" (an
 │   │           accent-tinted row: a sliders tile, a line on what it does,
 │   │           a chevron), with Russian as the recognition language "Or set it up like
 │   │           Denis, who makes VibeHex ›" (quiet text under it; no such
-│   │           row with Auto or another language), four example questions, and what
+│   │           row with Auto or another language), the example questions
+│   │           that fill the suggestions to four, and what
 │   │           the guide holds (Labs features and topics). With no model to
 │   │           ask, the same page without the examples and the guide line,
 │   │           over the Connect panel: setup needs no model
@@ -1022,6 +1027,76 @@ the gate, saying who proposes (`Origin`: an answer, a plan, the preset).
   which General saves directly) is refused as it is recorded, with
   General's "Add a modifier", rather than failing at Save.
 
+## Start page suggestions
+
+A new conversation's start page adapts to what is going on
+(`rune_ui::assistant::suggestions`, the rules in `assistant::suggest`). Under
+the title and lead, one block of at most four rows, then "Set VibeHex up for
+me", then as many example questions as fill the block to four (none with
+four rows, all four with none; an example a row already asks steps aside).
+With no model connected, only the rows that need none show.
+
+- The order is the owner's: what broke (at most two), a setup left
+  unfinished, the update, where the person came from, then what is new for
+  them.
+  - What broke: the last 3+ dictations pasted without AI cleanup while it
+    is on ("Your last 5 dictations were pasted without AI cleanup", its line
+    naming why from the engine's own message: Codex signed out, its limit,
+    not installed, OpenCode not running, no OpenRouter key, the built-in
+    model not downloaded, too slow, or else) opens AI cleanup's settings;
+    a week's meeting whose notes failed opens it on Summary. Both come with
+    Back to Assistant, to the start page.
+  - "Pick up your setup where you left it" or "Your setup's plan is
+    waiting" opens that conversation; "Updated to <version>" asks what's
+    new, as before.
+  - From Meetings: "What did we decide in “<the meeting open>”?" and, with
+    two or more this week, "Pull the action items from this week's N
+    meetings"; from History, the wrong-word question; from Labs, which
+    features fit (or the new-features row); from Output, how to steer
+    cleanup, or how to get it while it is off. Each asks its question.
+  - "N new features fit how you use VibeHex": Labs features a release
+    brought after the last setup (without one, after the first version
+    this install ran; without either, none) that setup's follow-ups would
+    offer now (they fit the answers, are off, and work here), named in the
+    window's words, the first three and "and N more". A press starts guided
+    setup.
+- What broke is drawn as a warning: a soft warning tint and border, the
+  warning colour on the tile's glyph, never a bar on its edge. New
+  features take the accent on their tile; the rest are neutral.
+- × hides a row while its reason is the same (`suggest::Suggestion::key`): a
+  new run of failures, a newer meeting, the next update come back. Pressing
+  hides only the new-features row; what broke stays until it works again
+  or is hidden, and a pane's question comes back each visit. Hidden keys
+  live in `<support>/assistant/suggestions.json`, read once (as the store
+  loads, or for the first mark) and written on change; a scene never reads
+  or writes it.
+- The mark: when something broke that Assistant wasn't opened on, the
+  sidebar's Assistant row (and the rail's face) carries a warning-coloured
+  dot, described "Something stopped working", over an update's. It is read
+  slowly wherever the window is: 10 seconds after launch, then every 5
+  minutes, and when History's revision changes (checked every 10 seconds),
+  from the dictations and the meetings only. Opening Assistant lands on a
+  new conversation's start page and marks what broke as seen
+  (`Hidden::see`): the dot goes, the rows stay.
+- Where the signals come from: the newest 30 History entries from its
+  store (only a dictation's cleanup time and fallback reason, never its
+  text, `HistoryPane::cleanups`), Clean up with AI's switch, the finished
+  meetings (the Meetings pane's list, else a scan of the folder on a
+  thread of its own: titles, times, whether notes failed; again when
+  Assistant opens or a conversation starts, unless one ran in the last 30
+  seconds), the pane
+  Assistant was switched to from (`Ui::select_pane`; a link or onboarding
+  counts as none), the conversations and setups kept, and the release
+  notes. The rows are picked again when the pane opens, a conversation
+  starts, a row is pressed or hidden, and every 5 seconds while the page
+  shows; the new features only when the settings or the setups change.
+  Nothing is read per frame, and no recording's words are read.
+- Checks: `assistant::suggest::tests` (the rules),
+  `rune_ui::assistant::suggestions::tests` (where Assistant came from,
+  hiding, pressing what broke, the examples, the mark, a setup left),
+  `rune_ui::history::tests`; scenes `assistant-start-broke`,
+  `assistant-start-meetings`.
+
 ## What's new
 
 - This is where VibeHex tells what is new. Hex's What's new pane, a feed of
@@ -1061,7 +1136,8 @@ the gate, saying who proposes (`Origin`: an answer, a plan, the preset).
   model reads.
 - After an update (two weeks from the first run of a new release, when an
   earlier one ran here) a new conversation shows "Updated to <version>"
-  over Set VibeHex up for me (`rune_ui::assistant::whats_new`). A press
+  among its suggestions, over Set VibeHex up for me
+  (`rune_ui::assistant::whats_new`, Start page suggestions). A press
   asks "What's new since my last version?" in Assistant's language,
   answered from the notes whatever its words; once such a question is asked
   the row goes. There is no speech bubble on the face to put it in.
@@ -1597,6 +1673,7 @@ The other scenes, each through `every_scene_is_laid_out_whole`:
 | Surface | Scenes |
 | --- | --- |
 | Start page in Russian | `assistant-start-russian` |
+| Start page suggestions: what broke, from Meetings | `assistant-start-broke`, `assistant-start-meetings` |
 | Answer being written | `assistant-answering`, `assistant-web-answering` |
 | Answer from recordings | `assistant-steps`, `assistant-recordings` |
 | Answer from the web | `assistant-web`, `assistant-web-off`, `assistant-web-held` |

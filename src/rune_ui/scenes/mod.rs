@@ -836,6 +836,8 @@ pub(super) const SCENES: &[Scene] = &[
     ("assistant-lab-opened", assistant::fixture::lab_opened),
     ("assistant-start", assistant::fixture::start),
     ("assistant-start-russian", assistant::fixture::start_russian),
+    ("assistant-start-broke", assistant::suggested::broke),
+    ("assistant-start-meetings", assistant::suggested::meetings),
     ("assistant-connect", assistant::fixture::connect),
     ("assistant-setup-unreachable", assistant::connect::scene),
     ("assistant-settings", assistant::fixture::settings),
