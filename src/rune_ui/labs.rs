@@ -9,6 +9,8 @@
 mod browser_access;
 pub(super) mod fits;
 mod group;
+// VibeHex: Screen vocabulary's AI cleanup row.
+mod screen_vocabulary;
 #[cfg(all(target_os = "macos", hex_capture))]
 pub(super) mod screenshots;
 mod store;
@@ -1047,6 +1049,8 @@ fn extras(ui: &Ui, p: Paint, entry: &Row, layer: &mut Vec<El>) -> Option<El> {
                 .child(appearance_theme(ui, p)),
         ),
         Lab::Feature(Feature::VoicePrompt) => Some(voice_prompt::body(ui, p)),
+        // VibeHex: whether AI cleanup gets the window's terms too.
+        Lab::Feature(Feature::ScreenVocabulary) => Some(screen_vocabulary::body(ui, p)),
         Lab::Feature(Feature::ApiBrowserAccess) => Some(browser_access::body(ui, p)),
         #[cfg(all(target_os = "macos", hex_capture))]
         Lab::Feature(Feature::Screenshots) => Some(screenshots::body(

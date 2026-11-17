@@ -1670,6 +1670,8 @@ mod tests {
         include_str!("../rune_ui/labs/fits.rs"),
         include_str!("../rune_ui/labs/group.rs"),
         include_str!("../rune_ui/labs/screenshots.rs"),
+        // VibeHex: Screen vocabulary's AI cleanup row.
+        include_str!("../rune_ui/labs/screen_vocabulary.rs"),
         include_str!("../rune_ui/labs/store.rs"),
         include_str!("../rune_ui/labs/voice_prompt.rs"),
         include_str!("../rune_ui/linux_host.rs"),

@@ -207,6 +207,10 @@ impl Feature {
         if key == "labs.voice_prompt_phrase" {
             return Some(Self::VoicePrompt);
         }
+        // VibeHex: a row of Screen vocabulary's card.
+        if key == "labs.screen_vocabulary_cleanup" {
+            return Some(Self::ScreenVocabulary);
+        }
         if key == "labs.caps_lock_light" {
             return Some(Self::CapsLockDictation);
         }

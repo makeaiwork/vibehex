@@ -51,7 +51,7 @@ pub use self::group::Group;
 #[cfg_attr(not(target_os = "macos"), allow(unused_imports))]
 pub use self::vibehex::{
     ai_cleanup_server, cleanup_progress, feedback_mailto, files, lower_every_app,
-    vocabulary_quick_add,
+    screen_vocabulary_cleanup, vocabulary_quick_add,
 };
 
 /// Who a Labs feature is for.

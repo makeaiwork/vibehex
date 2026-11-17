@@ -89,6 +89,7 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 ├── Live chapters   no    labs.live_chapters           (macOS)   chapters a meeting while it records, boundary pass after Stop
 ├── Vocabulary biasing no labs.vocabulary_biasing                Parakeet transcription biased toward the vocabulary (#452/#457)
 ├── Screen vocabulary no labs.screen_vocabulary         (macOS)   names and terms in the focused window become temporary vocabulary for each dictation; read locally through Accessibility, never saved, password fields skipped
+│                                        VibeHex: + labs.screen_vocabulary_cleanup (off; a row on the card while on) gives the terms to AI cleanup too, listed after the Vocabulary and checked by the vocabulary guard; the window is then read whatever the speech model, and a cloud engine receives them
 ├── Rewrite reads nearby text no labs.cursor_context (macOS) the mode's OpenCode rewrite reads the focused text element's text around the caret as context for names, terms, and where the result lands; password fields skipped
 ├── Switch model with keyboard language  no  keyboard_model_switching.enabled  (macOS, Windows, X11)
 │                                        the input source picks its mapped model (#216); General shows the mappings while on
@@ -488,10 +489,11 @@ Whisper and Qwen3-ASR read them as a prompt; Apple Speech and other models
 that take no vocabulary never read them. A capture with terms for a model
 that reads them takes its whole clip after release rather than a live stream's
 text, because a stream fixes its vocabulary when it starts; that costs a
-little latency. Meetings, the local API, and OpenCode rewriting never see the
-terms, and nothing is saved or logged except the term count and read time at
-debug level. Off, or for a model that ignores the terms, no Accessibility
-read or thread starts. Checks: `dictation::screen_vocabulary::tests` (the
+little latency. Meetings and the local API never see the terms, AI cleanup
+only with VibeHex's switch below, and nothing is saved or logged except the
+term count and read time at debug level. Off, or for a model that ignores the
+terms while they don't go to AI cleanup, no Accessibility read or thread
+starts. Checks: `dictation::screen_vocabulary::tests` (the
 Qdrant example, sentence-start exclusion, acronyms, long all-caps words,
 stoplist and log levels, hashes, ordinals, times, units, random tokens, the
 24-term cap, dedup against the saved list),
@@ -506,6 +508,40 @@ stoplist and log levels, hashes, ordinals, times, units, random tokens, the
 `hex_never_reads_its_own_accessibility_tree` in
 [accessibility.rs](../../src/accessibility.rs). Not observed: a real Mac
 reading a real window, or a dictated word corrected by what was on screen.
+
+VibeHex: Also give them to AI cleanup (`labs.screen_vocabulary_cleanup`, off
+by default; a switch row on the card while the lab is on; the key needs the
+lab in `control::settings::requires`). `labs::screen_vocabulary_cleanup()` is on only
+while the lab is (its own atomic in `labs::vibehex`). With it on, the window is
+read as the capture becomes real whatever the speech model
+(`ScreenVocabulary::start`), so it also helps with GigaAM, Apple Speech, and
+Parakeet without biasing; `parakeet.rs` still gives up a live stream only for
+a model that reads the terms, so a model that ignores them adds no latency.
+For a heard dictation, `processor::process_cancellable_with` keeps the terms
+the merged Vocabulary doesn't already have, in any case
+(`dictation::screen_vocabulary::cleanup::ForCleanup`), and hands both prompt
+builders (`prompt_parts` for the fork's cleanup engines, `prompt` for an
+OpenCode rewrite) a context holding only those; they list them after the
+Vocabulary under `SCREEN_TERMS_PROMPT`, one `- Term` per line. The voice
+prompt's request never carries them. The vocabulary guard takes them as terms
+with no "sounds like", so a screen term cleanup wrote where nothing heard
+sounds like it is undone as a Vocabulary term is; `Guard::spell` is unchanged.
+With the switch off, for typed text, or with no new term, the prompt and the
+guard are exactly the Vocabulary's. A cloud engine receives the terms with the
+dictation; only their count is logged, at debug level, and History keeps only
+the final text. Checks: `a_model_that_ignores_terms_reads_only_for_cleanup`
+in [dictation/screen_vocabulary.rs](../../src/dictation/screen_vocabulary.rs),
+the tests in
+[dictation/screen_vocabulary/cleanup.rs](../../src/dictation/screen_vocabulary/cleanup.rs)
+(dedup, typed text, the section, the guard with «кудрант» written as Qdrant
+kept and a term from nothing undone, spelling untouched),
+`screen_terms_follow_the_vocabulary_in_their_own_section` in
+[dictation/processor.rs](../../src/dictation/processor.rs),
+`screen_terms_reach_cleanup_only_with_the_lab_on` in
+[labs/vibehex.rs](../../src/labs/vibehex.rs), and
+`screen_vocabulary_cleanup_reads_and_writes` in
+[control/settings.rs](../../src/control/settings.rs). Not observed: a real
+cleanup engine fixing a misheard name from a real window.
 
 Rewrite reads nearby text (`cursor-context`, macOS): while on,
 each dictation reads the focused text element once, on a background thread, at
@@ -3778,7 +3814,8 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   capture with terms for such a model uses its whole-clip run rather than a
   live stream's text, so the text arrives after release with a little more
   latency. Its read bounds and extraction are above, under "Screen
-  vocabulary".
+  vocabulary". VibeHex: with `labs.screen_vocabulary_cleanup` on, AI cleanup
+  gets the terms too, and the window is read for every speech model.
 - Terminal paste (Windows): paste with Ctrl+Shift+V instead of Ctrl+V for
   apps that ignore a synthetic Ctrl+V (issue 477 / PR 478). Its toggle is the
   shared `paste_with_shift`; Linux keeps it as a General › Advanced row.

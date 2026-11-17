@@ -3,7 +3,7 @@ version: next
 date: unreleased
 title: More ways to start dictating, calmer meetings, and hex transcribe
 labs: [more-dictation-shortcuts, microphone-key, double-tap-modifiers, yolo-mode, return-to-app, app-model-switching, speakers-only, keep-microphone-open, screen-vocabulary, history-multi-select, copy-dictation-audio, calendar-menu, appearance, pause-menu, shell-completions, print-start, api-timestamps, api-browser-access, copy-capture-zip, k-quant-models]
-keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.descriptive_filenames, meetings.export.notes_file, sound_effect_volume, labs.yolo_mode_seconds, labs.appearance_theme]
+keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.descriptive_filenames, meetings.export.notes_file, sound_effect_volume, labs.yolo_mode_seconds, labs.appearance_theme, labs.screen_vocabulary_cleanup]
 ---
 
 # VibeHex Next (not released yet)
@@ -22,6 +22,8 @@ keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.d
   language, and VibeHex switches when you change apps.
 - New in Labs: Only on speakers, Keep mic open after dictating, and Screen vocabulary
   (macOS), which uses names visible in the window to spell your dictation.
+- New: Screen vocabulary can give those names to AI cleanup too, so it fixes a name the
+  speech model misheard. Off by default; a cloud engine then receives the names.
 - New: Ten meeting features left Labs. Meetings › Settings now has Keep audio, and Export
   with Descriptive meeting file names and Separate notes file.
 - New: Stop when the call ends (macOS) is a setting under Detected calls: the recording ends

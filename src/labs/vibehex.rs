@@ -185,6 +185,16 @@ const SWITCHED: [Feature; 5] = [
 /// beside Hex's state word.
 static SWITCHES: [AtomicBool; SWITCHED.len()] = [const { AtomicBool::new(false) }; SWITCHED.len()];
 
+/// Labs › Screen vocabulary's terms go to AI cleanup too: VibeHex's switch
+/// on Hex's lab, written by [`store`] beside [`SWITCHES`].
+static SCREEN_VOCABULARY_CLEANUP: AtomicBool = AtomicBool::new(false);
+
+/// Whether `settings` give Screen vocabulary's terms to AI cleanup: the
+/// switch is on and so is the lab, in this build and unlocked.
+fn screen_vocabulary_cleanup_enabled(settings: &LabsSettings) -> bool {
+    settings.screen_vocabulary_cleanup && super::screen_vocabulary_enabled(settings)
+}
+
 /// Whether `settings` hold `feature`'s switch on.
 fn saved(settings: &LabsSettings, feature: Feature) -> bool {
     match feature {
@@ -217,6 +227,10 @@ pub(super) fn store(settings: &LabsSettings) {
     for (switch, on) in SWITCHES.iter().zip(on) {
         switch.store(on, Ordering::Release);
     }
+    SCREEN_VOCABULARY_CLEANUP.store(
+        screen_vocabulary_cleanup_enabled(settings),
+        Ordering::Release,
+    );
 }
 
 /// `feature`'s switch in this process, loading the saved settings first in
@@ -254,6 +268,14 @@ pub fn lower_every_app() -> bool {
     switch(Feature::LowerEveryApp)
 }
 
+/// Labs › Screen vocabulary › Also give them to AI cleanup: a dictation's
+/// screen terms reach its cleanup too, and the window is read for them
+/// whatever the speech model (macOS; read as the capture becomes real and as
+/// its cleanup starts). Only while the lab itself is on.
+pub fn screen_vocabulary_cleanup() -> bool {
+    super::screen_vocabulary() && SCREEN_VOCABULARY_CLEANUP.load(Ordering::Acquire)
+}
+
 /// Dictation cleanup may run on OpenRouter or the person's own
 /// OpenAI-compatible server instead of OpenCode (read as each dictation's
 /// rewrite starts).
@@ -285,6 +307,37 @@ mod tests {
             }
             assert!(Feature::Files.shipped());
         }
+    }
+
+    /// Giving the screen's terms to AI cleanup is off by default and does
+    /// nothing without Screen vocabulary itself.
+    #[test]
+    fn screen_terms_reach_cleanup_only_with_the_lab_on() {
+        let mut labs = LabsSettings::default();
+        assert!(!labs.screen_vocabulary_cleanup);
+        assert!(!screen_vocabulary_cleanup_enabled(&labs));
+        labs.screen_vocabulary_cleanup = true;
+        assert!(!screen_vocabulary_cleanup_enabled(&labs), "the lab is off");
+        labs.screen_vocabulary = true;
+        assert!(screen_vocabulary_cleanup_enabled(&labs));
+        labs.screen_vocabulary_cleanup = false;
+        assert!(!screen_vocabulary_cleanup_enabled(&labs));
+
+        labs.screen_vocabulary_cleanup = true;
+        super::super::apply(&labs);
+        assert_eq!(
+            screen_vocabulary_cleanup(),
+            Feature::ScreenVocabulary.on_this_os()
+        );
+        labs.screen_vocabulary = false;
+        super::super::apply(&labs);
+        assert!(!screen_vocabulary_cleanup());
+        super::super::apply(&LabsSettings::default());
+        assert!(!screen_vocabulary_cleanup());
+        assert_eq!(
+            Feature::for_settings_key("labs.screen_vocabulary_cleanup"),
+            Some(Feature::ScreenVocabulary)
+        );
     }
 
     #[test]

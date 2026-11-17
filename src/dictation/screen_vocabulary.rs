@@ -5,7 +5,8 @@
 //! [`crate::accessibility`]; [`extract`] is pure so every host's tests can
 //! check it, and [`ScreenVocabulary`] is the bounded one-read state machine
 //! `recognition::context_watch` starts. Nothing here saves a term or logs its
-//! text.
+//! text. VibeHex: [`cleanup`] gives the terms to AI cleanup too, behind
+//! `labs.screen_vocabulary_cleanup`.
 
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -13,6 +14,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc;
 #[cfg(target_os = "macos")]
 use std::thread;
+
+// VibeHex: the terms for AI cleanup.
+pub(crate) mod cleanup;
 
 /// Most terms one capture adds.
 pub const MAX_TERMS: usize = 24;
@@ -121,12 +125,17 @@ pub(crate) struct ScreenVocabulary {
 
 impl ScreenVocabulary {
     /// Starts this capture's one read, if it has a pending capture, the lab
-    /// is on, and the selected model would use the terms. Off, or for a model
-    /// that ignores the vocabulary, nothing reads Accessibility at all.
+    /// is on, and the selected model or AI cleanup would use the terms. Off,
+    /// or for a model that ignores the vocabulary while the terms don't go
+    /// to cleanup, nothing reads Accessibility at all.
     #[cfg(target_os = "macos")]
     pub(crate) fn start(&mut self, pending: bool) {
-        let reading =
-            crate::labs::screen_vocabulary() && crate::dictation::vocabulary::uses_terms();
+        // VibeHex: AI cleanup may want the terms whatever the speech model.
+        let reading = reads(
+            crate::labs::screen_vocabulary(),
+            crate::dictation::vocabulary::uses_terms(),
+            crate::labs::screen_vocabulary_cleanup(),
+        );
         let Some(sender) = self.begin(pending, reading) else {
             return;
         };
@@ -195,6 +204,13 @@ impl ScreenVocabulary {
     fn set_running(&self, running: bool) {
         self.running.store(running, Ordering::Release);
     }
+}
+
+/// Whether a capture reads its window: with the lab on, for a speech model
+/// that uses the terms or (VibeHex) for AI cleanup.
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
+fn reads(lab: bool, model_uses_terms: bool, cleanup: bool) -> bool {
+    lab && (model_uses_terms || cleanup)
 }
 
 struct Token<'a> {
@@ -541,7 +557,7 @@ mod tests {
 /// `recognition::context_watch` starts.
 #[cfg(test)]
 mod context_watch {
-    use super::ScreenVocabulary;
+    use super::{ScreenVocabulary, reads};
 
     /// begin -> intend -> cancel -> intend -> finish: a cancelled capture's
     /// read never reaches the next dictation, and an intend with no pending
@@ -584,6 +600,27 @@ mod context_watch {
             !screen.read_now(true, false, &["OpenCode"]),
             "a model that ignores terms reads nothing"
         );
+        assert!(screen.take().is_empty());
+    }
+
+    /// VibeHex: a model that ignores terms still reads the window when
+    /// they go to AI cleanup, and nothing reads with the lab off.
+    #[test]
+    fn a_model_that_ignores_terms_reads_only_for_cleanup() {
+        let mut screen = ScreenVocabulary::default();
+        assert!(!screen.read_now(true, reads(true, false, false), &["Stale"]));
+        assert!(screen.take().is_empty());
+        assert!(screen.read_now(true, reads(true, false, true), &["Qdrant"]));
+        assert_eq!(screen.take(), ["Qdrant"]);
+        assert!(screen.read_now(true, reads(true, true, false), &["Rune"]));
+        assert_eq!(screen.take(), ["Rune"]);
+        for (model, cleanup) in [(false, false), (true, false), (false, true), (true, true)] {
+            assert!(!reads(false, model, cleanup), "the lab is off");
+        }
+        // Once per capture, as for the speech model.
+        assert!(screen.read_now(true, reads(true, false, true), &["Qdrant"]));
+        assert!(!screen.read_now(true, reads(true, false, true), &["OpenCode"]));
+        screen.cancel();
         assert!(screen.take().is_empty());
     }
 }

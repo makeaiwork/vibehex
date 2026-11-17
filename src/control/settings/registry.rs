@@ -322,6 +322,14 @@ pub(super) const KEYS: &[Key] = &[
         Kind::Bool,
         "Labs: use names and terms visible in the focused window as temporary vocabulary for each dictation (macOS)",
     ),
+    // VibeHex: Screen vocabulary's terms for AI cleanup.
+    key(
+        "labs.screen_vocabulary_cleanup",
+        Kind::Bool,
+        "Labs: while labs.screen_vocabulary is on, AI cleanup is given the names and terms read \
+         from the window too, so it can fix a name the speech model misheard; a cloud engine \
+         receives them with the dictation (macOS)",
+    ),
     key(
         "labs.cursor_context",
         Kind::Bool,
