@@ -29,7 +29,7 @@ use std::time::{Duration, Instant};
 use color_eyre::eyre::{Result, eyre};
 use serde::{Deserialize, Serialize};
 
-use crate::app_settings::{CleanupRunsOn, CleanupServerSettings};
+use crate::app_settings::{CleanupRunsOn, CleanupServerSettings, DictationProcessingSettings};
 use crate::dictation::cleanup_pieces::Streamed;
 
 pub const OPENROUTER_URL: &str = "https://openrouter.ai/api/v1";
@@ -52,6 +52,14 @@ pub fn set_saved(settings: &CleanupServerSettings) {
     if let Ok(mut saved) = SAVED.write() {
         *saved = Some(settings.clone());
     }
+}
+
+/// Whether some mode, Global included, cleans its dictations up with AI:
+/// what a Labs card that feeds cleanup calls "AI cleanup is off" when not.
+pub fn cleans_up(processing: &DictationProcessingSettings) -> bool {
+    std::iter::once(&processing.default_mode)
+        .chain(&processing.modes)
+        .any(|mode| mode.post_processing.enabled)
 }
 
 /// The server a dictation's rewrite runs on now: `None` means OpenCode,
@@ -457,7 +465,10 @@ fn api_base(base: &str) -> &str {
     base.strip_suffix("/chat/completions").unwrap_or(base)
 }
 
-fn is_loopback(url: &url::Url) -> bool {
+/// Whether `url` names this computer: `localhost`, or a loopback address
+/// such as 127.0.0.1 or ::1. The loopback-only agent refuses a `localhost`
+/// that resolves anywhere else.
+pub(crate) fn is_loopback(url: &url::Url) -> bool {
     match url.host() {
         Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
         Some(url::Host::Ipv4(address)) => address.is_loopback(),

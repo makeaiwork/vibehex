@@ -46,18 +46,20 @@ toggle (off by default, macOS) uses names and terms visible in the focused
 window as temporary vocabulary for each dictation, read locally through
 Accessibility and never saved ([vocabulary.md](vocabulary.md)); in VibeHex its
 `labs.screen_vocabulary_cleanup` switch (off by default) gives them to AI cleanup too. Its Rewrite
-reads nearby text toggle (off by default, macOS) hands the mode's OpenCode
-rewrite the text around the caret as context for names, terms, and where the
-result lands; the text goes to the configured provider, which may be a cloud
-service, password fields are never read, and off leaves the prompt byte for
-byte unchanged. Its Clean up with Apple Intelligence toggle (off by default,
+reads nearby text toggle (off by default, macOS) hands AI cleanup the text
+around the caret as context for names, terms, and where the result lands, on
+every engine: it stays on this Mac with the built-in model or an own server at
+a loopback address, goes to OpenCode's model as in Hex, and is sent to Codex,
+OpenRouter, or another server when cleanup runs there (the card says which);
+known key and token shapes are cut out as it is read, password fields are
+never read, and off leaves the prompt byte for byte unchanged. Its Clean up with Apple Intelligence toggle (off by default,
 macOS) gives each dictation its mode does not rewrite one short on-device pass
 that fixes clearly misheard words and spoken self-corrections, pasting the
 corrected text whenever Apple Intelligence is unavailable, slow, or refuses.
 A stable VibeHex leaves Hex's Import audio, Release notes link, ⌘Q closes
-Settings, and Annotate 15 s replay out of Labs, and Rewrite reads nearby text,
-Clean up with Apple Intelligence, and Voice prompt too until they run on
-VibeHex's own cleanup engines and not only OpenCode; a dev build keeps them
+Settings, and Annotate 15 s replay out of Labs, and Clean up with Apple
+Intelligence and Voice prompt too until they run on VibeHex's own cleanup
+engines and not only OpenCode; a dev build keeps them
 (`labs::Feature::vibehex_hides`, [labs.md](labs.md)).
 General › Advanced › Interface language offers Português (Brasil), and Hex
 uses it for any Portuguese system language (#867); it also offers Français,
@@ -1502,7 +1504,9 @@ under its own `timeout` (1 s by default, 30 s when the config uses host APIs,
 provider; speech transcription stays local. With Labs › Rewrite reads nearby
 text on (macOS), that context also includes the focused text element's text
 around the caret, read through Accessibility and never saved; password fields
-are skipped, and off leaves the prompt unchanged.
+are skipped, and off leaves the prompt unchanged. In VibeHex the fork's
+cleanup engines get it too, cloud ones included, with known key and token
+shapes cut out ([labs.md](labs.md)).
 
 ```ts
 Discover custom transformations           // personal_commands::host_needed; every OS

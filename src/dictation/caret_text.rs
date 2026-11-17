@@ -114,7 +114,9 @@ impl CaretTextRead {
                 }
                 let _done = Done(running);
                 if let Some(caret) = from_focused_element() {
-                    let _ = sender.send(caret);
+                    // VibeHex: known key and token shapes never leave this
+                    // thread (`caret_prompt::secrets`).
+                    let _ = sender.send(crate::dictation::caret_prompt::secrets::cut_from(caret));
                 }
             });
         if let Err(error) = spawned {

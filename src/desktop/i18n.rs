@@ -1667,6 +1667,8 @@ mod tests {
         include_str!("../rune_ui/hud_lab.rs"),
         include_str!("../rune_ui/labs.rs"),
         include_str!("../rune_ui/labs/browser_access.rs"),
+        // VibeHex: where Rewrite reads nearby text's text goes.
+        include_str!("../rune_ui/labs/cursor_context.rs"),
         include_str!("../rune_ui/labs/fits.rs"),
         include_str!("../rune_ui/labs/group.rs"),
         include_str!("../rune_ui/labs/screenshots.rs"),

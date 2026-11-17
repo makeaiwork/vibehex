@@ -129,7 +129,8 @@ Screen vocabulary (Labs › Screen vocabulary, macOS)  // vocabulary.screen
 │   see the terms, and only the term count and read time are logged, at debug
 ├── VibeHex: labs.screen_vocabulary_cleanup (off) gives them to AI cleanup
 │   too, after the Vocabulary in the prompt and checked by the vocabulary
-│   guard; the window is then read whatever the model (labs.md)
+│   guard; the window is then read whatever the model; a term shaped like a
+│   key or a token is never given to cleanup (labs.md)
 ├── One reader runs at a time; an intend with no pending capture reads nothing
 └── Password fields and their subtrees are skipped; Hex's own window is never
     read

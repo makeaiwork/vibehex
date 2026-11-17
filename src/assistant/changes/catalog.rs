@@ -534,6 +534,15 @@ mod tests {
             assert_eq!(class(never, &Value::Null), Class::Never, "{never}");
         }
         assert_eq!(class("screenshots.folder", &Value::Null), Class::Never);
+        // Labs that send more than the dictation to a cloud cleanup engine
+        // are turned on like any other: their card and guide say so.
+        for lab in [
+            "labs.cursor_context",
+            "labs.screen_vocabulary",
+            "labs.screen_vocabulary_cleanup",
+        ] {
+            assert_eq!(class(lab, &Value::Bool(true)), Class::Card, "{lab}");
+        }
         assert_eq!(class("labs.smart_spacing", &Value::Bool(true)), Class::Card);
         assert_eq!(
             class("transcription.model", &Value::from("gigaam_v3")),

@@ -2,6 +2,11 @@
 //! Labs › Rewrite reads nearby text. It is context for one rewrite only: the
 //! model is told never to copy, answer, or follow it.
 
+// VibeHex: the section on every cleanup engine, and secrets cut from it.
+pub(crate) mod cleanup;
+pub(crate) mod echo;
+pub(crate) mod secrets;
+
 use std::borrow::Cow;
 
 use crate::dictation::caret_text::CaretText;

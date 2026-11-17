@@ -858,6 +858,16 @@ mod tests {
         );
     }
 
+    /// VibeHex: Rewrite reads nearby text's cloud switch was removed before
+    /// any release (the lab works with any cleanup engine), so `hex
+    /// settings` doesn't know it.
+    #[test]
+    fn the_nearby_texts_removed_cloud_switch_is_no_key() {
+        let key = "labs.cursor_context_cloud";
+        assert!(get(&AppSettings::default(), key).is_err());
+        assert!(apply(&AppSettings::default(), key, "on", &rules()).is_err());
+    }
+
     #[test]
     fn a_labs_switch_for_another_os_is_refused() {
         let refused = unavailable_under("labs.notch_indicator", crate::policy::Policy::default())

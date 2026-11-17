@@ -59,13 +59,37 @@ pub(crate) struct Cleaned {
     pub early: bool,
 }
 
+/// One piece of a cleanup: its text, and whether it starts or ends the
+/// whole, so what borders the whole (the text around the cursor) goes with
+/// the piece it borders. A dictation of one piece is both.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct Piece<'a> {
+    pub text: &'a str,
+    /// Nothing of the transcript comes before it.
+    pub first: bool,
+    /// Nothing of the transcript comes after it.
+    pub last: bool,
+}
+
+#[cfg(test)]
+impl<'a> Piece<'a> {
+    /// A whole text as one piece.
+    pub(crate) fn whole(text: &'a str) -> Self {
+        Self {
+            text,
+            first: true,
+            last: true,
+        }
+    }
+}
+
 /// Cleans `text` piece by piece with `generate`, which gets the piece, a
 /// flag that ends its request, and (while Cleanup progress is on) where to
 /// report its streamed answer. `cancelled` ends the work like Paste now.
 pub(crate) fn clean(
     text: &str,
     cancelled: &AtomicBool,
-    mut generate: impl FnMut(&str, &AtomicBool, Option<Streamed>) -> Result<String>,
+    mut generate: impl FnMut(Piece<'_>, &AtomicBool, Option<Streamed>) -> Result<String>,
 ) -> Cleaned {
     let pieces = split(text, PIECE_WORDS);
     let stop = Arc::new(AtomicBool::new(false));
@@ -93,12 +117,12 @@ fn clean_pieces(
     pieces: &[&str],
     stop: &AtomicBool,
     job: Option<&Job>,
-    generate: &mut impl FnMut(&str, &AtomicBool, Option<Streamed>) -> Result<String>,
+    generate: &mut impl FnMut(Piece<'_>, &AtomicBool, Option<Streamed>) -> Result<String>,
 ) -> Cleaned {
     let mut text = String::new();
     let mut reasons: Vec<String> = Vec::new();
     let mut early = false;
-    for piece in pieces {
+    for (index, piece) in pieces.iter().enumerate() {
         let body = piece.trim_end();
         let tail = &piece[body.len()..];
         if stop.load(Ordering::Acquire) {
@@ -107,7 +131,12 @@ fn clean_pieces(
             continue;
         }
         let streamed = job.map(|job| job.streamed(body.chars().count()));
-        match generate(body, stop, streamed) {
+        let placed = Piece {
+            text: body,
+            first: index == 0,
+            last: index + 1 == pieces.len(),
+        };
+        match generate(placed, stop, streamed) {
             Ok(cleaned) if !cleaned.trim().is_empty() => {
                 text.push_str(cleaned.trim());
                 text.push_str(tail);
@@ -469,7 +498,7 @@ mod tests {
             if calls == 2 {
                 Err(eyre!("timed out"))
             } else {
-                Ok(piece.to_uppercase())
+                Ok(piece.text.to_uppercase())
             }
         });
         let pieces = split(&text, PIECE_WORDS);
@@ -503,7 +532,7 @@ mod tests {
                 stop.store(true, Ordering::Release);
                 return Err(eyre!("cancelled"));
             }
-            Ok(piece.to_uppercase())
+            Ok(piece.text.to_uppercase())
         });
         assert_eq!(calls, 2);
         assert_eq!(
@@ -517,6 +546,29 @@ mod tests {
         );
         assert!(cleaned.early);
         assert_eq!(cleaned.failed, None);
+    }
+
+    /// Each piece knows whether it starts or ends the whole, so what borders
+    /// the dictation goes with the piece it borders; one piece is both.
+    #[test]
+    fn the_first_and_last_pieces_know_they_border_the_whole() {
+        let text = format!("{}. {}. {}.", words(300), words(300), words(300));
+        let mut seen = Vec::new();
+        clean(&text, &AtomicBool::new(false), |piece, _, _| {
+            seen.push((piece.first, piece.last));
+            Ok(piece.text.into())
+        });
+        assert_eq!(seen, [(true, false), (false, false), (false, true)]);
+        let mut seen = Vec::new();
+        clean(
+            "Один. Два.",
+            &AtomicBool::new(false),
+            |piece, _, _| {
+                seen.push(piece == Piece::whole("Один. Два."));
+                Ok(piece.text.into())
+            },
+        );
+        assert_eq!(seen, [true]);
     }
 
     #[test]

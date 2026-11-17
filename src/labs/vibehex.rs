@@ -62,7 +62,8 @@ impl Feature {
     /// developer tools: they repeat something VibeHex already has (About),
     /// the owner chose not to ship them, or they run only on OpenCode while
     /// VibeHex cleans up on its own engines (Apple Intelligence cleanup,
-    /// Voice prompt, Rewrite reads nearby text), until they run there too.
+    /// Voice prompt), until they run there too. Rewrite reads nearby text
+    /// runs on every engine (`dictation::caret_prompt::cleanup`).
     pub const fn vibehex_hides(self) -> bool {
         matches!(
             self,
@@ -72,7 +73,6 @@ impl Feature {
                 | Self::AnnotateReplay
                 | Self::CleanUpWithAppleIntelligence
                 | Self::VoicePrompt
-                | Self::CursorContext
         )
     }
 
@@ -338,6 +338,13 @@ mod tests {
             Feature::for_settings_key("labs.screen_vocabulary_cleanup"),
             Some(Feature::ScreenVocabulary)
         );
+    }
+
+    /// Rewrite reads nearby text shows in a stable build now that it runs
+    /// on every cleanup engine.
+    #[test]
+    fn the_nearby_text_lab_is_not_hidden() {
+        assert!(!Feature::CursorContext.vibehex_hides());
     }
 
     #[test]
