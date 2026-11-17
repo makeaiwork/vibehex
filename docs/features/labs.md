@@ -551,6 +551,45 @@ kept and a term from nothing undone, spelling untouched),
 [control/settings.rs](../../src/control/settings.rs). Not observed: a real
 cleanup engine fixing a misheard name from a real window.
 
+VibeHex: interface labels are not names
+([dictation/screen_vocabulary/labels.rs](../../src/dictation/screen_vocabulary/labels.rs)).
+In an editor such as VS Code the window's `AXTitle` and `AXDescription` (its
+buttons, tabs and panels) filled all 24 places with words like Code, Panel,
+Branch and Changes. `accessibility::focused_window_text` now returns a
+`WindowText`: the same text, read under the same bounds and byte budget, with
+the byte range of each title and description, so the content (text values) is
+told from the labels. `labels::rank` keeps the content's terms as upstream's
+`extract` ranks them, first; then, up to the cap, the terms found only in
+labels (`screen_vocabulary::uncapped`, upstream's list before its cap) that
+are not ordinary words: a capital right after a lowercase letter
+(`AskUserQuestion`, `GitHub`, `iOS`) or a digit keeps one; otherwise a term
+whose every part between `.`, `-` and `_`, lowercased, is a dictionary word
+or a plural, `-ed`, `-ing` or `-ies` form of one goes (`Panel`, `Changes`,
+`NOT`). Anywhere, a term in `/usr/share/dict/connectives` (150 function words:
+`The`, `AND`, `FOR`) and a word of the app's own name (`Code`, `Sublime Text`,
+as the context names it) is not a term. The dictionary is macOS's
+`/usr/share/dict/words`, only its entries that start lowercase (so `Denis`,
+listed capitalized, is no ordinary word), read once on first use in the reader
+thread into a sorted list (about 3 MB); a missing or unreadable file filters
+nothing, and no list is bundled. The same terms go to the speech model and to
+AI cleanup. When the lab read and found nothing (Sublime Text exposes no
+element under its window), History's What VibeHex read says "No names could
+be read from this window." (`HistoryRead::screen_tried`); with Rewrite reads
+nearby text, "This app gave no text near the cursor." (`nearby_tried`; a part
+that is only whitespace is none). Checks: the tests in
+[dictation/screen_vocabulary/labels.rs](../../src/dictation/screen_vocabulary/labels.rs)
+(the owner's VS Code labels gone and the content's names kept ahead, a
+label-only CamelCase name, `Slack` and `Cursor` kept from the content and
+dropped as labels, function words and the app's name, inflections, the split,
+the missing-dictionary fallback, the system lists loading), and
+`a_started_read_is_known_until_taken_or_cancelled` in
+[dictation/screen_vocabulary.rs](../../src/dictation/screen_vocabulary.rs).
+Observed once on a Mac, counts only (an ignored test,
+`the_real_reader_tells_labels_from_content`): in reads of VS Code, labels
+were 4 to 17 KB of the text, and in one of them 20 of the 38 label candidates
+were ordinary words and were dropped. Not observed: a dictation in a real
+window spelled better for it.
+
 Rewrite reads nearby text (`cursor-context`, macOS): while on,
 each dictation reads the focused text element once, on a background thread, at
 the same moment as the screen vocabulary read (a hold past its threshold, a

@@ -4,6 +4,7 @@ use std::ptr;
 use std::time::{Duration, Instant};
 
 use crate::dictation::caret_text::{Keep, bounded_units};
+use crate::dictation::screen_vocabulary::labels::WindowText; // VibeHex
 
 type CfTypeRef = *const c_void;
 type CfStringRef = *const c_void;
@@ -122,12 +123,14 @@ const TEXT_DEADLINE: Duration = Duration::from_millis(150);
 /// names none, so a document or a terminal's scrollback never fills the
 /// budget. Secure text fields and their subtrees are skipped, so a password
 /// never leaves the app. `None` for Hex's own window or when the tree has no
-/// text.
-pub fn focused_window_text(pid: i32) -> Option<String> {
+/// text. VibeHex: where each title and description sits in the text is kept
+/// beside it, so the fork tells labels from values (`screen_vocabulary::labels`).
+pub fn focused_window_text(pid: i32) -> Option<WindowText> {
     let application = foreign_application(pid)?;
     let window = copy_element(&application, c"AXFocusedWindow")?;
     let started = Instant::now();
     let mut text = String::new();
+    let mut labels = Vec::new(); // VibeHex
     let mut queue = VecDeque::from([(window, 0_usize)]);
     let mut visited = 0_usize;
     while let Some((element, depth)) = queue.pop_front() {
@@ -150,7 +153,10 @@ pub fn focused_window_text(pid: i32) -> Option<String> {
                 let Some(value) = copy_string_capped(&element, name, MAX_VALUE_CHARS) else {
                     continue;
                 };
-                if !append_text(&mut text, &value) {
+                let at = text.len(); // VibeHex: a label's place in `text`.
+                let more = append_text(&mut text, &value);
+                labels.push(at..text.len()); // VibeHex
+                if !more {
                     full = true;
                     break;
                 }
@@ -167,7 +173,7 @@ pub fn focused_window_text(pid: i32) -> Option<String> {
             queue.push_back((child, depth + 1));
         }
     }
-    (!text.trim().is_empty()).then_some(text)
+    (!text.trim().is_empty()).then_some(WindowText { text, labels }) // VibeHex
 }
 
 /// Whether an element holds a password. macOS marks most secure fields with

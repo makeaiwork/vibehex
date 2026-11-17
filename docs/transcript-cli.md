@@ -187,6 +187,8 @@ type History = {
       nearby?: { before?: string, selected?: string, after?: string } // text near the cursor, secrets cut out
       nearby_sent?: "all" | "part" // what cleanup was given of it; omitted when nothing
       asked_again?: true // cleanup repeated the text and was asked again without it
+      screen_tried?: true // Screen vocabulary read the window, even if it found no name
+      nearby_tried?: true // Rewrite reads nearby text read around the cursor, even if the app gave none
     }
   }[]
 }

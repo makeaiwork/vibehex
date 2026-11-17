@@ -6,7 +6,8 @@
 //! check it, and [`ScreenVocabulary`] is the bounded one-read state machine
 //! `recognition::context_watch` starts. Nothing here saves a term or logs its
 //! text. VibeHex: [`cleanup`] gives the terms to AI cleanup too, behind
-//! `labs.screen_vocabulary_cleanup`.
+//! `labs.screen_vocabulary_cleanup`, and [`labels`] keeps the window's
+//! interface labels made of ordinary words out.
 
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -17,6 +18,8 @@ use std::thread;
 
 // VibeHex: the terms for AI cleanup.
 pub(crate) mod cleanup;
+// VibeHex: interface labels made of ordinary words are not names.
+pub(crate) mod labels;
 
 /// Most terms one capture adds.
 pub const MAX_TERMS: usize = 24;
@@ -45,6 +48,15 @@ const UNIT_SUFFIXES: [&str; 32] = [
 /// (case-insensitive).
 #[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
 pub(crate) fn extract(text: &str, known: &[String]) -> Vec<String> {
+    // VibeHex: the same list uncapped, for the window's labels (`labels`).
+    let mut terms = uncapped(text, known);
+    terms.truncate(MAX_TERMS);
+    terms
+}
+
+/// VibeHex: [`extract`] before its cap.
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
+pub(crate) fn uncapped(text: &str, known: &[String]) -> Vec<String> {
     let known: HashSet<String> = known.iter().map(|term| term.to_lowercase()).collect();
     let mut candidates: Vec<Candidate> = Vec::new();
     let mut slots: HashMap<String, usize> = HashMap::new();
@@ -84,7 +96,6 @@ pub(crate) fn extract(text: &str, known: &[String]) -> Vec<String> {
     });
     candidates
         .into_iter()
-        .take(MAX_TERMS)
         .map(|candidate| candidate.term)
         .collect()
 }
@@ -97,7 +108,8 @@ pub(crate) fn from_focused_window() -> Option<Vec<String>> {
     let started = std::time::Instant::now();
     let terms = crate::dictation::context::frontmost_pid()
         .and_then(crate::accessibility::focused_window_text)
-        .map(|text| extract(&text, &crate::dictation::vocabulary::terms()))
+        // VibeHex: interface labels made of ordinary words are not names.
+        .map(|window| labels::terms(&window, &crate::dictation::vocabulary::terms()))
         .unwrap_or_default();
     tracing::debug!(
         terms = terms.len(),
@@ -172,6 +184,11 @@ impl ScreenVocabulary {
         let (sender, read) = mpsc::channel();
         self.read = Some(read);
         Some(sender)
+    }
+
+    /// VibeHex: whether this capture's read started, for History.
+    pub(crate) fn started(&self) -> bool {
+        self.read.is_some()
     }
 
     /// This capture's terms, if the read finished before its run.
@@ -622,5 +639,22 @@ mod context_watch {
         assert!(!screen.read_now(true, reads(true, false, true), &["OpenCode"]));
         screen.cancel();
         assert!(screen.take().is_empty());
+    }
+
+    /// VibeHex: History knows a capture read its window even when the read
+    /// found nothing, and never for one that did not read.
+    #[test]
+    fn a_started_read_is_known_until_taken_or_cancelled() {
+        let mut screen = ScreenVocabulary::default();
+        assert!(!screen.started());
+        assert!(!screen.read_now(true, false, &[]));
+        assert!(!screen.started(), "the lab is off");
+        assert!(screen.read_now(true, true, &[]));
+        assert!(screen.started(), "a read that finds nothing still started");
+        assert!(screen.take().is_empty());
+        assert!(!screen.started());
+        assert!(screen.read_now(true, true, &["Qdrant"]));
+        screen.cancel();
+        assert!(!screen.started());
     }
 }

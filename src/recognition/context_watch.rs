@@ -104,6 +104,11 @@ impl ContextWatch {
     /// loop's own context) returns it unchanged.
     pub(super) fn finish(&mut self, events: &mut EventLog) -> Result<ContextSnapshot> {
         let mut snapshot = self.finish_snapshot(events)?;
+        // VibeHex: History says when a read found nothing (`history::read`).
+        snapshot.read_tried = crate::history::read::ReadTried {
+            screen: self.screen.started(),
+            nearby: self.caret.started(),
+        };
         let terms = self.screen.take();
         if !terms.is_empty() {
             snapshot.screen_terms = terms;

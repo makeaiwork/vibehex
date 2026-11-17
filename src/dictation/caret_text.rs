@@ -144,6 +144,12 @@ impl CaretTextRead {
         Some(sender)
     }
 
+    /// VibeHex: whether this capture's read started and the lab is still
+    /// on, for History.
+    pub(crate) fn started(&self) -> bool {
+        self.read.is_some() && crate::labs::cursor_context()
+    }
+
     /// This capture's text, if the read finished before its run and the lab
     /// is still on. Turning it off during a capture sends nothing, even for a
     /// read that already finished: the read is taken and dropped.

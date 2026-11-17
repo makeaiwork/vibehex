@@ -82,6 +82,7 @@ impl PendingContext {
             input_revision: None,
             screen_terms: Vec::new(),
             caret_text: None,
+            read_tried: Default::default(), // VibeHex
         }
     }
 }
