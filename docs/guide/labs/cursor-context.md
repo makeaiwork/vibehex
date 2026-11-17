@@ -8,12 +8,12 @@ now: AI cleanup sees only what you said, so it can misspell names already in you
 with: AI cleanup also reads the text around your cursor to spell names right, and a cloud engine receives that text.
 group: Output
 os: macOS
-vibehex: false
+vibehex: reworked
 ---
 
 # Rewrite reads nearby text
 
-**What it does.** AI cleanup sees only what you said, so it can misspell names already in your document or fit badly where it pastes. With this on, each dictation reads up to about 1,000 characters before and after the cursor (and the selection) and gives them to AI cleanup as context, never as text to copy.
+**What it does.** AI cleanup sees only what you said, so it can misspell names already in your document or fit badly where it pastes. With this on, each dictation reads up to about 1,000 characters before and after the cursor (and the selection) and gives them to AI cleanup as context, never as text to copy. VibeHex reworked Hex's version of this lab, which worked only with OpenCode: it works with every cleanup engine and cuts keys and tokens out of the text.
 
 **Where the text goes.** It works with every cleanup engine, and goes wherever your cleanup runs: with the built-in model, or your own server at this Mac's address (localhost, 127.0.0.1 or ::1), it stays on this Mac; with Codex, OpenRouter, or a server that is not this Mac, it is sent to that engine with each dictation; with OpenCode it goes to the mode's OpenCode model, which may be a cloud provider. There is no separate switch for the cloud: if the text should not leave this Mac, run cleanup on the built-in model or a local server. The card's line names where it goes with the engine you chose in Output › AI cleanup.
 

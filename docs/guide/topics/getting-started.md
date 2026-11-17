@@ -101,8 +101,8 @@ a lab by its name, its description, or its group. **Discover** lists every
 lab and **Turned on** only the ones you switched on. Chips narrow the list by
 group: All, Dictation, Output, History, Meetings, Annotate, Shortcuts, Models
 (a group appears only if it has a lab on your system), and a VibeHex chip for
-the labs VibeHex added to Hex. Those carry a star, which says "Added in
-VibeHex" when you point at it. The newest labs show first under "New in
+the labs VibeHex added to Hex or reworked. Those carry a star, which says
+"Added in VibeHex" or "Reworked in VibeHex" when you point at it. The newest labs show first under "New in
 Labs". Each card has its own switch. At the bottom, Run setup again and Send
 feedback.
 

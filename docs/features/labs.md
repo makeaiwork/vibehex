@@ -54,7 +54,16 @@ to the recording, Lower every app; Hex itself has none of them) sits in the grou
 `labs/group.rs` gives it, its copy and runtime switch live in `src/labs/vibehex.rs`
 (each its own atomic, never a bit of Hex's state word; check:
 `no_two_labs_share_a_switch`); its card carries a star ("Added in VibeHex"), and
-the VibeHex chip after the group chips keeps only these (`hex://labs?category=vibehex`).
+the VibeHex chip after the group chips keeps only the starred labs (`hex://labs?category=vibehex`).
+A Hex lab VibeHex reworked (`labs::Feature::vibehex_reworked`: Screen
+vocabulary, which reads from the field outward, skips interface labels and can
+give its names to AI cleanup; Rewrite reads nearby text, which runs on every
+cleanup engine and cuts keys and tokens out) carries the same star, said
+"Reworked in VibeHex" (`rune_ui/labs.rs` `Lab::star`, the owner's request of
+2026-11-17), and the chip keeps it too. Nothing else treats it as VibeHex's:
+Russian vibe coding doesn't turn it on, Hex's website still lists it, and it
+keeps Hex's card copy. Its guide article says `vibehex: reworked` (check:
+`every_labs_article_says_whose_the_lab_is`; `no_lab_is_both_added_and_reworked`).
 Turning on Russian vibe coding also turns on every
 other VibeHex feature this OS and build have and no organization locks, except
 Stop shortcut (it takes a key, Return, so it is left to the person); turning it

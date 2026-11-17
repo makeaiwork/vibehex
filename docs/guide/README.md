@@ -85,7 +85,7 @@ now: …                            # with a non-empty for: one sentence, 4 to 2
 with: …                           # with a non-empty for: one sentence, 4 to 22 words: what changes for the person once it is on, and the one detail that matters for trust
 group: Pasting                    # the Labs section it sits in
 os: macOS                         # macOS | Windows | Linux | every OS, or a list
-vibehex: false                    # true when VibeHex added it (a star in Labs)
+vibehex: false                    # true when VibeHex added it, reworked when VibeHex reworked Hex's lab (both a star in Labs), else false
 ---
 
 # Smart spacing

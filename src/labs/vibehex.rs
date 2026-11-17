@@ -1,8 +1,8 @@
-//! VibeHex's own Labs: which features VibeHex added (their cards carry a
-//! star), which of Hex's labs a stable VibeHex leaves out, the English copy
-//! of VibeHex's cards, where feedback goes, and the runtime switches of
-//! VibeHex's labs. Kept apart from Hex's registry files so an upstream sync
-//! only touches one arm per match there.
+//! VibeHex's own Labs: which features VibeHex added and which of Hex's it
+//! reworked (their cards carry a star), which of Hex's labs a stable
+//! VibeHex leaves out, the English copy of VibeHex's cards, where feedback
+//! goes, and the runtime switches of VibeHex's labs. Kept apart from Hex's
+//! registry files so an upstream sync only touches one arm per match there.
 //!
 //! VibeHex's switches are not bits in Hex's state word ([`super::STATE`]):
 //! each has its own atomic here, so a lab Hex adds can never land on one.
@@ -56,6 +56,19 @@ impl Feature {
                 | Self::VocabularyPasteList
                 | Self::VocabularyQuickAdd
         )
+    }
+
+    /// Whether VibeHex reworked this feature: Hex has the lab, and VibeHex
+    /// changed how it works. Settings › Labs gives these rows the same star,
+    /// said "Reworked in VibeHex" (the owner's request of 2026-11-17).
+    ///
+    /// - Screen vocabulary: reads from the field being dictated into
+    ///   outward, skips interface labels, and can give the names to AI
+    ///   cleanup (`dictation::screen_vocabulary::{labels, cleanup}`).
+    /// - Rewrite reads nearby text: works on every cleanup engine, not only
+    ///   OpenCode, and cuts keys and tokens out (`dictation::caret_prompt`).
+    pub const fn vibehex_reworked(self) -> bool {
+        matches!(self, Self::ScreenVocabulary | Self::CursorContext)
     }
 
     /// Hex labs VibeHex leaves out of a stable build, as Hex does its
@@ -338,6 +351,27 @@ mod tests {
             Feature::for_settings_key("labs.screen_vocabulary_cleanup"),
             Some(Feature::ScreenVocabulary)
         );
+    }
+
+    /// A lab is VibeHex's own or one of Hex's it reworked, never both, and
+    /// a reworked one stays in a stable build.
+    #[test]
+    fn no_lab_is_both_added_and_reworked() {
+        for feature in Feature::ALL {
+            assert!(
+                !(feature.vibehex() && feature.vibehex_reworked()),
+                "{feature:?}"
+            );
+            if feature.vibehex_reworked() {
+                assert!(!feature.vibehex_hides(), "{feature:?}");
+            }
+        }
+        let reworked: Vec<&str> = Feature::ALL
+            .into_iter()
+            .filter(|feature| feature.vibehex_reworked())
+            .map(Feature::name)
+            .collect();
+        assert_eq!(reworked, ["screen-vocabulary", "cursor-context"]);
     }
 
     /// Rewrite reads nearby text shows in a stable build now that it runs

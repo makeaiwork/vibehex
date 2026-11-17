@@ -9,12 +9,12 @@ now: VibeHex does not look at the window you dictate into, so names on screen ca
 with: Names and terms from the window you dictate into help spell that dictation; History keeps them and password fields are skipped.
 group: Dictation
 os: macOS
-vibehex: false
+vibehex: reworked
 ---
 
 # Screen vocabulary
 
-**What it does.** Names and terms on screen, such as a colleague's name in a chat or a function name in your editor, often come out misspelled. With this on, each dictation reads the window you dictate into and uses up to 24 names and technical terms from it as extra vocabulary for that one dictation.
+**What it does.** Names and terms on screen, such as a colleague's name in a chat or a function name in your editor, often come out misspelled. With this on, each dictation reads the window you dictate into and uses up to 24 names and technical terms from it as extra vocabulary for that one dictation. VibeHex reworked Hex's version of this lab: it reads from the field you dictate into outward, skips interface labels, and can give the names to AI cleanup.
 
 **Turn it on when.** You dictate about what you are looking at: code, tickets, chats full of names and product terms.
 

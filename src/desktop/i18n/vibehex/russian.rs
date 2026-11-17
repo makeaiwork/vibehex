@@ -88,6 +88,7 @@ pub(in super::super) const TRANSLATIONS: &[(&str, &str)] = &[
     ("{}-bit", "{}-битная"),
     ("Delete {}", "Удалить {}"),
     ("Added in VibeHex", "Добавлено в VibeHex"),
+    ("Reworked in VibeHex", "Переработано в VibeHex"),
     ("Turned on", "Включённые"),
     ("{} h", "{} ч"),
     ("{} turned on", "Включено: {}"),

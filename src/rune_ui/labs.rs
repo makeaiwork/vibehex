@@ -219,10 +219,25 @@ impl Lab {
         }
     }
 
-    /// Whether VibeHex added it: its card carries a star.
-    fn vibehex(self) -> bool {
-        matches!(self, Self::Feature(feature) if feature.vibehex())
+    /// The star its card carries: VibeHex added it, or reworked Hex's.
+    /// The VibeHex chip keeps the starred labs.
+    fn star(self) -> Option<Star> {
+        match self {
+            Self::Feature(feature) if feature.vibehex() => Some(Star::Added),
+            Self::Feature(feature) if feature.vibehex_reworked() => Some(Star::Reworked),
+            _ => None,
+        }
     }
+}
+
+/// Why a lab's card carries VibeHex's star, which its hover text says.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Star {
+    /// VibeHex added it (`Feature::vibehex`).
+    Added,
+    /// Hex has it and VibeHex changed how it works
+    /// (`Feature::vibehex_reworked`).
+    Reworked,
 }
 
 /// Discover lists every lab; Turned on only those that are on.
@@ -253,7 +268,8 @@ pub(super) struct Store {
     /// The lab a `hex://labs/<feature>` link named and when, so its card
     /// shows a focus border for [`FLASH`].
     pub(super) flash: Option<(&'static str, std::time::Instant)>,
-    /// VibeHex's chip: only the labs VibeHex added show.
+    /// VibeHex's chip: only the starred labs show, those VibeHex added or
+    /// reworked.
     pub(super) vibehex: bool,
     /// What Fits you shows, read when the page opens and when the
     /// settings change (`fits`).
