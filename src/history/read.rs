@@ -39,6 +39,18 @@ impl NearbySent {
     }
 }
 
+/// Which of the two labs' reads a capture started, as its context carries
+/// it (`recognition::context_watch`), so a read that found nothing still
+/// says so. Off for a lab that was off.
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct ReadTried {
+    /// Screen vocabulary read the window.
+    pub screen: bool,
+    /// Rewrite reads nearby text read around the cursor.
+    pub nearby: bool,
+}
+
 /// What one dictation's AI cleanup was given of what was read, as the
 /// processor knows it (`Processed::read`). Empty when no cleanup ran.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -75,11 +87,12 @@ impl std::fmt::Debug for ReadNearby {
 }
 
 impl ReadNearby {
-    fn is_empty(&self) -> bool {
-        self.before.is_empty() && self.selected.is_empty() && self.after.is_empty()
+    /// Whether no part holds more than whitespace.
+    pub fn is_empty(&self) -> bool {
+        self.parts().next().is_none()
     }
 
-    /// The parts that hold text, labelled, in reading order.
+    /// The parts that hold more than whitespace, labelled, in reading order.
     pub fn parts(&self) -> impl Iterator<Item = (Part, &str)> {
         [
             (Part::Before, self.before.as_str()),
@@ -87,7 +100,7 @@ impl ReadNearby {
             (Part::After, self.after.as_str()),
         ]
         .into_iter()
-        .filter(|(_, text)| !text.is_empty())
+        .filter(|(_, text)| !text.trim().is_empty())
     }
 }
 
@@ -125,11 +138,18 @@ pub struct HistoryRead {
     pub nearby_sent: NearbySent,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub asked_again: bool,
+    /// Screen vocabulary read the window, whether or not it found a name.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub screen_tried: bool,
+    /// Rewrite reads nearby text read around the cursor, whether or not
+    /// the app gave any text.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub nearby_tried: bool,
 }
 
 impl HistoryRead {
     /// A dictation's record from its context and what its cleanup was given;
-    /// `None` when it read nothing, so the entry is what it was before.
+    /// `None` when neither lab read, so the entry is what it was before.
     #[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
     pub fn of(context: &ContextSnapshot, given: &Given) -> Option<Self> {
         Self {
@@ -138,11 +158,14 @@ impl HistoryRead {
             nearby: context.caret_text.as_ref().map(ReadNearby::from),
             nearby_sent: given.nearby,
             asked_again: given.asked_again,
+            screen_tried: context.read_tried.screen,
+            nearby_tried: context.read_tried.nearby,
         }
         .kept()
     }
 
-    /// Bounded as History bounds its other fields, and `None` when empty.
+    /// Bounded as History bounds its other fields, and `None` when neither
+    /// lab read. A part of the nearby text that is only whitespace is none.
     /// What cleanup was given of the nearby text goes with the text.
     pub(super) fn kept(self) -> Option<Self> {
         let terms = |terms: Vec<String>| -> Vec<String> {
@@ -153,7 +176,10 @@ impl HistoryRead {
                 .map(|term| truncated(term, MAX_LABEL_BYTES))
                 .collect()
         };
-        let text = |text: &str| truncated(text, MAX_TEXT_BYTES);
+        let text = |text: &str| match text.trim().is_empty() {
+            true => String::new(),
+            false => truncated(text, MAX_TEXT_BYTES),
+        };
         let nearby = self
             .nearby
             .map(|nearby| ReadNearby {
@@ -170,8 +196,14 @@ impl HistoryRead {
                 .map_or(NearbySent::Nothing, |_| self.nearby_sent),
             asked_again: nearby.is_some() && self.asked_again,
             nearby,
+            screen_tried: self.screen_tried,
+            nearby_tried: self.nearby_tried,
         };
-        (!read.screen_terms.is_empty() || read.nearby.is_some()).then_some(read)
+        (!read.screen_terms.is_empty()
+            || read.nearby.is_some()
+            || read.screen_tried
+            || read.nearby_tried)
+            .then_some(read)
     }
 
     /// The bytes of text it holds, for History's text cap.
@@ -186,6 +218,19 @@ impl HistoryRead {
             + self.nearby.as_ref().map_or(0, |nearby| {
                 nearby.before.len() + nearby.selected.len() + nearby.after.len()
             })
+    }
+
+    /// Whether Screen vocabulary read the window: it found names, or says it
+    /// found none.
+    pub fn read_names(&self) -> bool {
+        self.screen_tried || !self.screen_terms.is_empty()
+    }
+
+    /// Whether Rewrite reads nearby text read around the cursor (an older
+    /// entry holding only whitespace there read too), and the text it found.
+    pub fn read_nearby(&self) -> Option<Option<&ReadNearby>> {
+        let found = self.nearby.as_ref().filter(|nearby| !nearby.is_empty());
+        (self.nearby_tried || self.nearby.is_some()).then_some(found)
     }
 
     /// Whether AI cleanup was given `term`.
@@ -315,6 +360,7 @@ mod tests {
             }),
             nearby_sent: NearbySent::All,
             asked_again: false,
+            ..Default::default()
         }
         .kept()
         .unwrap();
@@ -409,6 +455,69 @@ mod tests {
             None
         );
         assert_eq!(held(), 0, "History off writes no entry, and so no record");
+    }
+
+    fn tried(
+        terms: &[&str],
+        caret: Option<CaretText>,
+        screen: bool,
+        nearby: bool,
+    ) -> ContextSnapshot {
+        ContextSnapshot {
+            read_tried: ReadTried { screen, nearby },
+            ..context(terms, caret)
+        }
+    }
+
+    #[test]
+    fn a_lab_that_read_and_found_nothing_still_says_so() {
+        let names = HistoryRead::of(&tried(&[], None, true, false), &Given::default()).unwrap();
+        assert!(names.read_names() && names.screen_terms.is_empty());
+        assert_eq!(names.read_nearby(), None, "the other lab was off");
+        let nearby = HistoryRead::of(&tried(&[], None, false, true), &Given::default()).unwrap();
+        assert!(!nearby.read_names());
+        assert_eq!(nearby.read_nearby(), Some(None));
+        assert_eq!(
+            serde_json::to_value(&nearby).unwrap(),
+            serde_json::json!({"nearby_tried": true})
+        );
+        // Both labs off: no record, as before.
+        assert_eq!(
+            HistoryRead::of(&tried(&[], None, false, false), &Given::default()),
+            None
+        );
+    }
+
+    #[test]
+    fn whitespace_near_the_cursor_is_no_text() {
+        let blank = Some(caret(" ", "\t", "\n\n\n"));
+        assert_eq!(
+            HistoryRead::of(&context(&[], blank.clone()), &Given::default()),
+            None
+        );
+        let read = HistoryRead::of(&tried(&[], blank, false, true), &Given::default()).unwrap();
+        assert_eq!(read.nearby, None);
+        assert_eq!(read.read_nearby(), Some(None));
+        let read = HistoryRead::of(
+            &tried(&[], Some(caret("We ship on ", "", "\n\n\n")), false, true),
+            &Given::default(),
+        )
+        .unwrap();
+        let nearby = read.nearby.as_ref().unwrap();
+        assert_eq!((&*nearby.before, &*nearby.after), ("We ship on ", ""));
+        // An older entry that kept only whitespace read too, and found none.
+        let old: HistoryRead = serde_json::from_str(r#"{"nearby": {"after": "\n\n\n"}}"#).unwrap();
+        assert!(!old.nearby_tried);
+        assert_eq!(old.read_nearby(), Some(None));
+        assert_eq!(old.nearby.as_ref().unwrap().parts().count(), 0);
+    }
+
+    #[test]
+    fn an_older_record_reads_as_not_tried() {
+        let old: HistoryRead = serde_json::from_str(r#"{"screen_terms": ["Qdrant"]}"#).unwrap();
+        assert!(!old.screen_tried && !old.nearby_tried);
+        assert!(old.read_names());
+        assert_eq!(old.read_nearby(), None);
     }
 
     #[test]

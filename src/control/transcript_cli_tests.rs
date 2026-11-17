@@ -785,6 +785,7 @@ fn history_json_prints_what_a_dictation_read_only_with_raw() {
         }),
         nearby_sent: NearbySent::All,
         asked_again: false,
+        ..Default::default()
     });
     let json = |extra: &[&str]| {
         let output = history_output(

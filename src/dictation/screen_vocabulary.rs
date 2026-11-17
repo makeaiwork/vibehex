@@ -6,7 +6,8 @@
 //! check it, and [`ScreenVocabulary`] is the bounded one-read state machine
 //! `recognition::context_watch` starts. Nothing here saves a term or logs its
 //! text. VibeHex: [`cleanup`] gives the terms to AI cleanup too, behind
-//! `labs.screen_vocabulary_cleanup`.
+//! `labs.screen_vocabulary_cleanup`, and [`labels`] keeps the window's
+//! interface labels made of ordinary words out.
 
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -17,6 +18,8 @@ use std::thread;
 
 // VibeHex: the terms for AI cleanup.
 pub(crate) mod cleanup;
+// VibeHex: interface labels made of ordinary words are not names.
+pub(crate) mod labels;
 
 /// Most terms one capture adds.
 pub const MAX_TERMS: usize = 24;
@@ -45,6 +48,41 @@ const UNIT_SUFFIXES: [&str; 32] = [
 /// (case-insensitive).
 #[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
 pub(crate) fn extract(text: &str, known: &[String]) -> Vec<String> {
+    // VibeHex: the same list uncapped, for the window's labels (`labels`).
+    let mut terms = uncapped(text, known);
+    terms.truncate(MAX_TERMS);
+    terms
+}
+
+/// VibeHex: [`extract`] before its cap.
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
+pub(crate) fn uncapped(text: &str, known: &[String]) -> Vec<String> {
+    let mut candidates = candidates(text, known);
+    candidates.sort_by(|left, right| {
+        right
+            .count
+            .cmp(&left.count)
+            .then(left.first.cmp(&right.first))
+    });
+    candidates
+        .into_iter()
+        .map(|candidate| candidate.term)
+        .collect()
+}
+
+/// VibeHex: the same terms in the order they first appear, for text read
+/// nearest first (`labels::rank_near`).
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
+pub(crate) fn in_order(text: &str, known: &[String]) -> Vec<String> {
+    candidates(text, known)
+        .into_iter()
+        .map(|candidate| candidate.term)
+        .collect()
+}
+
+/// VibeHex: every term of `text` once, in the order it first appears.
+#[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
+fn candidates(text: &str, known: &[String]) -> Vec<Candidate> {
     let known: HashSet<String> = known.iter().map(|term| term.to_lowercase()).collect();
     let mut candidates: Vec<Candidate> = Vec::new();
     let mut slots: HashMap<String, usize> = HashMap::new();
@@ -56,6 +94,7 @@ pub(crate) fn extract(text: &str, known: &[String]) -> Vec<String> {
         };
         if !(minimum..=MAX_CHARS).contains(&token.text.chars().count())
             || is_stopword(token.text)
+            || token.negation // VibeHex
             || !looks_like_a_term(&token)
         {
             continue;
@@ -76,17 +115,7 @@ pub(crate) fn extract(text: &str, known: &[String]) -> Vec<String> {
             }
         }
     }
-    candidates.sort_by(|left, right| {
-        right
-            .count
-            .cmp(&left.count)
-            .then(left.first.cmp(&right.first))
-    });
     candidates
-        .into_iter()
-        .take(MAX_TERMS)
-        .map(|candidate| candidate.term)
-        .collect()
 }
 
 /// The accessible text of the focused window of the application in front,
@@ -97,7 +126,8 @@ pub(crate) fn from_focused_window() -> Option<Vec<String>> {
     let started = std::time::Instant::now();
     let terms = crate::dictation::context::frontmost_pid()
         .and_then(crate::accessibility::focused_window_text)
-        .map(|text| extract(&text, &crate::dictation::vocabulary::terms()))
+        // VibeHex: interface labels made of ordinary words are not names.
+        .map(|window| labels::terms(&window, &crate::dictation::vocabulary::terms()))
         .unwrap_or_default();
     tracing::debug!(
         terms = terms.len(),
@@ -174,6 +204,11 @@ impl ScreenVocabulary {
         Some(sender)
     }
 
+    /// VibeHex: whether this capture's read started, for History.
+    pub(crate) fn started(&self) -> bool {
+        self.read.is_some()
+    }
+
     /// This capture's terms, if the read finished before its run.
     pub(crate) fn take(&mut self) -> Vec<String> {
         self.read
@@ -219,6 +254,9 @@ struct Token<'a> {
     /// sentence-ending mark, where a capitalized word is usually just the
     /// first word.
     sentence_start: bool,
+    /// VibeHex: the first half of `Couldn't`, `Don't`, `Isn't`: a
+    /// capitalized ordinary word the apostrophe cut short, never a name.
+    negation: bool,
 }
 
 /// The words in `text`, keeping `.`, `-`, and `_` inside a word such as
@@ -251,7 +289,18 @@ fn push_token<'a>(tokens: &mut Vec<Token<'a>>, text: &'a str, start: usize, end:
     tokens.push(Token {
         text: trimmed,
         sentence_start: at_a_sentence_start(text, start),
+        negation: negation(trimmed, &text[end..]),
     });
+}
+
+/// VibeHex: whether `word` and the text after it are the two halves of a
+/// negation such as `Couldn't`, with either apostrophe.
+fn negation(word: &str, after: &str) -> bool {
+    let mut after = after.chars();
+    word.ends_with(['n', 'N'])
+        && matches!(after.next(), Some('\'' | '’'))
+        && matches!(after.next(), Some('t' | 'T'))
+        && !after.next().is_some_and(char::is_alphanumeric)
 }
 
 fn is_word_char(character: char) -> bool {
@@ -543,6 +592,17 @@ mod tests {
         );
     }
 
+    /// VibeHex: `Couldn't` used to leave `Couldn` as a name.
+    #[test]
+    fn the_first_half_of_a_negation_is_not_a_term() {
+        assert!(terms("The app said Couldn't connect and Don’t retry.").is_empty());
+        assert_eq!(
+            terms("We use Qdrant's index and Finn’s here."),
+            ["Qdrant", "Finn"],
+            "a possessive keeps its name"
+        );
+    }
+
     #[test]
     fn a_long_word_is_not_a_term() {
         let long = format!(
@@ -622,5 +682,22 @@ mod context_watch {
         assert!(!screen.read_now(true, reads(true, false, true), &["OpenCode"]));
         screen.cancel();
         assert!(screen.take().is_empty());
+    }
+
+    /// VibeHex: History knows a capture read its window even when the read
+    /// found nothing, and never for one that did not read.
+    #[test]
+    fn a_started_read_is_known_until_taken_or_cancelled() {
+        let mut screen = ScreenVocabulary::default();
+        assert!(!screen.started());
+        assert!(!screen.read_now(true, false, &[]));
+        assert!(!screen.started(), "the lab is off");
+        assert!(screen.read_now(true, true, &[]));
+        assert!(screen.started(), "a read that finds nothing still started");
+        assert!(screen.take().is_empty());
+        assert!(!screen.started());
+        assert!(screen.read_now(true, true, &["Qdrant"]));
+        screen.cancel();
+        assert!(!screen.started());
     }
 }

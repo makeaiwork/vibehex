@@ -2,7 +2,8 @@
 //! entry's detail (`history::read`): the names Screen vocabulary read from
 //! the window, marked where AI cleanup was given them, and the text Rewrite
 //! reads nearby text read around the cursor, with what cleanup was given of
-//! it. Closed until pressed; an entry without the record has no section.
+//! it. Closed until pressed; an entry without the record has no section. A
+//! lab that read and found nothing says so in its part.
 
 use rune::text::{RichLayoutOptions, measure, measure_with};
 use rune::{El, col, row, text};
@@ -66,11 +67,13 @@ pub(super) fn section(ui: &Ui, p: Paint, entry: &HistoryEntry) -> Option<El> {
     if !open {
         return Some(section);
     }
-    if !read.screen_terms.is_empty() {
+    if read.read_names() {
         section = section.child(names(p, read));
     }
-    if let Some(nearby) = &read.nearby {
-        section = section.child(near_cursor(p, shown, id, read, nearby));
+    match read.read_nearby() {
+        Some(Some(nearby)) => section = section.child(near_cursor(p, shown, id, read, nearby)),
+        Some(None) => section = section.child(no_text(p)),
+        None => {}
     }
     Some(section)
 }
@@ -115,6 +118,15 @@ fn heading(p: Paint, id: u64, open: bool) -> El {
 /// The window's names as quiet tags, the ones cleanup was given on the
 /// accent tint, and what the marking means.
 fn names(p: Paint, read: &HistoryRead) -> El {
+    let label = section_label(p, "label", tr("Names from the window"));
+    if read.screen_terms.is_empty() {
+        let none = note(
+            p,
+            "names-none",
+            tr("No names could be read from this window."),
+        );
+        return col().key("names").gap(8.0).child(label).child(none);
+    }
     let mut tags = row().key("tags").gap(4.0).flex_wrap();
     for (index, term) in read.screen_terms.iter().enumerate() {
         let key = format!("name{index}");
@@ -137,7 +149,7 @@ fn names(p: Paint, read: &HistoryRead) -> El {
                 .key("names-head")
                 .gap(8.0)
                 .center_y()
-                .child(section_label(p, "label", tr("Names from the window")))
+                .child(label)
                 .child(
                     text(read.screen_terms.len().to_string())
                         .key("count")
@@ -180,6 +192,19 @@ fn near_cursor(p: Paint, shown: &Shown, id: u64, read: &HistoryRead, nearby: &Re
         );
     }
     section
+}
+
+/// Text near the cursor when the app gave none.
+fn no_text(p: Paint) -> El {
+    col()
+        .key("nearby")
+        .gap(8.0)
+        .child(section_label(p, "label", tr("Text near the cursor")))
+        .child(note(
+            p,
+            "nearby-none",
+            tr("This app gave no text near the cursor."),
+        ))
 }
 
 /// One part's label and its text on its own backing, capped at [`LINES`]
@@ -290,6 +315,8 @@ fn fixture() -> HistoryRead {
         }),
         nearby_sent: NearbySent::Part,
         asked_again: true,
+        screen_tried: true,
+        nearby_tried: true,
     }
 }
 
@@ -434,6 +461,46 @@ mod tests {
             };
             assert!(shows(&rt, legend), "{legend}");
         }
+    }
+
+    /// A lab that read and found nothing says so; one that was off shows
+    /// nothing; whitespace near the cursor is no text.
+    #[test]
+    fn a_read_that_found_nothing_says_so() {
+        let names = "No names could be read from this window.";
+        let text = "This app gave no text near the cursor.";
+        let both = HistoryRead {
+            screen_tried: true,
+            nearby_tried: true,
+            ..HistoryRead::default()
+        };
+        let mut rt = runtime(Some(both));
+        tap(&mut rt, "read-toggle");
+        for words in ["Names from the window", names, "Text near the cursor", text] {
+            assert!(shows(&rt, words), "{words:?} in {:?}", texts(&rt));
+        }
+        assert!(rt.find("tags").is_none() && rt.find("nearby-sent").is_none());
+
+        let screen_only = HistoryRead {
+            screen_tried: true,
+            ..HistoryRead::default()
+        };
+        let mut rt = runtime(Some(screen_only));
+        tap(&mut rt, "read-toggle");
+        assert!(shows(&rt, names));
+        assert!(!shows(&rt, "Text near the cursor"), "the lab was off");
+
+        let blank = HistoryRead {
+            nearby: Some(ReadNearby {
+                after: "\n\n\n".into(),
+                ..ReadNearby::default()
+            }),
+            ..HistoryRead::default()
+        };
+        let mut rt = runtime(Some(blank));
+        tap(&mut rt, "read-toggle");
+        assert!(shows(&rt, text), "an older entry's whitespace is no text");
+        assert!(!shows(&rt, "After the cursor") && !shows(&rt, "Names from the window"));
     }
 
     #[test]

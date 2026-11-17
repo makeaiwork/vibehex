@@ -551,6 +551,95 @@ kept and a term from nothing undone, spelling untouched),
 [control/settings.rs](../../src/control/settings.rs). Not observed: a real
 cleanup engine fixing a misheard name from a real window.
 
+VibeHex: interface labels are not names
+([dictation/screen_vocabulary/labels.rs](../../src/dictation/screen_vocabulary/labels.rs)).
+In an editor such as VS Code the window's `AXTitle` and `AXDescription` (its
+buttons, tabs and panels) filled all 24 places with words like Code, Panel,
+Branch and Changes. `accessibility::focused_window_text` now returns a
+`WindowText`: the same text, read under the same bounds and byte budget, with
+the byte range of each title and description, so the content (text values) is
+told from the labels. `labels::rank` keeps the content's terms as upstream's
+`extract` ranks them, first; then, up to the cap, the terms found only in
+labels (`screen_vocabulary::uncapped`, upstream's list before its cap) that
+are not ordinary words: a capital right after a lowercase letter
+(`AskUserQuestion`, `GitHub`, `iOS`) or a digit keeps one; otherwise a term
+whose every part between `.`, `-` and `_`, lowercased, is a dictionary word
+or a plural, `-ed`, `-ing` or `-ies` form of one goes (`Panel`, `Changes`,
+`NOT`). Anywhere, a term in `/usr/share/dict/connectives` (150 function words:
+`The`, `AND`, `FOR`) and a word of the app's own name (`Code`, `Sublime Text`,
+as the context names it) is not a term. The dictionary is macOS's
+`/usr/share/dict/words`, only its entries that start lowercase (so `Denis`,
+listed capitalized, is no ordinary word), read once on first use in the reader
+thread into a sorted list (about 3 MB); a missing or unreadable file filters
+nothing, and no list is bundled. The same terms go to the speech model and to
+AI cleanup. When the lab read and found nothing (Sublime Text exposes no
+element under its window), History's What VibeHex read says "No names could
+be read from this window." (`HistoryRead::screen_tried`); with Rewrite reads
+nearby text, "This app gave no text near the cursor." (`nearby_tried`; a part
+that is only whitespace is none). Checks: the tests in
+[dictation/screen_vocabulary/labels.rs](../../src/dictation/screen_vocabulary/labels.rs)
+(the owner's VS Code labels gone and the content's names kept ahead, a
+label-only CamelCase name, `Slack` and `Cursor` kept from the content and
+dropped as labels, function words and the app's name, inflections, the split,
+the missing-dictionary fallback, the system lists loading), and
+`a_started_read_is_known_until_taken_or_cancelled` in
+[dictation/screen_vocabulary.rs](../../src/dictation/screen_vocabulary.rs).
+Observed once on a Mac, counts only (an ignored test,
+`the_real_reader_tells_labels_from_content`): in reads of VS Code, labels
+were 4 to 17 KB of the text, and in one of them 20 of the 38 label candidates
+were ordinary words and were dropped. Not observed: a dictation in a real
+window spelled better for it.
+
+VibeHex: the window is read from the field being dictated into
+([accessibility/near.rs](../../src/accessibility/near.rs)). Upstream's
+breadth-first walk spent its 1,500 elements on an editor's menus, tabs and
+side bars: VS Code with a Claude Code panel open is about 6,000 elements, the
+panel's messages start about 20 levels down, and a dictation into the panel
+got names from the chrome and none from the conversation (the owner's report
+of 2026-11-17: 7 names, none from the panel). `near::around` starts at the
+application's `AXFocusedUIElement` (when there is one and it is not the
+window) and works outward: the element, then at each level above it the
+siblings before it, last first (a chat's newest message before its oldest),
+then the siblings after it, up to the window, never into another window. It
+takes at most 1,000 elements, 24 KB and 100 ms of the read's budget;
+upstream's walk then spends what is left on the window from its top, skipping
+the highest element the first walk went into. Without a focused element
+(Sublime Text; a web app whose window is not key) the read is upstream's
+alone. Three things follow from reading text as a document rather than as a
+list of elements:
+
+- Pieces of running text next to each other (`AXStaticText`), and what is
+  inside a link or a style group other than code (`AXStrongStyleGroup`,
+  `AXEmphasisStyleGroup`), are written on one line, so a bold name inside a
+  sentence is not taken for a sentence's first word and dropped.
+- Code (`AXCodeStyleGroup`: a block, a command, a file name in a sentence)
+  is marked like a title, so `labels::rank` drops its ordinary words
+  (`String`, `Option`) and keeps its own names (`CfObject`) after the
+  prose's.
+- `WindowText::near` is how much of the text was read around the field, and
+  `labels::rank_near` puts that part's names first in the order read
+  (`screen_vocabulary::in_order`), not most frequent first: the message
+  being answered matters more than a word some output repeats forty times
+  further up. The rest of the window follows as before.
+
+Two smaller rules: the first half of a negation (`Couldn't` used to leave
+`Couldn` as a name) is not a term, and a capitalized label word with no
+Latin letter is ordinary (the dictionary is English, and such a word was the
+first word of a message's description: `Смотри`, `Слушай`). Checks: the
+tests in [accessibility/near.rs](../../src/accessibility/near.rs) over a
+tree written in the test (the field first, then the newest text before it;
+a bold name kept in its sentence; code marked apart; a small budget spent
+nearest the field and the panel not read twice; a password field and what is
+below it never read; the byte budget), `names_near_the_field_come_first_in_the_order_read`
+and `a_capitalized_label_word_in_another_alphabet_is_not_a_name` in
+[labels.rs](../../src/dictation/screen_vocabulary/labels.rs), and
+`the_first_half_of_a_negation_is_not_a_term` in
+[screen_vocabulary.rs](../../src/dictation/screen_vocabulary.rs). Observed
+once on the owner's Mac against a real VS Code window with a Claude Code
+panel, starting from the panel's message field: 406 elements and the 24 KB
+read around the field in about 40 ms, the conversation's newest messages
+first. Not observed: a dictation in that panel spelled better for it.
+
 Rewrite reads nearby text (`cursor-context`, macOS): while on,
 each dictation reads the focused text element once, on a background thread, at
 the same moment as the screen vocabulary read (a hold past its threshold, a
@@ -566,7 +655,29 @@ selection skips the read), and up to 1,000 units after it, bounded with
 answers a range with more text than asked still sends at most that range's
 units: the last units before the selection, the first ones for the selection
 and after it. A slice edge that splits a surrogate pair drops that half, so a
-real U+FFFD in the text stays, and everything empty returns nothing. The read
+real U+FFFD in the text stays, and everything empty returns nothing.
+VibeHex: a web field's placeholder is not text
+([accessibility/placeholder.rs](../../src/accessibility/placeholder.rs)). An
+Electron or browser field can draw its hint, or a suggested message, as an
+element inside itself (Claude Code's panel in VS Code does); Accessibility
+then gives the hint as the field's value with the cursor at its end, and the
+read took a suggestion the person never wrote for the text before the cursor
+(the owner's report of 2026-11-17). Chromium lists `AXEditableAncestor` among
+an element's attributes only when it can be edited
+(`ax_platform_node_cocoa.mm`: the `kEditable` state), and a hint drawn in a
+field cannot. So for a field that lists it, a read whose pieces of text
+(`AXStaticText`, up to 64 elements below the field) all lack it returns
+nothing, as does a value equal to the field's `AXPlaceholderValue`; a native
+field, a field with no pieces, or one piece that can be edited reads as
+before. Labs › Smart spacing (`char_before_caret`) uses the same check, so an
+empty field's hint is not a word to put a space after. Screen vocabulary
+still reads the hint as text on screen. Checks: the tests in that file (the
+decision over the pieces, and the placeholder value). Observed on the owner's
+Mac: Claude Code's empty message field ("Queue another message…", cursor at
+22 of 22) is told as a placeholder (its one piece of text does not list the
+attribute), and the same field with typed text is not (its piece lists it).
+Not observed: a dictation into the empty field with History showing no text
+before the cursor. The read
 is taken non-blocking when the dictation finishes, so a very short dictation,
 or an app that answers slower than that, may send no nearby text. The text
 joins that capture's context

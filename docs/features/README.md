@@ -1053,7 +1053,9 @@ Completed output                         // output
         -> Names from the window (count, tags; the ones AI cleanup was given marked) + one legend line
         -> Text near the cursor: Before the cursor / Selected / After the cursor blocks (6 lines, Show all)
         -> what cleanup got: all / the built-in model's part / nothing; warning line when it was asked again
-        -> both labs off, or a dictation that read nothing -> the entry and the pane are exactly as before
+        -> a lab that read and found nothing says so: "No names could be read from this window." /
+           "This app gave no text near the cursor." (whitespace-only text is none)
+        -> both labs off -> the entry and the pane are exactly as before
 Every entry since #1177 -> "Speech model" fact: the model that made its text (+ language when chosen)
 ```
 
@@ -1066,7 +1068,11 @@ order), `cleanup_terms` (the ones AI cleanup's prompt listed), `nearby` (before,
 selected, after: the context's text after the secrets pass), `nearby_sent`
 (`nothing`, `all`, or `part`: a built-in model's end of the text before the
 cursor and the selection, unless that was all of it) and `asked_again` (an
-answer repeated the nearby text and was asked again without it). The macOS
+answer repeated the nearby text and was asked again without it), and
+`screen_tried` / `nearby_tried` (the lab's read started for that capture, from
+`ContextSnapshot::read_tried`, which `recognition::context_watch` sets as the
+capture finishes; older entries read as not tried). A part of the nearby text
+that is only whitespace is kept as none. The macOS
 processor worker writes it from the job's context and `Processed::read`
 (`Nearby::given`, which knows the terms cleanup listed and what of the text a
 piece was asked with); the raw path keeps what was read with nothing given;
@@ -1080,7 +1086,8 @@ local API, or Assistant (whose History readers pick their own fields);
 Search does not look in it. Checks: `history::read::tests` (the record from a
 context and what cleanup was given, nothing for nothing, bounds, the round
 trip and an entry without it byte for byte, retention, Delete, Clear all and
-History Off, the text cap), `what_cleanup_was_given_is_told_to_history` in
+History Off, the text cap, a read that found nothing, whitespace as no text,
+older records as not tried), `what_cleanup_was_given_is_told_to_history` in
 [dictation/caret_prompt/cleanup.rs](../../src/dictation/caret_prompt/cleanup.rs),
 `a_dictations_history_entry_keeps_what_it_read` in
 [parakeet.rs](../../src/parakeet.rs),
@@ -1088,7 +1095,8 @@ History Off, the text cap), `what_cleanup_was_given_is_told_to_history` in
 `control/transcript_cli_tests.rs`, and the window tests in
 [rune_ui/history/read.rs](../../src/rune_ui/history/read.rs) (no section
 without the record, folded until pressed, names, blocks, Show all, each
-"what cleanup got" line, the warning line, accessible names). The `history`
+"what cleanup got" line, the warning line, accessible names, the two
+"found nothing" lines). The `history`
 scene shows the rewritten entry with the section folded. Not observed: a real
 dictation's record on a Mac.
 

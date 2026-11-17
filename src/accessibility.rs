@@ -4,6 +4,12 @@ use std::ptr;
 use std::time::{Duration, Instant};
 
 use crate::dictation::caret_text::{Keep, bounded_units};
+use crate::dictation::screen_vocabulary::labels::WindowText; // VibeHex
+
+// VibeHex: what is nearest the focused element is read first, and a web
+// field's placeholder is not text.
+mod near;
+mod placeholder;
 
 type CfTypeRef = *const c_void;
 type CfStringRef = *const c_void;
@@ -21,6 +27,8 @@ unsafe extern "C" {
         value: *mut CfTypeRef,
     ) -> i32;
     fn AXUIElementSetMessagingTimeout(element: AxUiElementRef, timeout_in_seconds: f32) -> i32;
+    // VibeHex: `placeholder` asks which attributes an element names.
+    fn AXUIElementCopyAttributeNames(element: AxUiElementRef, names: *mut CfTypeRef) -> i32;
     fn AXUIElementSetAttributeValue(
         element: AxUiElementRef,
         attribute: CfStringRef,
@@ -122,20 +130,30 @@ const TEXT_DEADLINE: Duration = Duration::from_millis(150);
 /// names none, so a document or a terminal's scrollback never fills the
 /// budget. Secure text fields and their subtrees are skipped, so a password
 /// never leaves the app. `None` for Hex's own window or when the tree has no
-/// text.
-pub fn focused_window_text(pid: i32) -> Option<String> {
+/// text. VibeHex: where each title and description sits in the text is kept
+/// beside it, so the fork tells labels from values (`screen_vocabulary::labels`).
+pub fn focused_window_text(pid: i32) -> Option<WindowText> {
     let application = foreign_application(pid)?;
     let window = copy_element(&application, c"AXFocusedWindow")?;
     let started = Instant::now();
-    let mut text = String::new();
+    // VibeHex: what is nearest the focused element first (`near`); the walk
+    // below spends the rest of the budget on the rest of the window.
+    let near = near::read(&application, &window, started);
+    let near_bytes = near.text.len();
+    let mut text = near.text;
+    let mut labels = near.labels; // VibeHex
     let mut queue = VecDeque::from([(window, 0_usize)]);
-    let mut visited = 0_usize;
+    let mut visited = near.visited;
     while let Some((element, depth)) = queue.pop_front() {
         if visited >= MAX_TEXT_NODES
             || started.elapsed() >= TEXT_DEADLINE
             || text.len() >= MAX_TEXT_BYTES
         {
             break;
+        }
+        // VibeHex: already read.
+        if (near.top.as_ref()).is_some_and(|top| unsafe { CFEqual(top.0, element.0) } != 0) {
+            continue;
         }
         visited += 1;
         if is_secure_text_field(&element) {
@@ -150,7 +168,10 @@ pub fn focused_window_text(pid: i32) -> Option<String> {
                 let Some(value) = copy_string_capped(&element, name, MAX_VALUE_CHARS) else {
                     continue;
                 };
-                if !append_text(&mut text, &value) {
+                let at = text.len(); // VibeHex: a label's place in `text`.
+                let more = append_text(&mut text, &value);
+                labels.push(at..text.len()); // VibeHex
+                if !more {
                     full = true;
                     break;
                 }
@@ -167,7 +188,12 @@ pub fn focused_window_text(pid: i32) -> Option<String> {
             queue.push_back((child, depth + 1));
         }
     }
-    (!text.trim().is_empty()).then_some(text)
+    // VibeHex
+    (!text.trim().is_empty()).then_some(WindowText {
+        text,
+        labels,
+        near: near_bytes,
+    })
 }
 
 /// Whether an element holds a password. macOS marks most secure fields with
@@ -271,10 +297,20 @@ const MAX_CARET_SELECTION: isize = 2_000;
 /// drops that half. `None` when the app names no focused text element or no
 /// selection, or all three parts are empty; without `AXNumberOfCharacters`
 /// the text after the selection is skipped.
+/// VibeHex: where the text before a cursor at `location` starts: at most
+/// `MAX_CARET_BEFORE` units back, and never before the document's start.
+fn before_start(location: isize) -> isize {
+    (location - MAX_CARET_BEFORE).max(0)
+}
+
 pub fn text_around_caret(pid: i32) -> Option<crate::dictation::caret_text::CaretText> {
     let application = foreign_application(pid)?;
     let focused = copy_element(&application, c"AXFocusedUIElement")?;
     if is_secure_text_field(&focused) {
+        return None;
+    }
+    // VibeHex: an empty web field's hint is not text near the cursor.
+    if placeholder::only(&focused) {
         return None;
     }
     let selection = copy_range(&focused, c"AXSelectedTextRange")?;
@@ -284,7 +320,11 @@ pub fn text_around_caret(pid: i32) -> Option<crate::dictation::caret_text::Caret
     let selection_end = selection.location.saturating_add(selection.length);
     let mut caret = crate::dictation::caret_text::CaretText::default();
     if selection.location > 0 {
-        let location = selection.location.saturating_sub(MAX_CARET_BEFORE);
+        // VibeHex: `saturating_sub` on a signed location went below zero
+        // for a cursor within the first `MAX_CARET_BEFORE` characters, and
+        // an app (Notes) answers a negative range with nothing, so most
+        // fields gave no text before the cursor at all.
+        let location = before_start(selection.location);
         caret.before = copy_text_for_range(
             &focused,
             CfRange {
@@ -464,6 +504,11 @@ pub fn char_before_caret(pid: i32) -> Option<char> {
     let focused = copy_element(&application, c"AXFocusedUIElement")?;
     let selection = copy_range(&focused, c"AXSelectedTextRange")?;
     if selection.length != 0 || selection.location <= 0 {
+        return None;
+    }
+    // VibeHex: an empty web field's hint is not a character typed before
+    // the cursor.
+    if placeholder::only(&focused) {
         return None;
     }
     // One UTF-16 unit, or two when it is half of a surrogate pair.
@@ -855,5 +900,23 @@ mod tests {
         assert_eq!(char_before_caret(own_pid), None);
         assert_eq!(text_around_caret(own_pid), None);
         assert!(browser_pages(own_pid).urls.is_empty());
+    }
+}
+
+#[cfg(all(test, target_os = "macos"))]
+mod caret_range_tests {
+    use super::{MAX_CARET_BEFORE, before_start};
+
+    /// VibeHex: the text before the cursor starts at the document's start
+    /// while the cursor is within the first `MAX_CARET_BEFORE` characters
+    /// (it used to start below zero there, which Notes answers with
+    /// nothing), and `MAX_CARET_BEFORE` back after that.
+    #[test]
+    fn the_text_before_the_cursor_never_starts_below_zero() {
+        assert_eq!(before_start(1), 0);
+        assert_eq!(before_start(514), 0);
+        assert_eq!(before_start(MAX_CARET_BEFORE), 0);
+        assert_eq!(before_start(MAX_CARET_BEFORE + 1), 1);
+        assert_eq!(before_start(5_000), 5_000 - MAX_CARET_BEFORE);
     }
 }

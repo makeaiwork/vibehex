@@ -112,6 +112,11 @@ Screen vocabulary (Labs › Screen vocabulary, macOS)  // vocabulary.screen
 │   window's text, bounded to 1,500 elements, 40 levels, 32 KB, a soft 150 ms
 │   deadline checked between elements, and 4 KB per value; a larger text value
 │   reads only its AXVisibleCharacterRange, or is skipped when none is named
+├── VibeHex: the read starts at the focused element and works outward (in a
+│   chat panel: the field, then the messages above it, newest first), taking
+│   up to 1,000 of the elements, 24 KB and 100 ms; the rest goes to the
+│   window from its top. Names read around the field come first, in the
+│   order read; code is ranked like a label  // accessibility/near.rs
 ├── At most 24 terms: mixed-case and CamelCase words, letters with digits,
 │   2–6 letter all-caps acronyms, and capitalized words away from a sentence's
 │   start; plain lowercase words, sentence-start capitals, common window

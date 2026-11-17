@@ -41,6 +41,9 @@ pub struct ContextSnapshot {
     /// capture finishes with, and never logged; VibeHex keeps it with the
     /// dictation's History entry (`history::read`).
     pub caret_text: Option<CaretText>,
+    /// VibeHex: which of those two reads this capture started, so History
+    /// says when one found nothing (`history::read`).
+    pub read_tried: crate::history::read::ReadTried,
 }
 
 /// The page refresh one capture owes. A shortcut's press starts it
@@ -285,6 +288,7 @@ fn snapshot_of(front: &Frontmost, page: Option<Url>) -> ContextSnapshot {
         input_revision: None,
         screen_terms: Vec::new(),
         caret_text: None,
+        read_tried: Default::default(), // VibeHex
     }
 }
 
@@ -335,6 +339,7 @@ impl ContextSnapshot {
                         input_revision: None,
                         screen_terms: Vec::new(),
                         caret_text: None,
+                        read_tried: Default::default(), // VibeHex
                     });
                 }
                 Ok(None) => {}
@@ -377,6 +382,7 @@ impl ContextSnapshot {
                     input_revision: None,
                     screen_terms: Vec::new(),
                     caret_text: None,
+                    read_tried: Default::default(), // VibeHex
                 });
             }
         }
