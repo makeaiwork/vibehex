@@ -181,14 +181,14 @@ type History = {
     score?: number // present only with --search; higher is more relevant
     snippet?: string // present only with --search; matches wrapped in **
     recording?: string // absolute path to the kept WAV; only while Labs › Keep recordings has it
-    read?: { // VibeHex, only with --raw: what the dictation read (Screen vocabulary, Rewrite reads nearby text)
+    read?: { // VibeHex, only with --raw: what the dictation read (Enhanced screen vocabulary, Enhanced cursor context)
       screen_terms?: string[] // names read from the window, in order
       cleanup_terms?: string[] // the ones AI cleanup was given
       nearby?: { before?: string, selected?: string, after?: string } // text near the cursor, secrets cut out
       nearby_sent?: "all" | "part" // what cleanup was given of it; omitted when nothing
       asked_again?: true // cleanup repeated the text and was asked again without it
-      screen_tried?: true // Screen vocabulary read the window, even if it found no name
-      nearby_tried?: true // Rewrite reads nearby text read around the cursor, even if the app gave none
+      screen_tried?: true // Enhanced screen vocabulary read the window, even if it found no name
+      nearby_tried?: true // Enhanced cursor context read around the cursor, even if the app gave none
     }
   }[]
 }

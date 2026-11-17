@@ -53,7 +53,8 @@ fn catalog_json() -> String {
             let added = feature.added();
             serde_json::json!({
                 "id": feature.name(),
-                "title": feature.title(),
+                // VibeHex: Hex's website names a lab as Hex does.
+                "title": feature.hex_title(),
                 "summary": feature.web_summary(),
                 "group": feature.group().id(),
                 "groupTitle": feature.group().title(),

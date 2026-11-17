@@ -62,13 +62,27 @@ impl Feature {
     /// changed how it works. Settings › Labs gives these rows the same star,
     /// said "Reworked in VibeHex" (the owner's request of 2026-11-17).
     ///
-    /// - Screen vocabulary: reads from the field being dictated into
-    ///   outward, skips interface labels, and can give the names to AI
-    ///   cleanup (`dictation::screen_vocabulary::{labels, cleanup}`).
-    /// - Rewrite reads nearby text: works on every cleanup engine, not only
-    ///   OpenCode, and cuts keys and tokens out (`dictation::caret_prompt`).
+    /// - Screen vocabulary (Hex's name): reads from the field being
+    ///   dictated into outward, skips interface labels, and can give the
+    ///   names to AI cleanup (`dictation::screen_vocabulary::{labels,
+    ///   cleanup}`).
+    /// - Rewrite reads nearby text (Hex's name): works on every cleanup
+    ///   engine, not only OpenCode, and cuts keys and tokens out
+    ///   (`dictation::caret_prompt`).
     pub const fn vibehex_reworked(self) -> bool {
         matches!(self, Self::ScreenVocabulary | Self::CursorContext)
+    }
+
+    /// The fork's card title for a Hex lab it reworked, in place of Hex's
+    /// ([`Feature::hex_title`]), so the name says it is the improved one
+    /// (the owner's request of 2026-11-17). Its `hex labs` name, settings
+    /// keys and Hex's website stay Hex's.
+    pub(super) const fn vibehex_renamed(self) -> Option<&'static str> {
+        match self {
+            Self::ScreenVocabulary => Some("Enhanced screen vocabulary"),
+            Self::CursorContext => Some("Enhanced cursor context"),
+            _ => None,
+        }
     }
 
     /// Hex labs VibeHex leaves out of a stable build, as Hex does its
@@ -372,6 +386,27 @@ mod tests {
             .map(Feature::name)
             .collect();
         assert_eq!(reworked, ["screen-vocabulary", "cursor-context"]);
+    }
+
+    /// Only a reworked lab takes the fork's name, and it says so; Hex's
+    /// name stays for Hex's website.
+    #[test]
+    fn a_reworked_lab_has_the_forks_name() {
+        for feature in Feature::ALL {
+            match feature.vibehex_renamed() {
+                Some(title) => {
+                    assert!(feature.vibehex_reworked(), "{feature:?}");
+                    assert!(title.starts_with("Enhanced "), "{title}");
+                    assert_eq!(feature.title(), title);
+                }
+                None => assert_eq!(feature.title(), feature.hex_title()),
+            }
+        }
+        assert_eq!(Feature::ScreenVocabulary.hex_title(), "Screen vocabulary");
+        assert_eq!(
+            Feature::CursorContext.hex_title(),
+            "Rewrite reads nearby text"
+        );
     }
 
     /// Rewrite reads nearby text shows in a stable build now that it runs

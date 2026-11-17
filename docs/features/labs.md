@@ -55,14 +55,19 @@ to the recording, Lower every app; Hex itself has none of them) sits in the grou
 (each its own atomic, never a bit of Hex's state word; check:
 `no_two_labs_share_a_switch`); its card carries a star ("Added in VibeHex"), and
 the VibeHex chip after the group chips keeps only the starred labs (`hex://labs?category=vibehex`).
-A Hex lab VibeHex reworked (`labs::Feature::vibehex_reworked`: Screen
+A Hex lab VibeHex reworked (`labs::Feature::vibehex_reworked`: Enhanced screen
 vocabulary, which reads from the field outward, skips interface labels and can
-give its names to AI cleanup; Rewrite reads nearby text, which runs on every
+give its names to AI cleanup; Enhanced cursor context, which runs on every
 cleanup engine and cuts keys and tokens out) carries the same star, said
 "Reworked in VibeHex" (`rune_ui/labs.rs` `Lab::star`, the owner's request of
 2026-11-17), and the chip keeps it too. Nothing else treats it as VibeHex's:
-Russian vibe coding doesn't turn it on, Hex's website still lists it, and it
-keeps Hex's card copy. Its guide article says `vibehex: reworked` (check:
+Russian vibe coding doesn't turn it on, and Hex's website still lists it
+under Hex's name. Its card line is Hex's, but its title is the fork's
+(`Feature::vibehex_renamed` over `Feature::hex_title`): Enhanced screen
+vocabulary for Hex's Screen vocabulary, Enhanced cursor context for Hex's
+Rewrite reads nearby text (the owner's request of 2026-11-17; check:
+`a_reworked_lab_has_the_forks_name`); `hex labs` names and settings keys stay
+Hex's. Its guide article says `vibehex: reworked` (check:
 `every_labs_article_says_whose_the_lab_is`; `no_lab_is_both_added_and_reworked`).
 Turning on Russian vibe coding also turns on every
 other VibeHex feature this OS and build have and no organization locks, except
@@ -76,8 +81,7 @@ the owner chose not to ship, and Hex labs that run only on OpenCode while
 VibeHex cleans up on its own engines, until they run there too
 (`labs::Feature::vibehex_hides`: Import audio, Release notes link, ⌘Q closes
 Settings, Annotate 15 s replay, Clean up with Apple Intelligence, Voice prompt);
-a dev build keeps them, as Hex keeps its developer tools. Rewrite reads nearby
-text left that list once it ran on every cleanup engine. Check:
+a dev build keeps them, as Hex keeps its developer tools. Enhanced cursor context left that list once it ran on every cleanup engine. Check:
 `vibehex_hides_only_hex_labs_and_only_from_a_stable_build`.
 
 VibeHex's own labs stay off Hex's website (`labs::web`'s `on_the_web` leaves
@@ -97,9 +101,9 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 ├── Release notes link no labs.release_notes_link               About links this build's release notes under the update check: the fork's GitHub release for a VibeHex (`X.Y.Z-vibe.N`) or plain `X.Y.Z` version, nothing for any other
 ├── Live chapters   no    labs.live_chapters           (macOS)   chapters a meeting while it records, boundary pass after Stop
 ├── Vocabulary biasing no labs.vocabulary_biasing                Parakeet transcription biased toward the vocabulary (#452/#457)
-├── Screen vocabulary no labs.screen_vocabulary         (macOS)   names and terms in the focused window become temporary vocabulary for each dictation; read locally through Accessibility, password fields skipped; VibeHex keeps them with the dictation's History entry
+├── Enhanced screen vocabulary no labs.screen_vocabulary         (macOS)   names and terms in the focused window become temporary vocabulary for each dictation; read locally through Accessibility, password fields skipped; VibeHex keeps them with the dictation's History entry
 │                                        VibeHex: + labs.screen_vocabulary_cleanup (off; a row on the card while on) gives the terms to AI cleanup too, listed after the Vocabulary and checked by the vocabulary guard; the window is then read whatever the speech model, and a cloud engine receives them
-├── Rewrite reads nearby text no labs.cursor_context (macOS) AI cleanup reads the focused text element's text around the caret as context for names, terms, and where the result lands; password fields skipped
+├── Enhanced cursor context no labs.cursor_context (macOS) AI cleanup reads the focused text element's text around the caret as context for names, terms, and where the result lands; password fields skipped
 │                                        VibeHex: on every cleanup engine, a cloud one included (no consent switch); known key and token shapes cut out as it is read; the card's line names where the text goes now; kept with the dictation's History entry
 ├── Switch model with keyboard language  no  keyboard_model_switching.enabled  (macOS, Windows, X11)
 │                                        the input source picks its mapped model (#216); General shows the mappings while on
@@ -474,7 +478,8 @@ Add a new feature to `labs::Feature` (name, settings key, description, audience)
 it a row in `rune_ui/labs.rs` and a `hex settings` key, and default it off.
 When a feature graduates, remove it from Labs.
 
-Screen vocabulary (`screen-vocabulary`, macOS): while on, each dictation
+Enhanced screen vocabulary (`screen-vocabulary`, macOS; Hex calls it Screen
+vocabulary): while on, each dictation
 reads the focused window's visible text once, on a background thread, as the
 capture becomes real: the same point the page refresh is asked for (a hold
 past its threshold, a control start, or a released microphone opening). The
@@ -583,8 +588,8 @@ thread into a sorted list (about 3 MB); a missing or unreadable file filters
 nothing, and no list is bundled. The same terms go to the speech model and to
 AI cleanup. When the lab read and found nothing (Sublime Text exposes no
 element under its window), History's What VibeHex read says "No names could
-be read from this window." (`HistoryRead::screen_tried`); with Rewrite reads
-nearby text, "This app gave no text near the cursor." (`nearby_tried`; a part
+be read from this window." (`HistoryRead::screen_tried`); with Enhanced cursor
+context, "This app gave no text near the cursor." (`nearby_tried`; a part
 that is only whitespace is none). Checks: the tests in
 [dictation/screen_vocabulary/labels.rs](../../src/dictation/screen_vocabulary/labels.rs)
 (the owner's VS Code labels gone and the content's names kept ahead, a
@@ -649,7 +654,8 @@ panel, starting from the panel's message field: 406 elements and the 24 KB
 read around the field in about 40 ms, the conversation's newest messages
 first. Not observed: a dictation in that panel spelled better for it.
 
-Rewrite reads nearby text (`cursor-context`, macOS): while on,
+Enhanced cursor context (`cursor-context`, macOS; Hex calls it Rewrite reads
+nearby text): while on,
 each dictation reads the focused text element once, on a background thread, at
 the same moment as the screen vocabulary read (a hold past its threshold, a
 control start, or a released microphone opening), for the dictation's AI
@@ -679,7 +685,7 @@ field cannot. So for a field that lists it, a read whose pieces of text
 nothing, as does a value equal to the field's `AXPlaceholderValue`; a native
 field, a field with no pieces, or one piece that can be edited reads as
 before. Labs › Smart spacing (`char_before_caret`) uses the same check, so an
-empty field's hint is not a word to put a space after. Screen vocabulary
+empty field's hint is not a word to put a space after. Enhanced screen vocabulary
 still reads the hint as text on screen. Checks: the tests in that file (the
 decision over the pieces, and the placeholder value). Observed on the owner's
 Mac: Claude Code's empty message field ("Queue another message…", cursor at
@@ -4016,14 +4022,14 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   `dictation::vocabulary::transcription_bias` returns nothing, so no run or stream takes
   the list; rewriting and search still use it, and the Vocabulary sheet says
   so.
-- Screen vocabulary (macOS): each dictation may read the focused window's
+- Enhanced screen vocabulary (macOS): each dictation may read the focused window's
   visible text through Accessibility as temporary vocabulary. Off by default
   (`labs.screen_vocabulary`). Parakeet reads the terms only with Vocabulary
   biasing on and a boost other than Off; Whisper and Qwen3-ASR read them as a
   prompt; Apple Speech and models that take no vocabulary read nothing. A
   capture with terms for such a model uses its whole-clip run rather than a
   live stream's text, so the text arrives after release with a little more
-  latency. Its read bounds and extraction are above, under "Screen
+  latency. Its read bounds and extraction are above, under "Enhanced screen
   vocabulary". VibeHex: with `labs.screen_vocabulary_cleanup` on, AI cleanup
   gets the terms too, and the window is read for every speech model.
 - Terminal paste (Windows): paste with Ctrl+Shift+V instead of Ctrl+V for

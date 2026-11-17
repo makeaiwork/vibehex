@@ -49,9 +49,9 @@ to a server at sign-in; everything else stays in `%APPDATA%\hex`.
   plan, and OpenRouter to its model provider. "Your own" stays on your
   computer for LM Studio or Ollama at their usual local addresses, and goes
   wherever another address points.
-  "Built in" (Mac) never leaves. On a Mac, Labs › Rewrite reads nearby text
+  "Built in" (Mac) never leaves. On a Mac, Labs › Enhanced cursor context
   adds the text around your cursor (known keys and tokens cut out), and
-  Screen vocabulary's Also give them to AI cleanup the names in the window.
+  Enhanced screen vocabulary's Also give them to AI cleanup the names in the window.
   History keeps what was read with the entry, on this computer.
 - **Meeting notes:** Apple Intelligence keeps the transcript on the Mac, and a
   Built in writer keeps it on the computer; any other writer in Meetings ›

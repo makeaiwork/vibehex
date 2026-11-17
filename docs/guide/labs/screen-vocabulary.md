@@ -2,7 +2,7 @@
 feature: screen-vocabulary
 key: labs.screen_vocabulary
 keys: [labs.screen_vocabulary, labs.screen_vocabulary_cleanup]
-title: Screen vocabulary
+title: Enhanced screen vocabulary
 for: [code]
 ask: Let names visible in the window help spell your dictation?
 now: VibeHex does not look at the window you dictate into, so names on screen can come out misspelled.
@@ -12,9 +12,9 @@ os: macOS
 vibehex: reworked
 ---
 
-# Screen vocabulary
+# Enhanced screen vocabulary
 
-**What it does.** Names and terms on screen, such as a colleague's name in a chat or a function name in your editor, often come out misspelled. With this on, each dictation reads the window you dictate into and uses up to 24 names and technical terms from it as extra vocabulary for that one dictation. VibeHex reworked Hex's version of this lab: it reads from the field you dictate into outward, skips interface labels, and can give the names to AI cleanup.
+**What it does.** Names and terms on screen, such as a colleague's name in a chat or a function name in your editor, often come out misspelled. With this on, each dictation reads the window you dictate into and uses up to 24 names and technical terms from it as extra vocabulary for that one dictation. VibeHex reworked Hex's Screen vocabulary into this lab: it reads from the field you dictate into outward, skips interface labels, and can give the names to AI cleanup.
 
 **Turn it on when.** You dictate about what you are looking at: code, tickets, chats full of names and product terms.
 
@@ -24,8 +24,8 @@ vibehex: reworked
 
 **Good to know.** Names come from the text in the window, starting from the field you dictate into and working outward: in a chat or an AI coding panel that is the conversation above the field, newest messages first, and only then the rest of the window. Interface labels made of ordinary words, such as Panel or Changes on a button, are skipped, and so are ordinary words inside code, the words of the app's own name, and terms your Vocabulary already has. Some apps, such as Sublime Text, give VibeHex nothing to read: History's **What VibeHex read** then says no names could be read from the window. The window is read on this Mac; password fields and VibeHex's own window are skipped. The names read for a dictation are kept with it in History on this Mac, under **What VibeHex read** (the ones AI cleanup was given marked), and are removed with the entry; keeping them sends them nowhere. A dictation that found terms for a speech model that uses them is transcribed after you let go rather than while you speak, which costs a little time. Meetings and the local API never see the terms. AI cleanup sees them only with that switch on (off by default). Cleanup only corrects a name you said; one it writes where you said nothing like it is undone. With that switch on and a cloud cleanup engine (Codex, OpenRouter, a server that is not this Mac, or an online OpenCode model), the screen's names are sent to it with each dictation; keeping cleanup on this Mac keeps them here. A name shaped like a key or a token is never given to cleanup.
 
-**Where.** Labs › Screen vocabulary (`labs.screen_vocabulary`); its switch Also give them to AI cleanup shows on the card while it is on (`labs.screen_vocabulary_cleanup`).
+**Where.** Labs › Enhanced screen vocabulary (`labs.screen_vocabulary`); its switch Also give them to AI cleanup shows on the card while it is on (`labs.screen_vocabulary_cleanup`).
 
-**Asked as.** "It misspells names that are right there on screen"; "Use the words in my editor"; «Пусть берёт имена из окна»; «Неправильно пишет названия, которые видны на экране».
+**Asked as.** "It misspells names that are right there on screen"; "Use the words in my editor"; «Пусть берёт имена из окна»; «Неправильно пишет названия, которые видны на экране»; "Where is Screen vocabulary?"; «Улучшенный словарь с экрана».
 
-<!-- sources: src/labs/card.rs:19,119-122; src/labs/description.rs:25-28; src/labs/catalog.rs:210-213,287,448; src/labs/group.rs:72; src/labs/vibehex.rs:188-196,271-277; src/control/settings/registry.rs:321-332; src/control/settings/requires.rs (labs.screen_vocabulary_cleanup); src/transcription/models.rs:355-383,1624; src/parakeet.rs:456-472; src/dictation/screen_vocabulary.rs:139-151,226-231; src/dictation/screen_vocabulary/labels.rs; src/accessibility.rs (focused_window_text); src/dictation/screen_vocabulary/cleanup.rs; src/dictation/processor.rs:513-525,540-557,1310; src/rune_ui/labs/screen_vocabulary.rs; src/history/read.rs; src/rune_ui/history/read.rs; docs/features/labs.md (Screen vocabulary section); docs/features/README.md (History) -->
+<!-- sources: src/labs/card.rs:19,119-122; src/labs/description.rs:25-28; src/labs/catalog.rs:210-213,287,448; src/labs/group.rs:72; src/labs/vibehex.rs:188-196,271-277; src/control/settings/registry.rs:321-332; src/control/settings/requires.rs (labs.screen_vocabulary_cleanup); src/transcription/models.rs:355-383,1624; src/parakeet.rs:456-472; src/dictation/screen_vocabulary.rs:139-151,226-231; src/dictation/screen_vocabulary/labels.rs; src/accessibility.rs (focused_window_text); src/dictation/screen_vocabulary/cleanup.rs; src/dictation/processor.rs:513-525,540-557,1310; src/rune_ui/labs/screen_vocabulary.rs; src/history/read.rs; src/rune_ui/history/read.rs; docs/features/labs.md (Enhanced screen vocabulary section); docs/features/README.md (History) -->

@@ -33,9 +33,9 @@ choose in **Output › AI cleanup › Runs on**:
   Several GB each.
 - **OpenCode**: as without the Labs switch.
 
-On a Mac, two Labs features give cleanup more to go on, on any engine: **Rewrite
-reads nearby text** (the text around your cursor, keys and tokens cut out)
-and Screen vocabulary's **Also give them to AI cleanup** (names in the
+On a Mac, two Labs features give cleanup more to go on, on any engine: **Enhanced
+cursor context** (the text around your cursor, keys and tokens cut out)
+and Enhanced screen vocabulary's **Also give them to AI cleanup** (names in the
 window). A cloud engine receives that too; cleanup on this Mac keeps it here.
 
 API keys are kept in the macOS keychain or Windows Credential Manager, not in

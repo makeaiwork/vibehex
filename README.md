@@ -48,9 +48,10 @@ separately, so it is not an official Hex release.
   with the playing line lit.
 - **Quiet while you dictate, even on a monitor.** Music and other apps get
   quieter even when macOS can't set your display's volume.
-- **Two of Hex's Labs, reworked.** Screen vocabulary reads names from the
-  field you dictate into and can give them to AI cleanup; Rewrite reads
-  nearby text works with every cleanup engine and cuts keys and tokens out.
+- **Two of Hex's Labs, reworked.** Enhanced screen vocabulary (Hex's Screen
+  vocabulary) reads names from the field you dictate into and can give them
+  to AI cleanup; Enhanced cursor context (Hex's Rewrite reads nearby text)
+  works with every cleanup engine and cuts keys and tokens out.
   In Labs, a star marks what VibeHex added or reworked.
 
 ## Assistant

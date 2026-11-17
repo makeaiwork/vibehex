@@ -36,7 +36,7 @@ All of these need **Labs › Clean up on your own server** and Codex set up abov
 
 ## What Codex receives
 
-The text being worked on (a dictation, a transcript, a file) and your instructions, with a dictation also your Vocabulary and, on a Mac with Labs › Rewrite reads nearby text or Screen vocabulary's Also give them to AI cleanup on, the text around your cursor (keys and tokens cut out) or names in the window, sent to OpenAI through your ChatGPT account. VibeHex runs Codex isolated: no tools, shell, web search, plugins, memories or project files, an empty working folder, and a throwaway conversation outside its history. Your sign-in stays with Codex.
+The text being worked on (a dictation, a transcript, a file) and your instructions, with a dictation also your Vocabulary and, on a Mac with Labs › Enhanced cursor context or Enhanced screen vocabulary's Also give them to AI cleanup on, the text around your cursor (keys and tokens cut out) or names in the window, sent to OpenAI through your ChatGPT account. VibeHex runs Codex isolated: no tools, shell, web search, plugins, memories or project files, an empty working folder, and a throwaway conversation outside its history. Your sign-in stays with Codex.
 
 **Asked as.** "Can I use my ChatGPT subscription instead of an API key?"; "Codex not found"; "Does Codex see my files?"; «Как подключить Codex»; «Пишет, что лимит Codex исчерпан»; «Что отправляется в ChatGPT?».
 

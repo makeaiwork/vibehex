@@ -34,7 +34,7 @@ edit the same list through the running VibeHex, on macOS, Windows, and Linux.
   (Output article).
 - **Meeting titles and summaries** read its first 30 terms.
 
-On a Mac, **Labs › Screen vocabulary** adds names seen in the window you
+On a Mac, **Labs › Enhanced screen vocabulary** adds names seen in the window you
 dictate into, for that dictation only. Its **Also give them to AI cleanup**
 switch hands those names to AI cleanup too (a cloud engine then receives them).
 

@@ -1,11 +1,13 @@
-//! Strings of Labs › Rewrite reads nearby text's card: where the text goes
-//! with the cleanup engine chosen now.
+//! Strings of Labs › Enhanced cursor context's card (Hex's Rewrite reads
+//! nearby text): its title, and where the text goes with the cleanup
+//! engine chosen now.
 //! The six columns of [`super::super::TRANSLATIONS`] (Polish, Chinese
 //! (Simplified), Japanese, German, Spanish, Ukrainian), then French,
 //! Brazilian Portuguese, and Russian.
 
 #[rustfmt::skip]
 pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
+    ("Enhanced cursor context", ["Ulepszony kontekst kursora", "增强版光标上下文", "カーソル周辺の文脈（強化版）", "Erweiterter Cursorkontext", "Contexto del cursor mejorado", "Покращений контекст курсора"]),
     ("Password fields are never read.", ["Pola haseł nie są nigdy czytane.", "绝不会读取密码字段。", "パスワード欄は決して読み取りません。", "Passwortfelder werden nie gelesen.", "Nunca se leen los campos de contraseña.", "Поля паролів ніколи не читаються."]),
     ("With your cleanup engine now, the nearby text stays on this Mac.", ["Z obecnym silnikiem porządkowania tekst wokół kursora zostaje na tym Macu.", "使用你当前的整理引擎，光标附近的文字会留在这台 Mac 上。", "いまの整えのエンジンでは、カーソル周辺のテキストはこの Mac から出ません。", "Mit deiner aktuellen Bereinigungs-Engine bleibt der Text um den Cursor auf diesem Mac.", "Con tu motor de limpieza actual, el texto cercano se queda en este Mac.", "З вашим нинішнім рушієм упорядкування текст поруч із курсором лишається на цьому Mac."]),
     ("With your cleanup engine now, the nearby text goes to the mode's OpenCode model, which may be a cloud provider.", ["Z obecnym silnikiem porządkowania tekst wokół kursora trafia do modelu OpenCode danego trybu, który może być dostawcą chmurowym.", "使用你当前的整理引擎，光标附近的文字会发送到该模式的 OpenCode 模型，该模型可能是云端提供商。", "いまの整えのエンジンでは、カーソル周辺のテキストはモードの OpenCode モデルに送られます。クラウドの提供元の場合があります。", "Mit deiner aktuellen Bereinigungs-Engine geht der Text um den Cursor an das OpenCode-Modell des Modus, das ein Cloud-Anbieter sein kann.", "Con tu motor de limpieza actual, el texto cercano va al modelo OpenCode del modo, que puede ser un proveedor en la nube.", "З вашим нинішнім рушієм упорядкування текст поруч із курсором надходить до моделі OpenCode режиму, яка може бути хмарним провайдером."]),
@@ -17,6 +19,7 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
 
 #[rustfmt::skip]
 pub(in super::super) const FRENCH: &[(&str, &str)] = &[
+    ("Enhanced cursor context", "Contexte du curseur amélioré"),
     ("Password fields are never read.", "Les champs de mot de passe ne sont jamais lus."),
     ("With your cleanup engine now, the nearby text stays on this Mac.", "Avec votre moteur de nettoyage actuel, le texte proche reste sur ce Mac."),
     ("With your cleanup engine now, the nearby text goes to the mode's OpenCode model, which may be a cloud provider.", "Avec votre moteur de nettoyage actuel, le texte proche va au modèle OpenCode du mode, qui peut être un fournisseur cloud."),
@@ -28,6 +31,7 @@ pub(in super::super) const FRENCH: &[(&str, &str)] = &[
 
 #[rustfmt::skip]
 pub(in super::super) const PORTUGUESE: &[(&str, &str)] = &[
+    ("Enhanced cursor context", "Contexto do cursor aprimorado"),
     ("Password fields are never read.", "Campos de senha nunca são lidos."),
     ("With your cleanup engine now, the nearby text stays on this Mac.", "Com o seu mecanismo de limpeza atual, o texto próximo fica neste Mac."),
     ("With your cleanup engine now, the nearby text goes to the mode's OpenCode model, which may be a cloud provider.", "Com o seu mecanismo de limpeza atual, o texto próximo vai para o modelo OpenCode do modo, que pode ser um provedor na nuvem."),
@@ -39,6 +43,7 @@ pub(in super::super) const PORTUGUESE: &[(&str, &str)] = &[
 
 #[rustfmt::skip]
 pub(in super::super) const RUSSIAN: &[(&str, &str)] = &[
+    ("Enhanced cursor context", "Улучшенный контекст курсора"),
     ("Password fields are never read.", "Поля паролей никогда не читаются."),
     ("With your cleanup engine now, the nearby text stays on this Mac.", "С вашим нынешним движком очистки текст рядом с курсором остаётся на этом Mac."),
     ("With your cleanup engine now, the nearby text goes to the mode's OpenCode model, which may be a cloud provider.", "С вашим нынешним движком очистки текст рядом с курсором отправляется модели OpenCode режима, которая может быть облачным провайдером."),

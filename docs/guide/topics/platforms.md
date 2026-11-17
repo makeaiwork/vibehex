@@ -71,10 +71,10 @@ Meetings article.
 - **Mac only**: Import
   audio (dev builds), Screenshots, Annotate 15 s replay (dev builds, macOS 27),
   ⌘Q closes Settings and Clean up with Apple Intelligence (these two dev
-  builds only), Rewrite reads nearby text, Files, Listen to the recording, Smart spacing, Mouse shortcuts, Caps Lock dictation, Also pause
+  builds only), Enhanced cursor context, Files, Listen to the recording, Smart spacing, Mouse shortcuts, Caps Lock dictation, Also pause
   the browser, Stop shortcut, Sided modifier chords, Double-tap on a lone
   modifier, More dictation shortcuts, Microphone key alone, Pause from menu
-  bar, Return to app, Screen vocabulary, Smaller model files, Print-only CLI
+  bar, Return to app, Enhanced screen vocabulary, Smaller model files, Print-only CLI
   dictation, Upcoming meetings in menu bar,
   Copy recent dictations, Hide menu bar icon, Notch indicator, Add to
   vocabulary from a selection, Cleanup progress, and Lower every app. Meetings'

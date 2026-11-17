@@ -20,18 +20,20 @@ keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.d
   clicked elsewhere meanwhile.
 - New in Labs: Switch model with app (macOS). Each mode picks its own speech model and
   language, and VibeHex switches when you change apps.
-- New in Labs: Only on speakers, Keep mic open after dictating, and Screen vocabulary
-  (macOS), which uses names visible in the window to spell your dictation.
-- New: Screen vocabulary can give those names to AI cleanup too, so it fixes a name the
-  speech model misheard. Off by default; a cloud engine then receives the names.
-- New in Labs: Rewrite reads nearby text (macOS). AI cleanup on any engine reads the text
+- New in Labs: Only on speakers, Keep mic open after dictating, and Enhanced screen
+  vocabulary (macOS), which uses names visible in the window to spell your dictation.
+- New: Enhanced screen vocabulary can give those names to AI cleanup too, so it fixes a
+  name the speech model misheard. Off by default; a cloud engine then receives the names.
+- New in Labs: Enhanced cursor context (macOS). AI cleanup on any engine reads the text
   around your cursor to spell names right; keys and tokens in it are cut out first.
-- New: History keeps what VibeHex read for each dictation, on this Mac, and says when an app
-  gave nothing to read. Screen vocabulary skips the app's own button and tab labels.
-- New: Screen vocabulary reads from the field you dictate into outward: in a chat or an AI
-  coding panel, the newest messages above it come first.
-- New: In Labs, the star also marks the two Hex features VibeHex reworked, Screen vocabulary
-  and Rewrite reads nearby text; it says "Reworked in VibeHex".
+- New: History keeps what VibeHex read for each dictation, on this Mac, and says when an
+  app gave nothing to read. Enhanced screen vocabulary skips the app's own button and tab labels.
+- New: Enhanced screen vocabulary reads from the field you dictate into outward: in a chat
+  or an AI coding panel, the newest messages above it come first.
+- Changed: Hex's Screen vocabulary and Rewrite reads nearby text are called Enhanced screen
+  vocabulary and Enhanced cursor context in VibeHex, which reworked them.
+- New: In Labs, the star also marks those two Hex features VibeHex reworked; it says
+  "Reworked in VibeHex".
 - New: Ten meeting features left Labs. Meetings › Settings now has Keep audio, and Export
   with Descriptive meeting file names and Separate notes file.
 - New: Stop when the call ends (macOS) is a setting under Detected calls: the recording ends
