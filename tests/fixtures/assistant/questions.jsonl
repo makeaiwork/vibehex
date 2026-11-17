@@ -25,8 +25,8 @@
 {"id":"notes-russian","q":"Конспекты встреч по-русски получаются плохо","articles":["topics/meetings","topics/codex"],"changes":[{"key":"meetings.notes.writer"}],"web":false}
 {"id":"ask-meeting","q":"Можно задавать вопросы по записанной встрече?","articles":["topics/meetings"],"changes":[{"key":"meetings.questions.enabled","value":true}],"web":false}
 {"id":"chapters","q":"Хочу, чтобы длинная встреча делилась на главы","articles":["labs/live-chapters"],"changes":[{"key":"labs.live_chapters","value":true}],"web":false}
-{"id":"subtitles","q":"Можно получить субтитры SRT из записи встречи?","articles":["labs/subtitle-export"],"changes":[{"key":"labs.subtitle_export","value":true}],"web":false}
-{"id":"stop-after-call","q":"Запись встречи продолжается, когда звонок уже закончился","articles":["labs/stop-when-call-ends"],"changes":[{"key":"labs.stop_when_call_ends","value":true}],"web":false}
+{"id":"subtitles","q":"Можно получить субтитры SRT из записи встречи?","articles":["topics/meetings"],"changes":[],"web":false}
+{"id":"stop-after-call","q":"Запись встречи продолжается, когда звонок уже закончился","articles":["topics/meetings"],"changes":[{"key":"meetings.stop_when_call_ends","value":true}],"web":false}
 {"id":"see-words-live","q":"Хочу видеть слова, пока говорю","articles":["labs/live-text"],"changes":[{"key":"labs.live_text","value":true}],"web":false}
 {"id":"keep-clipboard","q":"После вставки надиктованного буфер обмена возвращается к старому. Можно оставить текст в буфере?","articles":["labs/keep-on-clipboard"],"changes":[{"key":"labs.keep_on_clipboard","value":true}],"web":false}
 {"id":"copy-only","q":"Не вставляй текст сам, просто копируй его","articles":["labs/copy-only"],"changes":[{"key":"labs.copy_only","value":true}],"web":false}

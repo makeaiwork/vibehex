@@ -53,6 +53,9 @@ pub(crate) struct Card {
     /// The card sits above its selection, so it hangs from the overlay's
     /// bottom instead of its top.
     above: bool,
+    /// The saved Labs as the card last opened, for Labs › Appearance
+    /// (`labs::window_dark`): the card is a window of VibeHex's own.
+    labs: Option<crate::app_settings::LabsSettings>,
 }
 
 /// The app whose selection the card was opened over.
@@ -71,14 +74,17 @@ static CARD: OnceLock<OverlayHandle<Card>> = OnceLock::new();
 /// Saves `term`, with `heard` among its spellings, as `hex vocabulary add`
 /// does, then `reload`s so the runtime and an open window adopt it.
 pub(crate) fn save_word(term: &str, heard: &str, reload: impl Fn()) -> Result<(), String> {
-    let mut settings =
-        crate::app_settings::AppSettings::load().map_err(|error| format!("{error:#}"))?;
+    let base = crate::app_settings::AppSettings::load().map_err(|error| format!("{error:#}"))?;
+    let mut settings = base.clone();
     let heard: Vec<String> = (!heard.trim().is_empty())
         .then(|| heard.to_string())
         .into_iter()
         .collect();
     if vocabulary::add(&mut settings.vocabulary, term, &heard)? {
-        settings.save().map_err(|error| format!("{error:#}"))?;
+        // Through the one persistence owner, so another writer's change
+        // since the load is kept.
+        base.update(&settings)
+            .map_err(|error| format!("{error:#}"))?;
         reload();
     }
     Ok(())
@@ -120,6 +126,7 @@ pub(crate) fn install<S: 'static>(app: &mut rune::App<S>, save: Save) {
         save: Some(save),
         overlay: None,
         above: false,
+        labs: None,
     };
     let overlay = app.overlay(spec, card);
     let handle = overlay.clone();
@@ -139,8 +146,10 @@ pub(crate) fn open(source: Option<Source>, selected: String, before: Option<Stri
     let cleaned = before.as_ref().map(|_| selected.clone());
     let heard = before.unwrap_or(selected);
     let known = known_term(&vocabulary::entries(), &heard);
+    let labs = crate::app_settings::AppSettings::saved_labs();
     overlay.update(move |card, tx| {
         card.cleaned = cleaned;
+        card.labs = Some(labs);
         let empty = heard.is_empty();
         card.heard = TextEdit::new(heard);
         card.term = TextEdit::new(known.unwrap_or_default());
@@ -393,7 +402,11 @@ fn card_field(card: &mut Card, term: bool) -> &mut TextEdit {
 }
 
 fn view(card: &Card, cx: &mut Cx<Card>) -> El {
-    let p = Paint::new(cx.system_dark(), cx.env().scale);
+    let dark = match &card.labs {
+        Some(labs) => crate::labs::window_dark(labs, cx.system_dark()),
+        None => cx.system_dark(),
+    };
+    let p = Paint::new(dark, cx.env().scale);
     let mut notes = Vec::new();
     if let Some(error) = &card.error {
         notes.push((tr_fill("Couldn't save: {}", error), p.danger()));

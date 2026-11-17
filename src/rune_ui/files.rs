@@ -925,7 +925,7 @@ fn list_row(pane: &FilesPane, p: Paint, listed: &Listed) -> El {
         (meta, None, listed.clock.clone())
     };
     let id = record.id.clone();
-    ld::item(
+    ld::item_with_icon(
         p,
         Item {
             key: format!("file-{}", record.id),
@@ -939,6 +939,7 @@ fn list_row(pane: &FilesPane, p: Paint, listed: &Listed) -> El {
             bar,
             mark: None,
         },
+        None,
         move |ui: &mut Ui| ui.files.select(id.clone()),
     )
 }

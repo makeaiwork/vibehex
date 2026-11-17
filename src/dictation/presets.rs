@@ -5,10 +5,9 @@
 //! up with AI on), turns on every other Lab VibeHex added (the
 //! starred rows: Clean up on your own server, Vocabulary text view, Add to
 //! vocabulary, Cleanup progress, Files, those this Hex has; not Stop
-//! shortcut, which takes a key and is left to the person) and Hex's
-//! Vocabulary in meeting notes,
-//! and takes back, when turned off, only what still reads as the preset
-//! wrote it (today's list, or the one it wrote through 3.3.0); those Labs
+//! shortcut, which takes a key and is left to the person), and takes
+//! back, when turned off, only what still reads as the preset wrote it
+//! (today's list, or the one it wrote through 3.3.0); those Labs
 //! stay on, since a server, key, or shortcut set up
 //! there is the person's own. Everything it writes stays editable
 //! in Vocabulary and Output like anything typed there.
@@ -75,14 +74,13 @@ fn add(settings: &mut AppSettings) {
     }
 }
 
-/// The other Labs VibeHex added (the starred rows), and Hex's Vocabulary
-/// in meeting notes, so the preset's terms reach meeting notes too, that
-/// this Hex has and no organization locks: the preset turns them all on,
-/// except Stop shortcut, which takes a key (Return) and is left to the
-/// person.
+/// The other Labs VibeHex added (the starred rows) that this Hex has and no
+/// organization locks: the preset turns them all on, except Stop shortcut,
+/// which takes a key (Return) and is left to the person. Meeting notes
+/// always read the vocabulary now, so the preset's terms reach them too.
 fn vibehex_labs() -> impl Iterator<Item = Feature> {
     Feature::available().filter(|feature| {
-        (feature.vibehex() || *feature == Feature::MeetingNotesVocabulary)
+        feature.vibehex()
             && !matches!(feature, Feature::RussianVibeCoding | Feature::StopShortcut)
             && feature.managed().is_none()
     })
@@ -190,13 +188,8 @@ mod tests {
             assert!(feature.on(&settings), "{} stayed off", feature.name());
         }
         assert!(!Feature::StopShortcut.on(&settings));
-        // Vocabulary in meeting notes carries the terms into the notes.
-        assert!(Feature::MeetingNotesVocabulary.on(&settings));
         // Other Labs Hex itself has stay as they were.
-        for feature in Feature::ALL
-            .into_iter()
-            .filter(|f| !f.vibehex() && *f != Feature::MeetingNotesVocabulary)
-        {
+        for feature in Feature::ALL.into_iter().filter(|f| !f.vibehex()) {
             assert_eq!(
                 feature.on(&settings),
                 feature.on(&AppSettings::default()),

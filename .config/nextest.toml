@@ -13,6 +13,20 @@ path = "junit.xml"
 [test-groups]
 gpu = { max-threads = 2 }
 
+# The first run's motion gate records 30 headless windows: a minute alone,
+# more on a busy machine.
+[[profile.default.overrides]]
+filter = "test(motion_gate::the_first_run_moves_cleanly)"
+test-group = "gpu"
+slow-timeout = { period = "60s", terminate-after = 2 }
+
+# VibeHex adds scenes of its own, and these tests walk every scene:
+# most of a minute alone on a Mac, more beside the rest of the suite.
+[[profile.default.overrides]]
+filter = "test(every_scene_stops_asking_for_frames) | test(every_control_in_every_scene_has_a_name) | test(every_scene_is_laid_out_whole)"
+test-group = "gpu"
+slow-timeout = { period = "30s", terminate-after = 4 }
+
 # Rune scenes render on the GPU; the driver test compiles the C plug-in.
 [[profile.default.overrides]]
 filter = "test(/scene|golden|rune_ui::/) | test(driver_plugin_loopback)"
@@ -23,6 +37,13 @@ slow-timeout = { period = "30s", terminate-after = 2 }
 [profile.ci]
 slow-timeout = { period = "60s", terminate-after = 2 }
 failure-output = "immediate-final"
+
+# VibeHex adds scenes of its own, and these tests walk every scene:
+# over three minutes on software Vulkan.
+[[profile.ci.overrides]]
+filter = "test(every_scene_stops_asking_for_frames) | test(every_control_in_every_scene_has_a_name) | test(every_scene_is_laid_out_whole)"
+test-group = "gpu"
+slow-timeout = { period = "90s", terminate-after = 4 }
 
 [[profile.ci.overrides]]
 filter = "test(/scene|golden|rune_ui::/) | test(driver_plugin_loopback)"

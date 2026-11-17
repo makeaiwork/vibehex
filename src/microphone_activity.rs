@@ -40,6 +40,8 @@ mod os;
 mod os;
 #[cfg(not(target_os = "macos"))]
 pub use os::active_microphone_applications;
+#[cfg(target_os = "windows")]
+pub(crate) use os::{EndpointSessions, active_endpoint_sessions, process_canonical_bundle_id};
 
 #[cfg(any(target_os = "windows", test))]
 mod telemost;
@@ -54,11 +56,9 @@ pub struct ActiveMicrophoneApplication {
 }
 
 impl ActiveMicrophoneApplication {
-    /// Whether this is a call app detection may offer. `more_call_apps` is
-    /// Labs › More call apps; off, the apps it adds are not meeting apps.
-    pub fn is_supported_meeting_app(&self, more_call_apps: bool) -> bool {
-        self.canonical_bundle_id()
-            .is_some_and(|canonical| more_call_apps || !is_more_call_app(canonical))
+    /// Whether this is a call app detection may offer.
+    pub fn is_supported_meeting_app(&self) -> bool {
+        self.canonical_bundle_id().is_some()
     }
 
     pub fn is_browser(&self) -> bool {
@@ -88,7 +88,8 @@ fn deduplicated(
     applications
 }
 
-fn is_browser_id(canonical_bundle_id: Option<&str>) -> bool {
+/// Whether a canonical bundle ID is a browser Hex reads pages from.
+pub(crate) fn is_browser_id(canonical_bundle_id: Option<&str>) -> bool {
     matches!(
         canonical_bundle_id,
         Some(
@@ -99,22 +100,10 @@ fn is_browser_id(canonical_bundle_id: Option<&str>) -> bool {
                 | "com.microsoft.edgemac"
                 | "company.thebrowser.Browser"
                 | "com.vivaldi.Vivaldi"
+                | "net.imput.helium"
+                | "com.ardia.browser"
+                | "app.zen-browser.zen"
         )
-    )
-}
-
-/// The call apps Labs › More call apps adds. With that off they are not
-/// meeting apps, so detection behaves exactly as before.
-fn is_more_call_app(canonical_bundle_id: &str) -> bool {
-    matches!(
-        canonical_bundle_id,
-        "org.whispersystems.signal-desktop"
-            | "ru.keepcoder.Telegram"
-            | "com.tencent.xinWeChat"
-            | "jp.naver.line.mac"
-            | "com.webex.meetingmanager"
-            | "im.riot.app"
-            | "com.apple.mobilephone"
     )
 }
 
@@ -245,6 +234,51 @@ pub(crate) fn application_input_devices(canonical_bundle_id: &str) -> Result<Vec
     })
 }
 
+#[cfg(target_os = "macos")]
+/// The process IDs recording from the input device `uid`, read from Core
+/// Audio's process metadata: devices only, never audio samples. Hex's own
+/// process is included; a caller that records excludes itself. A failed
+/// per-process read, including a listed device's UID, fails the whole call,
+/// so a dropped pid is never mistaken for an app that stopped recording.
+pub(crate) fn input_recorders(uid: &str) -> Result<Vec<i32>> {
+    objc2::rc::autoreleasepool(|_| {
+        let process_objects = property_vec::<AudioObjectID>(
+            kAudioObjectSystemObject as AudioObjectID,
+            kAudioHardwarePropertyProcessObjectList,
+        )?;
+        let mut pids = Vec::new();
+        for process_object in process_objects {
+            let recording =
+                property_value::<u32>(process_object, kAudioProcessPropertyIsRunningInput)?;
+            if recording == 0 {
+                continue;
+            }
+            let devices = property_vec_in::<AudioObjectID>(
+                process_object,
+                kAudioProcessPropertyDevices,
+                kAudioObjectPropertyScopeInput,
+            )?;
+            let mut records_uid = false;
+            for device in devices {
+                let device_uid = property_cf_string(device, kAudioDevicePropertyDeviceUID)
+                    .ok_or_else(|| {
+                        eyre!("could not read a recording process's input device uid")
+                    })?;
+                if device_uid == uid {
+                    records_uid = true;
+                    break;
+                }
+            }
+            if !records_uid {
+                continue;
+            }
+            let pid = property_value::<i32>(process_object, kAudioProcessPropertyPID)?;
+            pids.push(pid);
+        }
+        Ok(pids)
+    })
+}
+
 /// Whether the Core Audio process `bundle_id` belongs to the app
 /// `canonical_bundle_id`: the app itself or one of its helpers, such as the
 /// browser helper that holds the microphone for a Meet tab.
@@ -278,7 +312,7 @@ fn audio_process_is_of(object: AudioObjectID, bundle: &str, canonical: &str) -> 
 
 /// Linux and Windows executables (lowercase, without `.exe`) by the bundle
 /// identifier of the same app on macOS.
-const EXECUTABLES: [(&str, &str); 44] = [
+const EXECUTABLES: [(&str, &str); 46] = [
     // Discord and its Canary and PTB builds, on Windows and Linux (the
     // Flatpak runs the same binary).
     ("discord", "com.hnc.Discord"),
@@ -294,7 +328,7 @@ const EXECUTABLES: [(&str, &str); 44] = [
     // WhatsApp for Windows, before and after its WinUI rewrite.
     ("whatsapp", "net.whatsapp.WhatsApp"),
     ("whatsapp.root", "net.whatsapp.WhatsApp"),
-    // The apps Labs › More call apps adds.
+    // The apps Hex knows beyond the common ones.
     ("signal", "org.whispersystems.signal-desktop"),
     ("signal-desktop", "org.whispersystems.signal-desktop"),
     ("telegram", "ru.keepcoder.Telegram"),
@@ -319,6 +353,8 @@ const EXECUTABLES: [(&str, &str); 44] = [
     ("chromium-browser", "com.google.Chrome"),
     ("brave", "com.brave.Browser"),
     ("brave-browser", "com.brave.Browser"),
+    ("helium", "net.imput.helium"),
+    ("helium-browser", "net.imput.helium"),
     ("firefox", "org.mozilla.firefox"),
     ("firefox-bin", "org.mozilla.firefox"),
     ("firefox-esr", "org.mozilla.firefox"),
@@ -367,7 +403,7 @@ fn canonical_bundle_id_for(bundle_id: &str, name: Option<&str>) -> Option<&'stat
         ("com.hnc.discord", "com.hnc.Discord"),
         ("com.hnc.discordcanary", "com.hnc.Discord"),
         ("com.hnc.discordptb", "com.hnc.Discord"),
-        // The apps Labs › More call apps adds, their Electron helpers and
+        // The apps Hex knows beyond the common ones, their Electron helpers and
         // alternative bundle IDs included.
         (
             "org.whispersystems.signal-desktop",
@@ -392,6 +428,12 @@ fn canonical_bundle_id_for(bundle_id: &str, name: Option<&str>) -> Option<&'stat
         ("com.microsoft.edgemac", "com.microsoft.edgemac"),
         ("company.thebrowser.browser", "company.thebrowser.Browser"),
         ("com.vivaldi.vivaldi", "com.vivaldi.Vivaldi"),
+        ("net.imput.helium", "net.imput.helium"),
+        // Ardia's Chromium audio service reports `com.ardia.browser.helper`.
+        ("com.ardia.browser", "com.ardia.browser"),
+        // Zen is Firefox-based: its main process and its helpers, which are
+        // `app.zen-browser.*` rather than `org.mozilla.*`.
+        ("app.zen-browser", "app.zen-browser.zen"),
     ]
     .iter()
     .find_map(|(prefix, canonical)| {
@@ -426,6 +468,9 @@ pub(crate) fn canonical_application_name(canonical_bundle_id: &str) -> Option<&'
         "com.microsoft.edgemac" => Some("Microsoft Edge"),
         "company.thebrowser.Browser" => Some("Arc"),
         "com.vivaldi.Vivaldi" => Some("Vivaldi"),
+        "net.imput.helium" => Some("Helium"),
+        "com.ardia.browser" => Some("Ardia"),
+        "app.zen-browser.zen" => Some("Zen"),
         _ => None,
     }
 }
@@ -444,6 +489,7 @@ fn is_helper_bundle_id(bundle_id: &str) -> bool {
                 | "us.zoom.zoomcefhelper"
                 | "us.zoom.zccimeetinghost"
                 | "org.mozilla.plugincontainer"
+                | "app.zen-browser.plugincontainer"
                 | "org.qt-project.qt.qtwebengineprocess"
         )
 }
@@ -834,7 +880,7 @@ mod tests {
                 name: "Brave Browser".into(),
             }
         );
-        assert!(brave.is_supported_meeting_app(false));
+        assert!(brave.is_supported_meeting_app());
         assert!(brave.is_browser());
         assert_eq!(brave.canonical_bundle_id(), Some("com.brave.Browser"));
 
@@ -858,7 +904,7 @@ mod tests {
                 name: "Slack".into(),
             }
         );
-        assert!(slack.is_supported_meeting_app(false));
+        assert!(slack.is_supported_meeting_app());
         assert!(!slack.is_browser());
         assert_eq!(
             slack.canonical_bundle_id(),
@@ -938,7 +984,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(non_safari_webkit.canonical_bundle_id(), None);
-        assert!(!non_safari_webkit.is_supported_meeting_app(false));
+        assert!(!non_safari_webkit.is_supported_meeting_app());
 
         let facetime = resolve_application_with(
             8100,
@@ -987,6 +1033,28 @@ mod tests {
             "com.google.Chrome.helper.Renderer",
             "com.google.Chrome"
         ));
+        assert!(is_process_of(
+            "net.imput.helium.helper.Renderer",
+            "net.imput.helium"
+        ));
+        assert!(is_process_of(
+            "com.ardia.browser.helper",
+            "com.ardia.browser"
+        ));
+        // Zen's audio process is the main app; its helpers are Zen's own.
+        assert!(is_process_of("app.zen-browser.zen", "app.zen-browser.zen"));
+        assert!(is_process_of(
+            "app.zen-browser.plugincontainer",
+            "app.zen-browser.zen"
+        ));
+        assert!(is_process_of(
+            "app.zen-browser.zen-gpu-helper",
+            "app.zen-browser.zen"
+        ));
+        assert!(is_process_of(
+            "app.zen-browser.zen-media-plugin-helper",
+            "app.zen-browser.zen"
+        ));
         assert!(is_process_of("com.google.Chrome", "com.google.Chrome"));
         assert!(!is_process_of(
             "com.google.Chrome.helper",
@@ -997,12 +1065,19 @@ mod tests {
             "company.thebrowser.Browser"
         ));
         assert!(!is_process_of("com.google.Chromecast", "com.google.Chrome"));
+        // A prefix without the dot boundary is a different app.
+        assert!(!is_process_of("com.ardia.browserx", "com.ardia.browser"));
+        assert!(!is_process_of("app.zen-browserx", "app.zen-browser.zen"));
     }
 
     #[test]
     fn browser_bundles_include_helpers() {
         assert!(browser_bundle("com.brave.Browser.helper", None));
         assert!(browser_bundle("com.google.Chrome.helper", None));
+        assert!(browser_bundle("net.imput.helium.helper", None));
+        assert!(browser_bundle("com.ardia.browser.helper", None));
+        assert!(browser_bundle("app.zen-browser.zen", None));
+        assert!(browser_bundle("app.zen-browser.plugincontainer", None));
         assert!(browser_bundle(
             "com.apple.WebKit.GPU",
             Some("Safari Graphics and Media")
@@ -1075,6 +1150,55 @@ mod tests {
                 true,
             ),
             ("company.thebrowser.dia", "Dia", None, false),
+            ("net.imput.helium", "Helium", Some("net.imput.helium"), true),
+            (
+                "net.imput.helium.helper",
+                "Helium Helper",
+                Some("net.imput.helium"),
+                true,
+            ),
+            (
+                "net.imput.helium.helper.Renderer",
+                "Helium Helper (Renderer)",
+                Some("net.imput.helium"),
+                true,
+            ),
+            (
+                "com.ardia.browser",
+                "Ardia",
+                Some("com.ardia.browser"),
+                true,
+            ),
+            (
+                "com.ardia.browser.helper",
+                "Ardia Helper",
+                Some("com.ardia.browser"),
+                true,
+            ),
+            (
+                "app.zen-browser.zen",
+                "Zen",
+                Some("app.zen-browser.zen"),
+                true,
+            ),
+            (
+                "app.zen-browser.plugincontainer",
+                "plugin-container",
+                Some("app.zen-browser.zen"),
+                true,
+            ),
+            (
+                "app.zen-browser.zen-gpu-helper",
+                "Zen GPU Helper",
+                Some("app.zen-browser.zen"),
+                true,
+            ),
+            (
+                "app.zen-browser.zen-media-plugin-helper",
+                "Zen Media Plugin Helper",
+                Some("app.zen-browser.zen"),
+                true,
+            ),
             ("anomaly.hex", "Hex", None, false),
             ("zoom", "Zoom", Some("us.zoom.xos"), false),
             (
@@ -1099,6 +1223,9 @@ mod tests {
             ),
             ("vivaldi-bin", "Vivaldi", Some("com.vivaldi.Vivaldi"), true),
             ("vivaldi.exe", "Vivaldi", Some("com.vivaldi.Vivaldi"), true),
+            ("helium", "Helium", Some("net.imput.helium"), true),
+            ("helium-browser", "Helium", Some("net.imput.helium"), true),
+            ("helium.exe", "Helium", Some("net.imput.helium"), true),
             (
                 "com.vivaldi.Vivaldi.helper",
                 "Vivaldi Helper",
@@ -1115,6 +1242,15 @@ mod tests {
             assert_eq!(app.canonical_bundle_id(), expected, "bundle {bundle_id}");
             assert_eq!(app.is_browser(), browser, "browser {bundle_id}");
         }
+        // The names the pause and a browser call show for them.
+        assert_eq!(
+            canonical_application_name("com.ardia.browser"),
+            Some("Ardia")
+        );
+        assert_eq!(
+            canonical_application_name("app.zen-browser.zen"),
+            Some("Zen")
+        );
     }
     #[test]
     fn telemost_matches_only_its_application_identity() {
@@ -1219,9 +1355,7 @@ mod tests {
                 Some(expected),
                 "{bundle_id}"
             );
-            assert!(is_more_call_app(expected), "{expected}");
         }
-        assert!(!is_more_call_app("us.zoom.xos"));
         assert_eq!(
             canonical_application_name("ru.keepcoder.Telegram"),
             Some("Telegram")
@@ -1230,19 +1364,17 @@ mod tests {
             canonical_application_name("jp.naver.line.mac"),
             Some("LINE")
         );
-        // Off, the lab's apps are not meeting apps at all; on, they are.
         let signal = ActiveMicrophoneApplication {
             pid: 7,
             bundle_id: "org.whispersystems.signal-desktop".into(),
             name: "Signal".into(),
         };
-        assert!(!signal.is_supported_meeting_app(false));
-        assert!(signal.is_supported_meeting_app(true));
+        assert!(signal.is_supported_meeting_app());
         let chrome = ActiveMicrophoneApplication {
             pid: 8,
             bundle_id: "com.google.Chrome".into(),
             name: "Google Chrome".into(),
         };
-        assert!(chrome.is_supported_meeting_app(false));
+        assert!(chrome.is_supported_meeting_app());
     }
 }

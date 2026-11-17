@@ -425,7 +425,7 @@ fn model_list(ui: &Ui, p: Paint, server: &Server, saved: &str, layer: &mut Vec<E
         .variant(IconButtonVariant::Neutral)
         .control_size(rune_kit::ControlSize::Large)
         .label(tr("Choose a model"))
-        .expanded(ui.output.cleanup.picker.open)
+        .expanded(ui.output.cleanup.picker.is_open())
         .build(p.k)
         .key("ai-cleanup-models");
     Combobox::new(
@@ -779,8 +779,8 @@ pub(super) fn busy(ui: &Ui) -> bool {
 
 fn poll_models(ui: &mut Ui) -> bool {
     let cleanup = &mut ui.output.cleanup;
-    let opened = cleanup.picker.open && !cleanup.picker_was_open;
-    cleanup.picker_was_open = cleanup.picker.open;
+    let opened = cleanup.picker.is_open() && !cleanup.picker_was_open;
+    cleanup.picker_was_open = cleanup.picker.is_open();
     if let Models::Loading(from, receiver, _) = &cleanup.models {
         let finished = match receiver.try_recv() {
             Ok(Ok(models)) => Models::Loaded(from.clone(), models),

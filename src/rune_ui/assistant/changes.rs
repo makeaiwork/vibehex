@@ -454,9 +454,13 @@ fn commit(
     if !ui.update(|settings| *settings = saved) {
         return Err(ui.error.clone().unwrap_or_default());
     }
+    // The runtime prunes History once the saved retention reaches it; the
+    // window only reads the list again.
+    if before.history_retention != after.history_retention {
+        history::adopt_retention(ui, after.history_retention);
+    }
     for effect in effects {
         match effect {
-            Effect::HistoryRetention(retention) => history::adopt_retention(ui, retention),
             // The host shows or hides the Dock icon as it saves; a card
             // never changes the update channel.
             Effect::DockIcon | Effect::CheckForUpdates => {}

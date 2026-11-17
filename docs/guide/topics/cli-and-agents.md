@@ -1,7 +1,7 @@
 ---
 topic: cli-and-agents
 title: The hex command, AI agents and the local API
-keys: [labs.ai_cleanup_server, meetings.enabled]
+keys: [labs.ai_cleanup_server, meetings.enabled, labs.shell_completions, labs.print_start]
 os: every OS
 ---
 
@@ -28,8 +28,9 @@ hex mcp
 - `hex vocabulary` manages the shared Vocabulary: `hex vocabulary list`, `hex vocabulary add <term> [--sounds-like a,b]` (a term already listed only gains the spellings) and `hex vocabulary remove <term>`. It needs the app running.
 - `hex history` reads kept dictations (filters `--since 3d`, `--app`, `--grep`, `--search`), and `hex history clear --yes` deletes them all.
 - `hex meetings list`, `show`, `chapters`, `search` read recorded meetings and work even with the app closed. `hex meetings record`, `stop` and `copy-last` need the app running.
-- `hex dictation start`, `stop`, `toggle`, `cancel` do what the shortcut does. `stop --print` prints the transcript instead of pasting it.
-- `hex model list`, `use`, `install` switch and download speech models; `hex logs` shows recent log lines.
+- `hex dictation start`, `stop`, `toggle`, `cancel` do what the shortcut does. `stop --print` prints the transcript instead of pasting it; on a Mac, Labs › Print-only CLI dictation adds `start --print`.
+- `hex transcribe <file>` prints the transcript of an audio or video file (WAV, MP3, M4A, MP4, MOV, FLAC, Ogg, WebM, AIFF, CAF) with your dictation model, or `--model` and `--language`. Long files go in 30-second pieces. With VibeHex closed it starts its own helper; a model not yet downloaded is offered for download. Nothing is pasted, cleaned up or saved to History.
+- `hex model list`, `use`, `install` switch and download speech models; `hex logs` shows recent log lines. Labs › Shell completions adds `hex completions <shell>` for Tab completion.
 
 ## Let an AI agent read your meetings
 
@@ -39,6 +40,6 @@ hex mcp
 
 While running, VibeHex listens on `127.0.0.1` only (your own computer), protected by a secret token kept in a private file, `local-api.json`, in its data folder. The `hex` command uses it, as can your own scripts. Keep the token private.
 
-**Asked as.** "Can I control VibeHex from the terminal?"; "How do I connect Claude Code to my meetings?"; "Is there an API?"; «Как управлять VibeHex из терминала»; «Как дать агенту доступ к записям встреч»; «Команда hex не найдена».
+**Asked as.** "Can I control VibeHex from the terminal?"; "How do I connect Claude Code to my meetings?"; "Is there an API?"; "Transcribe an MP3 from the command line"; «Как управлять VibeHex из терминала»; «Как дать агенту доступ к записям встреч»; «Как расшифровать аудиофайл из терминала»; «Команда hex не найдена».
 
-<!-- sources: docs/cli.md:1-140,205-230; src/control/cli.rs:13-262,377-402,1005-1110,1338-1360; src/control/transcript_cli.rs:15-165; src/labs/cli.rs:1-130; src/labs.rs:460-470,569,648,895; src/control/settings.rs:679-697; docs/features/control-cli.md:60-90; docs/features/meetings.md:1344-1395,1750-1760; src/meeting/mcp.rs:1-30; src/local_api.rs:230,321; src/app_paths.rs:170; docs/vibehex-releases.md:3 -->
+<!-- sources: upstream docs/cli.md:37-42, 86, 171-223; upstream docs/features/labs.md:2943-2947 (transcribe graduated); docs/cli.md:1-140,205-230; src/control/cli.rs:13-262,377-402,1005-1110,1338-1360; src/control/transcript_cli.rs:15-165; src/labs/cli.rs:1-130; src/labs.rs:460-470,569,648,895; src/control/settings.rs:679-697; docs/features/control-cli.md:60-90; docs/features/meetings.md:1344-1395,1750-1760; src/meeting/mcp.rs:1-30; src/local_api.rs:230,321; src/app_paths.rs:170; docs/vibehex-releases.md:3 -->

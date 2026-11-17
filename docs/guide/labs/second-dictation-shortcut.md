@@ -6,7 +6,7 @@ for: [dictation]
 ask: Add a second dictation key, such as one on an external keyboard?
 then: Record its key in General › Second dictation shortcut
 group: Shortcuts
-os: macOS
+os: every OS
 vibehex: false
 ---
 
@@ -21,8 +21,10 @@ one, or want a spare key for dictating.
 
 **Leave it off when.** One shortcut is enough. Off, nothing is watched for it.
 
-**Needs.** macOS. After turning it on, record a key in the new row; it starts
-empty and can be cleared.
+**Needs.** Nothing else. After turning it on, record a key in the new row; it
+starts empty and can be cleared. On Windows and Linux the shortcut needs a
+key, not modifiers alone; on Linux it works on X11 or through the desktop's
+shortcuts portal, which may grant a different key.
 
 **Good to know.** It follows the main shortcut's Shortcut mode and double-tap
 settings and pastes with the same processing. Paste last dictation still
@@ -39,4 +41,4 @@ the lab is on.
 for dictation"; «Вторая клавиша для диктовки»; «Хочу диктовать и с Fn, и с
 клавиши внешней клавиатуры».
 
-<!-- sources: docs/features/labs.md:61-63,313-336; src/rune_ui/general.rs:84-100; src/app_settings.rs:1421-1430; src/rune_ui/labs.rs:344-353 -->
+<!-- sources: upstream docs/features/labs.md:1181-1205 (macOS, Linux and Windows); upstream src/labs/catalog.rs (EVERY); docs/features/labs.md:61-63,313-336; src/rune_ui/general.rs:84-100; src/app_settings.rs:1421-1430; src/rune_ui/labs.rs:344-353 -->

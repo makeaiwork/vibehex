@@ -78,7 +78,7 @@ pub fn values(settings: &AppSettings) -> Vec<(&'static str, Value)> {
 pub fn kinds() -> impl Iterator<Item = (&'static str, &'static str, Vec<&'static str>, bool)> {
     super::keys().map(|key| {
         let choices = match key.kind {
-            super::Kind::Choice(choices) => choices.to_vec(),
+            super::Kind::Choice(choices) | super::Kind::NumberChoice(choices) => choices.to_vec(),
             _ => Vec::new(),
         };
         (key.key, key.kind.name(), choices, key.read_only.is_none())

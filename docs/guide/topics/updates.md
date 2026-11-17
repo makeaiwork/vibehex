@@ -25,7 +25,8 @@ checks that the file is intact and properly signed. A window then says "VibeHex
 <version> is ready". It lists what changed in that release and in every one
 you skipped since yours, and offers **Restart to update** or **Not now**. Not
 now closes it; the sidebar keeps a Restart to update button above Assistant
-(About has it too), with a "What's new" link that opens the release notes page on GitHub. If you do nothing, a
+(About has it too), with the release's first few changes and a Release notes link
+that opens its page on GitHub. If you do nothing, a
 Mac installs the update when you quit.
 
 ## When VibeHex cannot update itself
@@ -55,9 +56,9 @@ such as "Switch to Stable" followed by the version. If unsure, stay on Stable.
 ## Release notes
 
 Each release's notes are on its page at github.com/makeaiwork/vibehex/releases.
-"What's new" under Restart to update opens the page for the staged release.
-Labs › Release notes link adds a Release notes link to About for the version
-you run.
+Release notes under Restart to update opens the page for the staged release.
+Labs › Release notes link, which adds the same link to About for the version
+you run, is listed only in dev builds.
 
 You can also ask Assistant "What's new?": it knows every VibeHex release,
 tells what changed since the version you had before, and offers what suits
@@ -81,4 +82,4 @@ says which build you use. About also has the developer's Telegram, @DenisKey.
 обновить приложение?»; «Что нового в последнем релизе?»; «Куда написать разработчику?»; «Как проверить
 обновления?».
 
-<!-- sources: src/updater.rs:1-60,62-135,240-300,640-725; src/updater/macos.rs:1-12; src/updater/windows.rs:50-92; src/updater/notes.rs:1-30,106-113; src/rune_ui/about/update.rs:1-215; src/rune_ui/sidebar.rs:540-560; src/rune_ui/sidebar_update.rs:1-160; src/rune_ui/update_sheet.rs:1-30,120-200; src/rune_ui/general.rs:1111-1145; src/rune_ui/about.rs:40-125; docs/vibehex-releases.md:12-30; src/assistant/releases/mod.rs; src/rune_ui/assistant/whats_new.rs -->
+<!-- sources: src/rune_ui/sidebar_update.rs:80-130 (first three changes, Release notes link); src/rune_ui/about/update.rs:170-215; src/labs/vibehex.rs:61-77 (Release notes link hidden from a stable build); src/updater.rs:1-60,62-135,240-300,640-725; src/updater/macos.rs:1-12; src/updater/windows.rs:50-92; src/updater/notes.rs:1-30,106-113; src/rune_ui/about/update.rs:1-215; src/rune_ui/sidebar.rs:540-560; src/rune_ui/sidebar_update.rs:1-160; src/rune_ui/update_sheet.rs:1-30,120-200; src/rune_ui/general.rs:1111-1145; src/rune_ui/about.rs:40-125; docs/vibehex-releases.md:12-30; src/assistant/releases/mod.rs; src/rune_ui/assistant/whats_new.rs -->

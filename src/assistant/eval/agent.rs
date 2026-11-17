@@ -151,7 +151,7 @@ pub fn scenarios() -> Vec<Scenario> {
                 "Can VibeHex's command line start a meeting recording, and can an agent read the \
                  transcript afterwards?",
                 &[
-                    "```hex-read\n{\"tool\":\"guide_read\",\"ids\":[\"topics/cli-and-agents\",\"labs/meeting-finished-event\"]}\n```",
+                    "```hex-read\n{\"tool\":\"guide_read\",\"ids\":[\"topics/cli-and-agents\",\"topics/meetings\"]}\n```",
                     "Yes. `hex meeting start` starts a recording, and an agent reads the transcript \
                      through `hex mcp`.\n\nSources: topics/cli-and-agents",
                 ],

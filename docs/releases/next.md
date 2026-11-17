@@ -1,11 +1,50 @@
 ---
 version: next
 date: unreleased
-title: Nothing new yet
-labs: []
-keys: []
+title: More ways to start dictating, calmer meetings, and hex transcribe
+labs: [more-dictation-shortcuts, microphone-key, double-tap-modifiers, yolo-mode, return-to-app, app-model-switching, speakers-only, keep-microphone-open, screen-vocabulary, history-multi-select, copy-dictation-audio, calendar-menu, appearance, pause-menu, shell-completions, print-start, api-timestamps, api-browser-access, copy-capture-zip, k-quant-models]
+keys: [meetings.audio_retention, meetings.stop_when_call_ends, meetings.export.descriptive_filenames, meetings.export.notes_file, sound_effect_volume, labs.yolo_mode_seconds, labs.appearance_theme]
 ---
 
 # VibeHex Next (not released yet)
 
-- Nothing new since the last release yet.
+- New: A dictation that is interrupted, such as by a microphone that goes quiet, is kept and
+  copied instead of lost. Your shortcuts also work while a password field has the keyboard.
+- New in Labs: More dictation shortcuts (macOS). Up to four extra shortcuts, each with its
+  own mode: hold, tap, or double-tap.
+- New in Labs: Microphone key alone and Double-tap on a lone modifier (macOS). Dictate with
+  the Mac's microphone key, or tap Option or Globe twice for hands-free dictation.
+- New in Labs: YOLO mode. After a long dictation (2 seconds by default) VibeHex presses
+  Return for you, so a chat message or an agent's prompt goes out.
+- New in Labs: Return to app (macOS). The text lands in the app you started in, even if you
+  clicked elsewhere meanwhile.
+- New in Labs: Switch model with app (macOS). Each mode picks its own speech model and
+  language, and VibeHex switches when you change apps.
+- New in Labs: Only on speakers, Keep mic open after dictating, and Screen vocabulary
+  (macOS), which uses names visible in the window to spell your dictation.
+- New: Ten meeting features left Labs. Meetings › Settings now has Keep audio, and Export
+  with Descriptive meeting file names and Separate notes file.
+- New: Stop when the call ends (macOS) is a setting under Detected calls: the recording ends
+  once the call does.
+- New: Meetings records Microsoft Teams calls in the browser, and a browser recording ends
+  when its page moves to another call.
+- New: The recording pill shows a dot, your level and the time, with Stop, Copy new and
+  Copy all on hover. Drag it to any corner.
+- New in Labs: Upcoming meetings in menu bar (macOS). The next five, soonest first; a click
+  opens the call.
+- New in Labs: Select multiple dictations and Copy dictation audio. History's Delete now
+  asks first, and an entry with kept audio has Play.
+- New in Labs: Appearance, to keep the window light or dark, and Pause from menu bar (macOS),
+  which frees VibeHex's keys for another app.
+- New: `hex transcribe <file>` prints the text of any audio or video file, long ones too.
+  Labs has Shell completions for Tab in your terminal.
+- New in Labs for developers: Print-only CLI dictation (macOS), Timestamps in API
+  transcripts, Browser access to the local API, Copy captures as a zip, Smaller model files.
+- Changed: The first run starts with VibeHex's language and speech model step, then a short
+  story about a group chat, then one page for each permission.
+- Changed: Settings saves no longer lose changes made elsewhere, Sound has a volume slider,
+  and shortcut rows have Reset.
+- Fixed: A microphone that dies mid-dictation is reopened; a Continuity iPhone is no longer
+  picked as the microphone on its own.
+- Fixed: Quiet speech and long recordings are heard better, and a meeting quit during its
+  final transcription resumes on the next launch.

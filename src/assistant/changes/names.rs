@@ -301,6 +301,24 @@ pub const WHERE: &[(&str, &str, &str, Home)] = &[
         Home::Meetings,
     ),
     (
+        "meetings.stop_when_call_ends",
+        "Meetings › Settings",
+        "Stop when the call ends",
+        Home::Meetings,
+    ),
+    (
+        "meetings.export.descriptive_filenames",
+        "Meetings › Settings",
+        "Descriptive meeting file names",
+        Home::Meetings,
+    ),
+    (
+        "meetings.export.notes_file",
+        "Meetings › Settings",
+        "Separate notes file",
+        Home::Meetings,
+    ),
+    (
         "meetings.calendar.remind",
         "Meetings › Calendar",
         "Remind me before meetings",

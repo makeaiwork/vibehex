@@ -15,9 +15,7 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
     ("Japanese", ["Japoński", "日语", "日本語", "Japanisch", "Japonés", "Японська"]),
     ("Korean", ["Koreański", "韩语", "韓国語", "Koreanisch", "Coreano", "Корейська"]),
     ("Spanish", ["Hiszpański", "西班牙语", "スペイン語", "Spanisch", "Español", "Іспанська"]),
-    ("French", ["Francuski", "法语", "フランス語", "Französisch", "Francés", "Французька"]),
     ("German", ["Niemiecki", "德语", "ドイツ語", "Deutsch", "Alemán", "Німецька"]),
-    ("Portuguese", ["Portugalski", "葡萄牙语", "ポルトガル語", "Portugiesisch", "Portugués", "Португальська"]),
     ("Italian", ["Włoski", "意大利语", "イタリア語", "Italienisch", "Italiano", "Італійська"]),
     ("Arabic", ["Arabski", "阿拉伯语", "アラビア語", "Arabisch", "Árabe", "Арабська"]),
     ("Hindi", ["Hindi", "印地语", "ヒンディー語", "Hindi", "Hindi", "Гінді"]),
@@ -52,6 +50,9 @@ pub(super) const TRANSLATIONS: &[(&str, [&str; 6])] = &[
     ("Hears {} well", ["Dobrze rozpoznaje {}", "能准确听懂{}", "{}をよく聞き取ります", "Versteht {} gut", "Entiende bien el {}", "{} розпізнається добре"]),
     ("The language you usually speak", ["Język, w którym zwykle mówisz", "你平时说的语言", "普段話している言語", "Die Sprache, die du meistens sprichst", "El idioma que hablas normalmente", "Мова, якою ви зазвичай говорите"]),
     ("Hears whichever language you speak", ["Rozpoznaje każdy język, w którym mówisz", "你说哪种语言都能听懂", "話している言語を自分で聞き分けます", "Erkennt jede Sprache, die du sprichst", "Reconoce el idioma en el que hables", "Розпізнає будь-яку мову, якою ви говорите"]),
+    ("Khmer", ["Khmerski", "高棉语", "クメール語", "Khmer", "Jemer", "Кхмерська"]),
+    ("French", ["Francuski", "法语", "フランス語", "Französisch", "Francés", "Французька"]),
+    ("Portuguese", ["Portugalski", "葡萄牙语", "ポルトガル語", "Portugiesisch", "Portugués", "Португальська"]),
 ];
 
 /// French.
@@ -99,6 +100,7 @@ pub(in super::super) const FRENCH: &[(&str, &str)] = &[
     ("Hears {} well", "Langue bien reconnue : {}"),
     ("The language you usually speak", "La langue que vous parlez d'habitude"),
     ("Hears whichever language you speak", "Reconnaît la langue dans laquelle vous parlez"),
+    ("Khmer", "Khmer"),
 ];
 
 /// Brazilian Portuguese.
@@ -146,6 +148,7 @@ pub(in super::super) const PORTUGUESE: &[(&str, &str)] = &[
     ("Hears {} well", "Entende bem o {}"),
     ("The language you usually speak", "O idioma que você costuma falar"),
     ("Hears whichever language you speak", "Reconhece o idioma em que você falar"),
+    ("Khmer", "Khmer"),
 ];
 
 /// Russian.
@@ -193,4 +196,5 @@ pub(in super::super) const RUSSIAN: &[(&str, &str)] = &[
     ("Hears {} well", "Хорошо понимает {}"),
     ("The language you usually speak", "Язык, на котором вы обычно говорите"),
     ("Hears whichever language you speak", "Распознаёт любой язык, на котором вы говорите"),
+    ("Khmer", "Кхмерский"),
 ];

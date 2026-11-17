@@ -1,7 +1,7 @@
 ---
 topic: privacy
 title: Privacy and your data
-keys: [history_retention, assistant.read_recordings, labs.keep_recordings, labs.ai_cleanup_server, dictation_processing.server.runs_on, dictation_processing.default_mode, meetings.retention]
+keys: [history_retention, assistant.read_recordings, labs.keep_recordings, labs.ai_cleanup_server, dictation_processing.server.runs_on, dictation_processing.default_mode, meetings.retention, meetings.audio_retention]
 os: every OS
 ---
 
@@ -24,10 +24,12 @@ there, what can leave and only when you choose it, and how to clear things.
 - **Meetings** (from Labs, a beta on Windows and Linux). Audio and transcripts
   stay on the computer. Meetings › Settings › After a meeting › Keep meetings
   defaults to 24 hours for new meetings, which then move to the Trash; meetings
-  from before the setting stay until you choose a period.
+  from before the setting stay until you choose a period. Keep audio, right
+  below, can move only the audio to the Trash sooner.
 - **A diagnostic log** in the data folder records what dictation did, but not
   the words you said: those live only in History. History's Off and retention
-  do not control the log.
+  do not control the log. Each log file is capped at 10 MB: VibeHex trims it
+  to its newest 5 MB at launch and every hour.
 
 The data folder is `~/Library/Application Support/hex` on a Mac, `%APPDATA%\hex`
 on Windows, and `~/.local/share/hex` on Linux. On Windows the logs and the
@@ -90,4 +92,4 @@ Codex keeps its own sign-in. Output › AI cleanup › API key has Remove.
 «Мои записи отправляются в интернет?»; «Как удалить историю диктовок?»; «Где
 хранится API-ключ?».
 
-<!-- sources: docs/features/README.md:660-690; src/history.rs:26-96,390; src/history/recordings.rs:1-27; src/rune_ui/history.rs:316-331,702-800; src/app_paths.rs:29-100; src/dictation/cleanup_server/keys.rs:1-12; src/dictation/cleanup_server/codex.rs:1-12; src/rune_ui/output/ai_cleanup.rs:108-200,456-510; src/rune_ui/labs.rs:776-780; src/rune_ui/meeting_notes.rs:113-123,126-210; src/rune_ui/platform_settings.rs:260-380,500-520,574-611; src/app_settings/meetings.rs:142-172; src/control/settings.rs:688-697; src/rune_ui/output.rs:300-330; src/updater.rs:1-60; src/rune_ui/assistant/settings.rs:20-165; docs/features/meetings.md:128-135; crates/capture/src/speech_model.rs:1-10 -->
+<!-- sources: upstream docs/features/README.md:935-936 (10 MB cap, newest 5 MB, launch and hourly); docs/features/README.md:660-690; src/history.rs:26-96,390; src/history/recordings.rs:1-27; src/rune_ui/history.rs:316-331,702-800; src/app_paths.rs:29-100; src/dictation/cleanup_server/keys.rs:1-12; src/dictation/cleanup_server/codex.rs:1-12; src/rune_ui/output/ai_cleanup.rs:108-200,456-510; src/rune_ui/labs.rs:776-780; src/rune_ui/meeting_notes.rs:113-123,126-210; src/rune_ui/platform_settings.rs:260-380,500-520,574-611; src/app_settings/meetings.rs:142-172; src/control/settings.rs:688-697; src/rune_ui/output.rs:300-330; src/updater.rs:1-60; src/rune_ui/assistant/settings.rs:20-165; docs/features/meetings.md:128-135; crates/capture/src/speech_model.rs:1-10 -->

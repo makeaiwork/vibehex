@@ -21,9 +21,11 @@ together, and undo if you change your mind.
 
 VibeHex is built for people who dictate to code and to AI assistants. Hold a
 key, speak, and it pastes. It is a fork of [Hex](https://github.com/anomalyco/hex)
-by Anomaly: everything Hex does, VibeHex does too, and it keeps up with Hex's
-changes. VibeHex is its own app, built and signed separately, so it is not an
-official Hex release.
+by Anomaly and keeps up with Hex's changes. It has what Hex has on the Mac,
+apart from a few of Hex's Labs features it leaves out: Clean up with Apple
+Intelligence, Voice prompt and Rewrite reads nearby text come once they also
+run on VibeHex's own cleanup engines. VibeHex is its own app, built and signed
+separately, so it is not an official Hex release.
 
 ## What VibeHex adds to Hex
 
@@ -42,8 +44,8 @@ official Hex release.
 - **Files.** Drop audio or video to transcribe it, clean it up, and rework
   the text with your own requests.
 - **Meetings you can ask and listen to.** Questions in a Requests tab, notes
-  even without Apple Intelligence, and playback from the transcript with the
-  playing line lit.
+  written by Codex or your cleanup engine, and playback from the transcript
+  with the playing line lit.
 - **Quiet while you dictate, even on a monitor.** Music and other apps get
   quieter even when macOS can't set your display's volume.
 
@@ -67,11 +69,11 @@ the line it came from.
 
 ## Meetings and files
 
-Ask questions about a meeting in its Requests tab. Notes are written even
-when Apple Intelligence is off, and the transcript can be cleaned up turn by
-turn. Yandex Telemost is detected alongside Zoom, Meet and the rest. Drop
-audio and video files to transcribe them, clean them up, and rework the text
-with your own requests.
+Ask questions about a meeting in its Requests tab. Notes can be written by
+Codex or any cleanup engine you set up, not only Apple Intelligence or
+OpenCode, and the transcript can be cleaned up turn by turn. Yandex Telemost
+is detected alongside Zoom, Meet and the rest. Drop audio and video files to
+transcribe them, clean them up, and rework the text with your own requests.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme/meetings-follow-dark.gif">
@@ -88,7 +90,7 @@ play from there. Works for meetings and files.
   your own server such as LM Studio or Ollama, or Codex with your ChatGPT
   plan. A long dictation is cleaned in pieces; a bar in place of the HUD
   shows the progress, and Paste now pastes what is ready.
-- **Technical words come out right.** Russian vibe coding adds 80 terms such
+- **Technical words come out right.** Russian vibe coding adds 90 terms such
   as Claude Code, GitHub and MCP, fixes for words that often come out wrong
   in Russian, and cleanup instructions, all in one switch.
 - **Fix a word where you see it.** Select a word that came out wrong in any
@@ -197,7 +199,8 @@ until you turn it on. Russian vibe coding turns on most of it in one go.
 - VibeHex transcribes on your Mac and pastes into whatever app you're in
 - the first run asks which speech model to download; after that nothing leaves your Mac
   unless you choose a cloud engine for cleanup
-- experimental features live in Labs, at the bottom of the sidebar
+- experimental features live in Labs, in the sidebar just above About; Assistant
+  sits at the bottom and tells you what's new after an update
 
 ## Download
 
@@ -212,6 +215,20 @@ VibeHex is a separate app from Hex: macOS asks for Microphone and
 Accessibility access again. Settings, History, Vocabulary and models are
 shared with Hex, since both use the same data folder. Run one of them at a
 time.
+
+## Command line
+
+`hex transcribe meeting.m4a` prints a recording's transcript, whether or not
+the app is running. It reads WAV, AIFF, CAF, FLAC, MP3, Ogg, WebM, and
+MP4/M4A/MOV, including a video's soundtrack. The same `hex` controls the
+running app (`hex status`, `hex dictation`, `hex settings`); see
+[`docs/cli.md`](docs/cli.md).
+
+The CLI is inside the app. Link it somewhere on your `PATH` that you own:
+
+```sh
+ln -s /Applications/VibeHex.app/Contents/MacOS/hex ~/.local/bin/hex
+```
 
 More docs are in [`docs/`](docs/README.md).
 

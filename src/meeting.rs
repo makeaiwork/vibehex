@@ -12,7 +12,7 @@ use hound::{SampleFormat, WavSpec, WavWriter};
 use serde::{Deserialize, Serialize};
 
 use crate::desktop::events::now_ms;
-use crate::durable::{sync_directory, sync_file};
+use crate::durable::{lock_contended, sync_directory, sync_file};
 
 const SAMPLE_RATE: u32 = 16_000;
 const TRANSCRIPT_TURN_GAP_MS: u64 = 3_000;
@@ -26,6 +26,7 @@ const IMPORT_PENDING_FILE: &str = "import.pending";
 
 mod capture;
 mod chapters;
+mod chunk_level;
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub(crate) mod detection;
 #[cfg(target_os = "linux")]
@@ -40,13 +41,13 @@ mod os;
 /// Linux's Trash, for capture retention too: distros ship no `trash` command.
 #[cfg(target_os = "linux")]
 pub(crate) use os::move_to_trash;
-pub(crate) use os::reveal;
 #[cfg(target_os = "macos")]
 pub(crate) use os::{
     SystemAudioAuthorization, create_tap_aggregate, own_process_object, request_screen_recording,
     request_system_audio_access, reset_system_audio_request, screen_recording_permitted,
     system_audio_authorization, system_audio_ready,
 };
+pub(crate) use os::{open_folder, reveal};
 mod delta;
 mod echo;
 mod export_name;
@@ -56,13 +57,17 @@ pub(crate) mod generator;
 mod hour_cycle;
 #[cfg(target_os = "macos")]
 pub(crate) mod import;
+#[cfg(any(target_os = "windows", test))]
+mod loopback_route;
 pub(crate) mod mcp;
 mod notes;
+mod notes_file;
+mod playback;
 pub mod query;
 pub(crate) mod requests;
 mod words;
 
-pub use words::word_starts;
+pub use words::{coalesce_transcript, coalesced_ranges, word_starts};
 mod retention;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 pub(crate) mod runtime;
@@ -71,6 +76,7 @@ pub(crate) mod transcript;
 mod warning;
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub(crate) mod watcher;
+pub use capture::track_levels;
 #[cfg(all(debug_assertions, target_os = "macos"))]
 pub use chapters::chapters_file;
 #[cfg(target_os = "macos")]
@@ -82,7 +88,7 @@ pub use notes::{MeetingNotes, display_title, notes_in_progress, notes_wanted, sp
 pub use notes::{summarize, summarize_file};
 #[cfg(test)]
 pub use retention::audio_expired;
-pub use retention::{expire, expire_audio, expired, retention_for};
+pub use retention::{expire, expire_audio, list, retention_for};
 pub use transcript::TranscriptReader;
 pub use warning::TrackWarning;
 
@@ -220,8 +226,21 @@ pub struct MeetingManifest {
     /// user edited stays.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub export_sha256: Option<String>,
-    /// When the meeting's WAV tracks moved to the Trash (Labs › Expire
-    /// meeting audio separately); the transcript, notes, and Markdown stay.
+    /// The notes file beside the transcript while Separate notes file
+    /// wrote one, tracked so renames, Trash, and retention follow it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notes_export_path: Option<PathBuf>,
+    /// SHA-256 of the notes file as Hex last wrote it. A later notes
+    /// regeneration rewrites it only while it still matches, and expiry moves
+    /// it only then, so a copy the user edited stays.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notes_export_sha256: Option<String>,
+    /// The tracked notes file was deleted outside Hex. Hex forgets its path
+    /// and never writes another notes file for this meeting.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub notes_export_removed: bool,
+    /// When the meeting's WAV tracks moved to the Trash (Meetings ›
+    /// Settings › Keep audio); the transcript, notes, and Markdown stay.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub audio_removed_at_ms: Option<u64>,
     /// Imported from an audio file rather than recorded: one speaker track,
@@ -339,57 +358,6 @@ pub struct TranscriptEntry {
     /// trusted once its count no longer matches the text's (an edit).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub words: Vec<u64>,
-}
-
-pub fn coalesce_transcript(
-    entries: impl IntoIterator<Item = TranscriptEntry>,
-) -> Vec<TranscriptEntry> {
-    coalesce(entries).0
-}
-
-/// Where each entry's words (trimmed) land in the transcript as the window
-/// shows it: [`coalesce_transcript`]'s turns joined by a line break.
-pub fn coalesced_ranges(entries: &[TranscriptEntry]) -> Vec<std::ops::Range<usize>> {
-    coalesce(entries.iter().cloned()).1
-}
-
-fn coalesce(
-    entries: impl IntoIterator<Item = TranscriptEntry>,
-) -> (Vec<TranscriptEntry>, Vec<std::ops::Range<usize>>) {
-    let mut turns: Vec<TranscriptEntry> = Vec::new();
-    let mut ranges = Vec::new();
-    // Where the last turn starts in the joined text.
-    let mut base = 0;
-    for entry in entries {
-        let lead = entry.text.len() - entry.text.trim_start().len();
-        let words = entry.text.trim().len();
-        if let Some(turn) = turns.last_mut()
-            && turn.source == entry.source
-            && entry.start_ms.saturating_sub(turn.end_ms) <= TRANSCRIPT_TURN_GAP_MS
-        {
-            if !turn.text.ends_with(char::is_whitespace) {
-                turn.text.push(' ');
-            }
-            let at = base + turn.text.len();
-            ranges.push(at..at + words);
-            let timed = word_starts(&turn.text, &turn.words).is_some()
-                && word_starts(&entry.text, &entry.words).is_some();
-            if timed {
-                turn.words.extend(&entry.words);
-            } else {
-                turn.words.clear();
-            }
-            turn.text.push_str(entry.text.trim());
-            turn.end_ms = turn.end_ms.max(entry.end_ms);
-        } else {
-            if let Some(last) = turns.last() {
-                base += last.text.len() + 1;
-            }
-            ranges.push(base + lead..base + lead + words);
-            turns.push(entry);
-        }
-    }
-    (turns, ranges)
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -523,6 +491,9 @@ pub fn record(
         chapters_refined: false,
         retention_applies: true,
         export_sha256: None,
+        notes_export_path: None,
+        notes_export_sha256: None,
+        notes_export_removed: false,
         audio_removed_at_ms: None,
         imported: false,
     };
@@ -565,8 +536,10 @@ pub fn record(
             start.application.clone(),
             microphone_warnings.clone(),
         );
-        let system_capture =
-            capture::SourceSupervisor::system(sink(MeetingSource::System, &system_drops));
+        let system_capture = capture::SourceSupervisor::system(
+            sink(MeetingSource::System, &system_drops),
+            start.application.clone(),
+        );
         manifest.status = MeetingStatus::Recording;
         if let Err(error) = write_manifest(&meeting_dir, &manifest) {
             drop(system_capture);
@@ -678,6 +651,7 @@ pub fn record(
         keep_rename(&meeting_dir, &mut manifest);
         write_manifest(&meeting_dir, &manifest)?;
         finished_events::publish(&manifest.id);
+        playback::prepare(&manifest);
         println!("Saved meeting {}", meeting_dir.display());
         Ok(manifest)
     })();
@@ -974,6 +948,7 @@ fn transcribe(
         &crate::app_settings::meeting_output_folder(),
         manifest,
         &transcript,
+        crate::app_settings::meeting_notes_file(),
     ) {
         Ok(path) => {
             tracing::info!(path = %path.display(), "published meeting transcript");
@@ -1028,10 +1003,13 @@ pub fn finish_pending(id: &str) -> Result<Option<MeetingManifest>> {
         meeting = id,
         "finishing a meeting transcript left pending by an earlier quit"
     );
-    finish::finish_transcription(&directory, manifest, &selection).map(Some)
+    let finished = finish::finish_transcription(&directory, manifest, &selection)?;
+    playback::prepare(&finished);
+    Ok(Some(finished))
 }
 
-pub fn list() -> Result<Vec<MeetingManifest>> {
+/// Maintenance must still see expired folders, including failed Trash attempts.
+fn list_all() -> Result<Vec<MeetingManifest>> {
     let root = root()?;
     let mut meetings = Vec::new();
     for entry in match fs::read_dir(root) {
@@ -1101,13 +1079,6 @@ fn meeting_is_active(directory: &Path) -> Option<bool> {
             None
         }
     }
-}
-
-/// Whether a failed try-lock means another handle holds the lock: `flock`'s
-/// `EWOULDBLOCK` on Unix, `ERROR_LOCK_VIOLATION` on Windows.
-fn lock_contended(error: &std::io::Error) -> bool {
-    error.kind() == std::io::ErrorKind::WouldBlock
-        || error.raw_os_error() == fs2::lock_contended_error().raw_os_error()
 }
 
 fn recovered_status(
@@ -1228,6 +1199,19 @@ fn explorer_select(path: &Path) -> std::ffi::OsString {
     select
 }
 
+/// Explorer's argument that opens `path` itself: the quoted path alone, with
+/// no select switch, so a folder opens rather than its parent selecting it.
+///
+/// The path is quoted on its own because Explorer splits its command line on
+/// commas, and `Command` quotes only the paths that contain a space.
+#[cfg(any(windows, test))]
+fn explorer_open(path: &Path) -> std::ffi::OsString {
+    let mut open = std::ffi::OsString::from("\"");
+    open.push(path.as_os_str());
+    open.push("\"");
+    open
+}
+
 /// Moves a finished meeting to the Trash: its exported Markdown first, then
 /// its recording folder. Refuses while it records, transcribes, or writes
 /// notes. A missing Markdown file is skipped.
@@ -1249,6 +1233,9 @@ fn trash_meeting(
     if let Some(path) = exported_markdown(&manifest) {
         move_to_trash(&path)?;
     }
+    if let Some(path) = notes_file::tracked(&manifest) {
+        move_to_trash(&path)?;
+    }
     move_to_trash(directory)
 }
 
@@ -1266,8 +1253,8 @@ fn text_sha256(bytes: &[u8]) -> String {
 }
 
 /// Renames a meeting. The Markdown heading follows only while it still reads
-/// the previous title. The file keeps its name unless Labs › Descriptive
-/// meeting file names is on, which renames it to the new title.
+/// the previous title. The file keeps its name unless Descriptive meeting file
+/// names is on, which renames it to the new title.
 pub fn rename(id: &str, title: &str) -> Result<MeetingManifest> {
     rename_meeting(&root()?.join(id), title)
 }
@@ -1276,7 +1263,7 @@ fn rename_meeting(directory: &Path, title: &str) -> Result<MeetingManifest> {
     rename_meeting_with(
         directory,
         title,
-        crate::labs::meeting_descriptive_filenames(),
+        crate::app_settings::meeting_descriptive_filenames(),
     )
 }
 
@@ -1299,7 +1286,8 @@ fn rename_meeting_with(
     set_title_source(&mut manifest, TitleSource::User);
     let next = display_title(&manifest);
     let mut markdown_error = None;
-    let mut heading_updated = previous != next;
+    let title_changed = previous != next;
+    let mut heading_updated = title_changed;
     if heading_updated
         && let Some(path) = manifest.export_path.clone().filter(|path| path.exists())
         && let Err(error) =
@@ -1311,9 +1299,13 @@ fn rename_meeting_with(
     }
     // The notes writer applies its own title and renames the file; leaving
     // the name alone here keeps it from racing that in-place rewrite. A
-    // failed heading update keeps the old name too, as notes do.
+    // failed heading update keeps the old name too, as notes do. The notes
+    // file follows the title independently, since it is Hex's own copy.
     if heading_updated && !notes_in_progress(&manifest.id) {
         export_name::rename_to_title(&mut manifest, &next, descriptive_filenames);
+    }
+    if title_changed && !notes_in_progress(&manifest.id) {
+        notes_file::refresh(&mut manifest);
     }
     write_manifest(directory, &manifest)?;
     match markdown_error {

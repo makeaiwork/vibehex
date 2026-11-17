@@ -432,7 +432,10 @@ fn mode_line(
             .into_iter()
             .filter(|trigger| trigger.unavailable(&then).is_none())
             .collect();
-        let labels = choices.iter().map(|trigger| trigger.name()).collect();
+        let labels = choices
+            .iter()
+            .map(|trigger| trigger.name().to_string())
+            .collect();
         let selected = choices
             .iter()
             .position(|trigger| *trigger == chosen)
@@ -585,6 +588,16 @@ pub(in super::super) fn recorded(
     };
     let others = after(ui, &card, Some(index));
     let item = card.items.get(index).cloned().unwrap_or_default();
+    // Plain ⌫ turns a shortcut that can be off off, as General's row does:
+    // the card's row reads none until Save. Stop shortcut's key is never
+    // none; its Labs switch turns it off.
+    if binding.as_ref().is_ok_and(HotkeyBinding::is_bare_erase)
+        && s::can_turn_off(target)
+        && item.key != "stop_hotkey"
+    {
+        s::cancel_capture(ui);
+        return act::set(ui, at, |card| shortcuts::set(card, index, Value::Null));
+    }
     let saves = |binding: HotkeyBinding| {
         s::validate(&others, target, &binding)?;
         // What General saves at once the card saves through `check`,

@@ -1,7 +1,7 @@
 ---
 topic: history
 title: History
-keys: [history_retention, paste_last_hotkey, labs.keep_recordings]
+keys: [history_retention, paste_last_hotkey, labs.keep_recordings, labs.history_multi_select, labs.copy_dictation_audio]
 os: every OS
 ---
 
@@ -11,7 +11,7 @@ History is the list of your recent dictations: what was pasted, what the speech 
 
 ## See what it keeps
 
-Open **History** in the sidebar. Each row shows the text, its kind (Dictation; Raw for Dictate without processing; Printed for `hex dictation stop --print`, which is never pasted), the app and the time. Select one to see the full text, the **Raw transcript** (if cleanup changed it), and its facts: **Application**, **Processing** (the cleanup profile and how long it took), **Speech model** (the model that heard it, with the language chosen for that run) and **Latency**. **Copy** puts the text on the clipboard; **Delete** removes one entry.
+Open **History** in the sidebar. Each row shows the text, its kind (Dictation; Raw for Dictate without processing; Printed for `hex dictation stop --print`, which is never pasted), the app and the time. Select one to see the full text, the **Raw transcript** (if cleanup changed it), and its facts: **Application**, **Processing** (the cleanup profile and how long it took), **Speech model** (the model that heard it, with the language chosen for that run) and **Latency**. **Copy** puts the text on the clipboard; **Delete…** asks once, then removes the entry. **Labs › Select multiple dictations** lets you Shift-click, Cmd-click (Ctrl on Windows and Linux) or drag to copy or delete several at once.
 
 ## Choose how long it keeps things
 
@@ -27,7 +27,7 @@ The **Paste last dictation** shortcut (General › Advanced › Output, Option-S
 
 ## Transcribe again with another model
 
-In the retention menu, choose **Keep audio too** (it carries a Lab badge and is the same switch as **Labs › Keep recordings**). From then on, each new dictation saved to History also keeps its audio on this computer. Open such an entry, find **Saved recording**, and open **Transcribe again** to pick any installed model. Some models ask for a language first. The new text appears with **Copy** and **Replace**, which swaps it into the entry.
+In the retention menu, choose **Keep audio too** (it carries a Lab badge and is the same switch as **Labs › Keep recordings**). From then on, each new dictation saved to History also keeps its audio on this computer. Open such an entry, find **Saved recording**: **Play** hears it, and **Transcribe again** picks any installed model. **Labs › Copy dictation audio** adds **Copy audio**, which copies the recording as a file. Some models ask for a language first. The new text appears with **Copy** and **Replace**, which swaps it into the entry.
 
 Replace keeps the text it swapped out. The entry then lists up to 5 **Earlier versions**, newest first, each with its model and age, **Copy** and **Use this version** to bring it back. Entries from before you chose Keep audio too have no audio. Audio shares the entry's retention, and all recordings together are capped at 512 MB (about four and a half hours); past that, the oldest entries keep their text and lose their audio.
 
@@ -35,6 +35,6 @@ Replace keeps the text it swapped out. The entry then lists up to 5 **Earlier ve
 
 Open the retention menu and choose **Clear all history…**. The menu then gives way to a red **Clear all history** button and **Cancel**; press the button to confirm. This also deletes the kept audio.
 
-**Asked as.** "Where can I see my old dictations?"; "I lost what I dictated"; «Где посмотреть прошлые диктовки?»; «Как заново расшифровать запись другой моделью?»; «Как очистить историю?»
+**Asked as.** "Where can I see my old dictations?"; "I lost what I dictated"; «Где посмотреть прошлые диктовки?»; «Текст надиктовал, но он не вставился. Как его вернуть?»; «Как заново расшифровать запись другой моделью?»; «Как очистить историю?»
 
-<!-- sources: docs/features/README.md:660-692; docs/features/labs.md:790-834; docs/features/transcript-cli.md:42-50; src/history.rs:29-35, 49-100, 160-175, 540-552; src/history/versions.rs:1-15; src/history/recordings.rs:24; src/rune_ui/history.rs:316-331, 515-565, 702-800, 880-930, 1140-1215; src/rune_ui/general.rs:830-845; src/rune_ui/general/search.rs:62-80; src/app_settings/hotkeys.rs:683-700; src/desktop/tray_menu.rs:160; src/control/settings.rs:340-344 -->
+<!-- sources: upstream docs/features/README.md:908-924; upstream docs/features/labs.md:2084-2110 (Play); docs/features/README.md:660-692; docs/features/labs.md:790-834; docs/features/transcript-cli.md:42-50; src/history.rs:29-35, 49-100, 160-175, 540-552; src/history/versions.rs:1-15; src/history/recordings.rs:24; src/rune_ui/history.rs:316-331, 515-565, 702-800, 880-930, 1140-1215; src/rune_ui/general.rs:830-845; src/rune_ui/general/search.rs:62-80; src/app_settings/hotkeys.rs:683-700; src/desktop/tray_menu.rs:160; src/control/settings.rs:340-344 -->

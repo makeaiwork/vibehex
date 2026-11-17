@@ -1,7 +1,7 @@
 ---
 topic: speech-models
 title: Speech models
-keys: [transcription.model, transcription.language, labs.live_text, labs.vocabulary_biasing, labs.parakeet_ultra, labs.model_in_place]
+keys: [transcription.model, transcription.language, labs.live_text, labs.vocabulary_biasing, labs.parakeet_ultra, labs.model_in_place, labs.app_model_switching, labs.k_quant_models, keyboard_model_switching.enabled]
 os: every OS
 ---
 
@@ -17,6 +17,10 @@ in languages, speed, size, and accuracy, so you choose.
 2. **Compare** shows the best three for your language, with badges: Recommended,
    Fewest wrong words, Fastest, Reads your vocabulary. "N more models" opens the full list.
 3. Press **Use**, or **Download** with its size. **Delete** frees the space.
+
+While a model gets ready, `hex status` names the real step: downloading,
+verifying, or loading. **Labs › Switch model with keyboard language** and, on
+a Mac or Windows, **Labs › Switch model with app** change the model by themselves.
 
 The language is the **Language** row below. A model that doesn't speak it says
 that choosing it switches the language to one it does speak (English, or its
@@ -91,8 +95,8 @@ Parakeet Ultra, and Granite always hear the language from the audio, whatever th
 In the picker, open the full list ("N more models") and press **Add model file…**, then choose a GGUF file (Whisper,
 Parakeet, Qwen3-ASR, Cohere, SenseVoice, or GigaAM type; Q8_0, F16, or F32). VibeHex
 checks and copies it. It has no live text and shows as Imported, not benchmarked. **Labs › Use model files where they are** adds **Use model file where it is…**,
-which copies nothing. Files other apps saved are listed under **Found on this computer**.
+which copies nothing. On a Mac, **Labs › Smaller model files** also takes Q6_K, Q5_K and Q4_K files. Files other apps saved are listed under **Found on this computer**.
 
 **Asked as.** "Which speech model should I use?"; "Can it work offline?"; «Какую модель выбрать для русского?»; «Какая модель лучше для русского с английскими терминами?»; «Как сменить модель распознавания»; «Где скачать другую модель».
 
-<!-- sources: src/transcription/models.rs:166-178,300-320,335-360,436-657,672-752; src/transcription/model_benchmarks.rs:183-186; src/transcription/model_details.rs:72-120; src/transcription/artifacts.rs:44-60,191-224; src/transcription/custom_models.rs:37-47; src/transcription/gguf_session.rs:237; src/rune_ui/picker/facts.rs:215-238,170-182; src/rune_ui/picker/compare.rs:22-50,89-150; src/rune_ui/picker/list.rs:268-280; src/rune_ui/picker.rs:540; src/rune_ui/general.rs:141-210; src/rune_ui/model_details.rs:1-6; docs/features/README.md:341-352; docs/features/own-models.md -->
+<!-- sources: upstream src/transcription/models.rs:139-143 and preparation.rs (stage), desktop/host.rs:25; upstream src/labs/catalog.rs (app-model-switching, k-quant-models); src/transcription/models.rs:166-178,300-320,335-360,436-657,672-752; src/transcription/model_benchmarks.rs:183-186; src/transcription/model_details.rs:72-120; src/transcription/artifacts.rs:44-60,191-224; src/transcription/custom_models.rs:37-47; src/transcription/gguf_session.rs:237; src/rune_ui/picker/facts.rs:215-238,170-182; src/rune_ui/picker/compare.rs:22-50,89-150; src/rune_ui/picker/list.rs:268-280; src/rune_ui/picker.rs:540; src/rune_ui/general.rs:141-210; src/rune_ui/model_details.rs:1-6; docs/features/README.md:341-352; docs/features/own-models.md -->

@@ -1,7 +1,7 @@
 ---
 topic: codex
 title: Codex, your ChatGPT plan as the writer
-keys: [labs.ai_cleanup_server, dictation_processing.server.runs_on, dictation_processing.server.codex_model, dictation_processing.server.codex_effort, dictation_processing.server.codex_wait_seconds, meetings.notes.writer, meetings.notes.effort, meetings.questions.engine, meetings.questions.effort, files.cleanup_engine, files.cleanup_effort, files.request_engine, files.request_effort]
+keys: [labs.ai_cleanup_server, dictation_processing.server.runs_on, dictation_processing.server.codex_model, dictation_processing.server.codex_effort, dictation_processing.server.codex_wait_seconds, meetings.notes.writer, meetings.notes.effort, meetings.questions.engine, meetings.questions.effort, files.cleanup_engine, files.cleanup_effort, files.request_engine, files.request_effort, assistant.engine, assistant.effort]
 os: every OS (Files: macOS)
 ---
 
@@ -24,10 +24,11 @@ All of these need **Labs › Clean up on your own server** and Codex set up abov
 - **Meetings › Settings › Notes › Written by**: the Codex group.
 - **Meetings › Settings › Questions › Questions run on**, while **Ask about a meeting** is on.
 - **Files › Settings › Cleanup › Runs on** and **Requests › Runs on** (Files is a macOS Labs feature).
+- **Assistant › Settings › Runs on**, for Assistant's answers.
 
 ## Model and Reasoning
 
-**Reasoning** (Low, Medium, High): Low answers soonest, higher levels think longer. Meeting notes and questions have their own Reasoning, and Files has one under Cleanup (following dictation's until you pick) and one under Requests. **Wait for Codex** (30 s, 1 min, 2 min; 1 min by default) is how long a dictation waits before it is pasted without AI cleanup.
+**Reasoning** (Low, Medium, High): Low answers soonest, higher levels think longer. Meeting notes, questions and Assistant (Medium until you pick) have their own Reasoning, and Files has one under Cleanup (following dictation's until you pick) and one under Requests. **Wait for Codex** (30 s, 1 min, 2 min; 1 min by default) is how long a dictation waits before it is pasted without AI cleanup.
 
 ## Plan limits
 
@@ -39,4 +40,4 @@ Only the text being worked on (a dictation, a transcript, a file) and your instr
 
 **Asked as.** "Can I use my ChatGPT subscription instead of an API key?"; "Codex not found"; "Does Codex see my files?"; «Как подключить Codex»; «Пишет, что лимит Codex исчерпан»; «Что отправляется в ChatGPT?».
 
-<!-- sources: src/dictation/cleanup_server/codex.rs:1-70, 419-430; src/rune_ui/output/codex_cleanup.rs:70-380; src/app_settings/dictation_processing.rs:20-60; src/rune_ui/meeting_notes.rs:44-300; src/rune_ui/files/settings.rs:55-70, 330-450; src/rune_ui/files.rs:138; docs/features/labs.md:915-940, 1054-1081; docs/features/meetings.md:36-52, 1155-1165; src/app_settings/notes_settings.rs:46 -->
+<!-- sources: src/rune_ui/assistant/settings.rs:29-100 (Runs on, Reasoning); src/dictation/cleanup_server/codex.rs:1-70, 419-430; src/rune_ui/output/codex_cleanup.rs:70-380; src/app_settings/dictation_processing.rs:20-60; src/rune_ui/meeting_notes.rs:44-300; src/rune_ui/files/settings.rs:55-70, 330-450; src/rune_ui/files.rs:138; docs/features/labs.md:915-940, 1054-1081; docs/features/meetings.md:36-52, 1155-1165; src/app_settings/notes_settings.rs:46 -->

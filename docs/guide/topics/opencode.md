@@ -28,7 +28,7 @@ VibeHex found no running OpenCode. To fix it:
 
 ## Choose its model
 
-The regular window has no OpenCode model picker now. If you set no model, VibeHex picks a fast one your OpenCode has connected. To choose one, use **Output › Edit with agent**, which copies a prompt for an AI agent to edit your settings, or set `model` in the rewrite part of `dictation_processing.default_mode` (a provider/model name, such as `openai/gpt-5.4-mini`) with the `hex settings` command. For meeting notes, set Summaries to OpenCode and choose under it in **Model** (`meetings.opencode_model`), a list of the running OpenCode's models; "VibeHex picks a fast model" is the automatic choice.
+The regular window has no OpenCode model picker now. If you set no model, VibeHex picks a fast one your OpenCode has connected. To choose one, use **Output › Edit with agent**, which copies a prompt for an AI agent to edit your settings, or set `model` in the rewrite part of `dictation_processing.default_mode` (a provider/model name, such as `openai/gpt-5.4-mini`) with the `hex settings` command. For meeting notes, set Summaries to OpenCode and choose under it in **Model** (`meetings.opencode_model`), a list of the running OpenCode's models; left on "OpenCode's default model", OpenCode's own default answers and the transcript goes to no other provider.
 
 ## Good to know
 
@@ -36,4 +36,4 @@ Your organization may lock OpenCode off; the rows then say so. Without OpenCode,
 
 **Asked as.** "OpenCode isn't running, what do I do?"; "How do I change the AI model for rewriting?"; «Пишет, что OpenCode не запущен»; «Как выбрать модель для обработки текста»; «Нужен ли OpenCode?».
 
-<!-- sources: src/desktop/opencode_service.rs:1-130; src/desktop/opencode_catalog.rs:40-80; docs/opencode-compatibility.md:30-60; src/rune_ui/output.rs:150-170, 755-770; src/rune_ui/sidebar.rs:124; src/rune_ui/platform_settings.rs:396-440; src/rune_ui/meeting_notes.rs:56-90; src/rune_ui/models.rs:236-245; docs/features/labs.md:881-905; docs/features/capture.md:142-145 -->
+<!-- sources: upstream docs/features/meetings.md:61-65 and src/control/settings/registry.rs:695-698 (no model: OpenCode's default); src/desktop/opencode_service.rs:1-130; src/desktop/opencode_catalog.rs:40-80; docs/opencode-compatibility.md:30-60; src/rune_ui/output.rs:150-170, 755-770; src/rune_ui/sidebar.rs:124; src/rune_ui/platform_settings.rs:396-440; src/rune_ui/meeting_notes.rs:56-90; src/rune_ui/models.rs:236-245; docs/features/labs.md:881-905; docs/features/capture.md:142-145 -->

@@ -37,6 +37,9 @@ if [ -e "$installed_bundle" ] || [ -L "$installed_bundle" ]; then
       ;;
   esac
 fi
+staged_bundle="$install_dir/.$(basename "$source_bundle").installing"
+rm -rf "$staged_bundle"
+/usr/bin/ditto "$source_bundle" "$staged_bundle"
 stop_bundle "$installed_bundle"
 # Hex (anomaly.hex) and the other VibeHex share this one's data folder and
 # its single-instance lock, so a running one stops first; it stays installed.
@@ -44,6 +47,6 @@ for sibling in Hex.app VibeHex.app "VibeHex 2.app"; do
   stop_bundle "$install_dir/$sibling"
 done
 rm -rf "$installed_bundle"
-/usr/bin/ditto "$source_bundle" "$installed_bundle"
+mv "$staged_bundle" "$installed_bundle"
 /usr/bin/open "$installed_bundle"
 echo "$installed_bundle"

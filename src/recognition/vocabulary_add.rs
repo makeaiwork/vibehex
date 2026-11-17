@@ -4,7 +4,7 @@
 
 use color_eyre::Result;
 
-use super::Shortcut;
+use super::hotkeys::Shortcut;
 use crate::audio::CaptureInstant;
 use crate::dictation::audio::DictationAudio;
 use crate::suppression::{HotkeyAction, InputEvent, ModifierTap};

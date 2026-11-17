@@ -1,9 +1,11 @@
 # Files (Labs, macOS)
 
 Labs › Files (`labs.files`, off by default, added in VibeHex) adds a Files pane:
-drop or choose any audio or video file, and Hex transcribes it, cleans it up,
+drop or choose any audio or video file, and VibeHex transcribes it, cleans it up,
 and reworks the text with your own requests. Each result is a tab of the
-file's text. Mockups: [docs/design/files](../design/files/README.md).
+file's text. With the lab off, `hex transcribe <file>` (Hex's Transcribe
+files, out of Labs since Hex 3.4.0) still prints a file's transcript
+([control-cli.md](control-cli.md)). Mockups: [docs/design/files](../design/files/README.md).
 
 ```ts
 Labs › Files on (macOS)                         // labs::Feature::Files, rune_ui::files
@@ -12,7 +14,7 @@ Labs › Files on (macOS)                         // labs::Feature::Files, rune_
 │   ├── Drop files on the pane -> each supported one (files::decode::EXTENSIONS:
 │   │   mp3, m4a, aac, wav, aif(f), caf, flac, ogg, opus, m4b, mp4, mov, m4v,
 │   │   3gp, webm) is added and queued; others -> "<name> isn't an audio or
-│   │   video file Hex can read."; the dashed zone lights while a drag is over
+│   │   video file VibeHex can read."; the dashed zone lights while a drag is over
 │   └── Choose file… -> the open dialog starts in files.last_folder, which the
 │       chosen file's folder replaces
 ├── Queue    FILES-QUEUE (files::worker, one "hex-files" thread, one job at a time)
@@ -34,7 +36,7 @@ Labs › Files on (macOS)                         // labs::Feature::Files, rune_
 │   │   lists them newest first under day headers (Today, Yesterday, a date):
 │   │   name (a typed request in quotes, two lines at most), model ↳ source
 │   │   tab, time, ✓ on the open one; a job shows its stage and percent
-│   ├── Clicking a tab opens the version last opened there (until Hex quits),
+│   ├── Clicking a tab opens the version last opened there (until VibeHex quits),
 │   │   else its newest; a new version opens at once
 │   ├── The version line keeps to one row: a tag ("v2" while its tab holds
 │   │   more than one version, a request's name) with an ⓘ in it, as tall
@@ -134,7 +136,7 @@ Labs › Files on (macOS)                         // labs::Feature::Files, rune_
              model speaks; else the app's), the list (Edited in amber, + Add
              request) beside Name and the prompt, then Default prompt /
              Edited / Your own request, Remove, Reset to default, Save.
-             Structure, Summary and Action items start from Hex's prompt in
+             Structure, Summary and Action items start from VibeHex's prompt in
              that language (app_settings::prompt_defaults,
              prompts/quick.json: en ru uk pl de es pt fr ja zh zh-Hant,
              English for any other); saved with an empty prompt they follow

@@ -197,7 +197,6 @@ pub(in super::super) const TRANSLATIONS: &[(&str, &str)] = &[
     ("a deleted tab", "удалённая вкладка"),
     ("{done} of {total}", "{done} из {total}"),
     ("{} isn't an audio or video file Hex can read.", "Hex не может прочитать {}: это не аудио- или видеофайл."),
-    ("Stopped", "Остановлено"),
     ("The transcription stopped before it finished.", "Расшифровка остановилась до завершения."),
     ("Requests", "Запросы"),
     ("Versions", "Версии"),

@@ -85,8 +85,13 @@ fn a_long_passage_lands_on_its_cited_words_not_its_top() {
         (0.2..0.45).contains(&down),
         "lit words {down:.2} of the way down"
     );
+    // The transcript's view starts under the bar that names the answer.
     let top = element(&rt, "turn4").rect[1];
-    assert!(top < panel[1], "the passage starts above the pane ({top})");
+    let bar = element(&rt, "cited-bar").rect;
+    assert!(
+        top < bar[1],
+        "the passage starts above the transcript's view ({top})"
+    );
 }
 
 /// [1] cited the meeting's notes: the meeting opens on Summary at its
