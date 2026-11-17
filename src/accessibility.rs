@@ -277,6 +277,12 @@ const MAX_CARET_SELECTION: isize = 2_000;
 /// drops that half. `None` when the app names no focused text element or no
 /// selection, or all three parts are empty; without `AXNumberOfCharacters`
 /// the text after the selection is skipped.
+/// VibeHex: where the text before a cursor at `location` starts: at most
+/// `MAX_CARET_BEFORE` units back, and never before the document's start.
+fn before_start(location: isize) -> isize {
+    (location - MAX_CARET_BEFORE).max(0)
+}
+
 pub fn text_around_caret(pid: i32) -> Option<crate::dictation::caret_text::CaretText> {
     let application = foreign_application(pid)?;
     let focused = copy_element(&application, c"AXFocusedUIElement")?;
@@ -290,7 +296,11 @@ pub fn text_around_caret(pid: i32) -> Option<crate::dictation::caret_text::Caret
     let selection_end = selection.location.saturating_add(selection.length);
     let mut caret = crate::dictation::caret_text::CaretText::default();
     if selection.location > 0 {
-        let location = selection.location.saturating_sub(MAX_CARET_BEFORE);
+        // VibeHex: `saturating_sub` on a signed location went below zero
+        // for a cursor within the first `MAX_CARET_BEFORE` characters, and
+        // an app (Notes) answers a negative range with nothing, so most
+        // fields gave no text before the cursor at all.
+        let location = before_start(selection.location);
         caret.before = copy_text_for_range(
             &focused,
             CfRange {
@@ -861,5 +871,23 @@ mod tests {
         assert_eq!(char_before_caret(own_pid), None);
         assert_eq!(text_around_caret(own_pid), None);
         assert!(browser_pages(own_pid).urls.is_empty());
+    }
+}
+
+#[cfg(all(test, target_os = "macos"))]
+mod caret_range_tests {
+    use super::{MAX_CARET_BEFORE, before_start};
+
+    /// VibeHex: the text before the cursor starts at the document's start
+    /// while the cursor is within the first `MAX_CARET_BEFORE` characters
+    /// (it used to start below zero there, which Notes answers with
+    /// nothing), and `MAX_CARET_BEFORE` back after that.
+    #[test]
+    fn the_text_before_the_cursor_never_starts_below_zero() {
+        assert_eq!(before_start(1), 0);
+        assert_eq!(before_start(514), 0);
+        assert_eq!(before_start(MAX_CARET_BEFORE), 0);
+        assert_eq!(before_start(MAX_CARET_BEFORE + 1), 1);
+        assert_eq!(before_start(5_000), 5_000 - MAX_CARET_BEFORE);
     }
 }
